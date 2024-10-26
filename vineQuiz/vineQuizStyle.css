@@ -1,0 +1,22 @@
+* {
+	box-sizing: border-box;
+}
+
+label {
+	display: block;
+}
+
+.ans {
+	text-indent: 2em;
+}
+
+.qn {
+	border: black solid 2px;
+	font-weight: bold;
+	padding: 1em;
+}
+
+body {
+	background-color: beige;
+	font-family: sans-serif;
+}

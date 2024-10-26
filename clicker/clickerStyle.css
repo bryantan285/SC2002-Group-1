@@ -1,0 +1,39 @@
+
+body {
+    background-color: beige;
+}
+
+#counter{
+    font-family: Verdana, sans-serif;
+    font-weight: bold;
+    font-size: 70px;
+    text-align: center;
+    border: 7px #f60 solid;
+    background-color: orange;
+    padding: 1rem;
+    border-radius: 20px;
+}
+
+#pancake-img {
+    width: 400px;
+    cursor: pointer;
+    border: 2px transparent;
+}
+
+#pancake-img:hover{
+    border-color: black;
+}
+
+#pancake-img:active{
+    padding: 0 0;
+    border: 4px black solid;
+    filter: brightness(90%);
+}
+
+#main-div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
+}
