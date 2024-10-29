@@ -53,7 +53,7 @@ public abstract class User {
 
     //function definitions
     public boolean login(String inputId, String inputPassword){
-        if (inputId == this.getId() && inputPassword == this.getPassword()){
+        if ((inputId.equals(this.getId())) && (inputPassword.equals(this.getPassword()))){
             //login successful
             return true;
         }

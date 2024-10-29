@@ -1,20 +1,20 @@
 // import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
 public class Patient extends User{
     private String dob;
     // private String contactNumber;
     private String email;
     private String bloodType;
-    private List<Appointment> appointments; 
+    // private List<Appointment> appointments; 
 
     public Patient(String id, String name, String gender, String dob, String bloodType, String email) {
         super(true, id, name, gender);
         this.dob = dob;
         this.bloodType = bloodType;
         this.email = email;
-        this.appointments = new ArrayList<>();
+        // this.appointments = new ArrayList<>();
     }
 
     // Getters
