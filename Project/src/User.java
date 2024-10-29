@@ -1,4 +1,3 @@
-import java.util.*;
 
 
 public abstract class User {
@@ -7,10 +6,10 @@ public abstract class User {
     private String id;
     private String name;
     private String password = "password"; //default password
-    private boolean gender; //true = male; false = female
+    private String gender; //true = male; false = female
 
     //password = "password" initially
-    public User(boolean isPatient, String userId, String name, boolean gender){
+    public User(boolean isPatient, String userId, String name, String gender){
         this.isPatient = isPatient;
         this.id = userId;
         this.name = name;
@@ -30,7 +29,7 @@ public abstract class User {
     public String getPassword() {
         return this.password;
     }
-    public boolean getGender() {
+    public String getGender() {
         return this.gender;
     }
 
@@ -48,7 +47,7 @@ public abstract class User {
     public void setPassword(String password) {
         this.password = password;
     }
-    public void setGender(boolean gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 
