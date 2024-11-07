@@ -1,4 +1,3 @@
-import entity.user.Patient;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -6,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class PatientManagement {
+public class DoctorManagement {
     private List<Patient> patients;
     private Scanner scanner;
 
-    public PatientManagement() {
+    public DoctorManagement() {
         this.patients = new ArrayList<>();
         this.scanner = new Scanner(System.in);
-        loadPatientsFromCSV("data/Patient_List.csv");
+        loadPatientsFromCSV("data/Staff_List.csv");
     }
 
     private void loadPatientsFromCSV(String filePath) {
@@ -43,16 +42,16 @@ public class PatientManagement {
         }
     }
 
-    public void patientMenu() {
+    public void doctorMenu() {
         while (true) {
-            System.out.println("Patient Menu:");
-            System.out.println("1. View Medical Record");
-            System.out.println("2. Update Personal Information");
-            System.out.println("3. Schedule an Appointment");
-            System.out.println("4. Reschedule an Appointment");
-            System.out.println("5. Cancel an Appointment");
-            System.out.println("6. View Scheduled Appointments");
-            System.out.println("7. View Past Appointment Outcome Records");
+            System.out.println("Doctor Menu:");
+            System.out.println("1. View Patient Medical Records");
+            System.out.println("2. Update Patient Medical Records");
+            System.out.println("3. View Personal Schedule");
+            System.out.println("4. Set Availability for Appointments");
+            System.out.println("5. Accept or Decline Appointment Requests");
+            System.out.println("6. View Upcoming Appointments");
+            System.out.println("7. Record Appointment Outcome");
             System.out.println("8. Logout");
 
             int choice = scanner.nextInt();
@@ -60,25 +59,25 @@ public class PatientManagement {
 
             switch (choice) {
                 case 1:
-                    viewMedicalRecord();
+                    viewPatientRecord();
                     break;
                 case 2:
-                    // updatePersonalInformation();
+                    // updatePatientRecord();
                     break;
                 case 3:
-                    // scheduleAppointment();
+                    // viewSchedule();
                     break;
                 case 4:
-                    // rescheduleAppointment();
+                    // setAppointment();
                     break;
                 case 5:
-                    // cancelAppointment();
+                    // updateAppointmentStatus();
                     break;
                 case 6:
-                    // viewScheduledAppointments();
+                    // viewUpcomingAppointments();
                     break;
                 case 7:
-                    // viewPastAppointmentOutcomeRecords();
+                    // recordAppointmentOutcome();
                     break;
                 case 8:
                     System.out.println("Logging out...");
@@ -103,7 +102,7 @@ public class PatientManagement {
     }
 
     // 1. View medical record
-    private void viewMedicalRecord() {
+    private void viewPatientRecord() {
         Patient patient = selectPatient();
         if (patient != null) {
             patient.viewMedicalRecord();

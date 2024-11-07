@@ -1,12 +1,14 @@
-import java.util.*;
+package entity.user;
+import entity.appointment.Appointment;
 import java.time.*;
+import java.util.*;
 
-public class Doctor extends HospitalStaff{
+public class Doctor extends HospitalStaff {
     private ArrayList<Appointment> upcomingAppointments;
     private ArrayList<UnavailableDates> unavailableDates;
 
-    public Doctor(boolean isPatient, String userId, String name, boolean gender, int age){
-        super(isPatient, userId, name, gender, HospitalStaff.Role.DOCTOR, age);
+    public Doctor(boolean isPatient, String userId, String password, String name, String gender, int age) {
+        super(isPatient, userId, password, name, gender, Role.DOCTOR, age);
     }
 
     public void viewSchedule(){
@@ -40,7 +42,7 @@ public class Doctor extends HospitalStaff{
             System.out.println("Appointment sucessfully confirmed.");
         }
         else {
-            appt.setStatus(Appointment.Status.REJECTED);
+            appt.setStatus(Appointment.Status.CANCELED);
             System.out.println("Appointment sucessfully declined.");
         }
     }

@@ -1,5 +1,11 @@
 import java.util.*;
 
+import entity.Pharmacist;
+import entity.user.Administrator;
+import entity.user.Doctor;
+import entity.user.Patient;
+import entity.user.User;
+
 //import User.Role;
 
 public class Main {
@@ -9,11 +15,11 @@ public class Main {
         
         users.add(new Doctor(false, "D001", "John Smith", true, 45));
         users.add(new Doctor(false,"D002", "Emily Clarke", false, 38));
-        users.add(new Pharmacist(User.Role.PHARMACIST,"P001", "Mark Lee", true, 29));
-        users.add(new Administrator(User.Role.ADMINISTRATOR,"A001", "Sarah Lee", false, 40));
-        users.add(new Patient(User.Role.PATIENT, "P1001", "Alice Brown", false, 40));
-        users.add(new Patient(User.Role.PATIENT, "P1001", "Bob Stone", false, 40));
-        users.add(new Patient(User.Role.PATIENT, "P1001", "Charlie White", false, 40));
+        users.add(new Pharmacist(entity.Role.PHARMACIST,"P001", "Mark Lee", true, 29));
+        users.add(new Administrator(entity.Role.ADMINISTRATOR,"A001", "Sarah Lee", false, 40));
+        users.add(new Patient(entity.Role.PATIENT, "P1001", "Alice Brown", false, 40));
+        users.add(new Patient(entity.Role.PATIENT, "P1001", "Bob Stone", false, 40));
+        users.add(new Patient(entity.Role.PATIENT, "P1001", "Charlie White", false, 40));
 
         int choice = 1;
         User user;

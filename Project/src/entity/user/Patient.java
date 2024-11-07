@@ -1,16 +1,23 @@
+package entity.user;
 // import java.time.LocalDate;
 // import java.util.ArrayList;
 // import java.util.List;
 
+import java.util.Date;
+
 public class Patient extends User{
-    private String dob;
+    private Date dob;
     // private String contactNumber;
-    private String email;
     private String bloodType;
+    private String email;
     // private List<Appointment> appointments; 
 
-    public Patient(String id, String name, String gender, String dob, String bloodType, String email) {
-        super(true, id, name, gender);
+    public Patient() {
+        super();
+    }
+
+    public Patient(String id, String name, String gender, Date dob, String bloodType, String email, String password) {
+        super(true, id, password, name, gender);
         this.dob = dob;
         this.bloodType = bloodType;
         this.email = email;
@@ -18,7 +25,7 @@ public class Patient extends User{
     }
 
     // Getters
-    public String getDOB() {
+    public Date getDOB() {
         return this.dob;
     }
 
@@ -31,9 +38,18 @@ public class Patient extends User{
     }
 
     //Setters
-    public void setEmail(String newEmail) {
-        this.email = newEmail;
-    } 
+
+    public void setDob(Date dob) {
+        this.dob = dob;
+    }
+
+    public void setBloodType(String bloodType) {
+        this.bloodType = bloodType;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     //Patient Menu opt 1
     public void viewMedicalRecord() {
@@ -42,6 +58,12 @@ public class Patient extends User{
         System.out.println("Date of Birth: " + dob);
         System.out.println("Gender: " + getGender());
         System.out.println("Blood Type: " + bloodType);
-        System.out.println("Email: " + email);
+        System.out.println("Email: " + getEmail());
     }
+
+    @Override
+    public String toString() {
+        return super.getId() + ", " + super.getName() + ", " + super.getGender() + ", " + dob + ", " + bloodType + ", " + email;
+    }
+
 }

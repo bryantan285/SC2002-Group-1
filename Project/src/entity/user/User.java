@@ -1,17 +1,24 @@
+package entity.user;
 
+import entity.EntityObject;
+import utility.Password_hash;
 
-public abstract class User {
+public abstract class User extends EntityObject {
 
     private boolean isPatient;
     private String id;
+    private String password;
     private String name;
-    private String password = "password"; //default password
     private String gender; //true = male; false = female
 
-    //password = "password" initially
-    public User(boolean isPatient, String userId, String name, String gender){
+    public User() {
+        
+    }
+
+    public User(boolean isPatient, String id, String password, String name, String gender){
         this.isPatient = isPatient;
-        this.id = userId;
+        this.id = id;
+        this.password = password;
         this.name = name;
         this.gender = gender;
     }
@@ -20,6 +27,8 @@ public abstract class User {
     public boolean getIsPatient() {
         return this.isPatient;
     }
+
+    @Override
     public String getId() {
         return this.id;
     }
@@ -44,26 +53,15 @@ public abstract class User {
     public void setName(String name) {
         this.name = name;
     }
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         this.password = password;
     }
     public void setGender(String gender) {
         this.gender = gender;
     }
 
-    //function definitions
-    public boolean login(String inputId, String inputPassword){
-        if ((inputId.equals(this.getId())) && (inputPassword.equals(this.getPassword()))){
-            //login successful
-            return true;
-        }
-        
-        System.out.println("Wrong ID and/or Password. Try again");
-        return false;
-    }
-
     public void changePassword(String input){
-        setPassword(input);
+        setPassword(Password_hash.hashPassword(input));
     }
     
 }
