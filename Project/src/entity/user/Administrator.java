@@ -2,8 +2,8 @@ package entity.user;
 
 public class Administrator extends HospitalStaff {
 
-    public static void main(String[] args) {
-        System.out.println("Testing");
+    public Administrator() {
+        super();
     }
 
     public Administrator(boolean isPatient, String userId, String password, String name, String gender, int age) {

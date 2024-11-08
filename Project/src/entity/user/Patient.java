@@ -3,11 +3,11 @@ package entity.user;
 // import java.util.ArrayList;
 // import java.util.List;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class Patient extends User{
-    private Date dob;
-    // private String contactNumber;
+    private LocalDateTime dob;
+    private String contactNumber;
     private String bloodType;
     private String email;
     // private List<Appointment> appointments; 
@@ -16,7 +16,7 @@ public class Patient extends User{
         super();
     }
 
-    public Patient(String id, String name, String gender, Date dob, String bloodType, String email, String password) {
+    public Patient(String id, String name, String gender, LocalDateTime dob, String bloodType, String email, String password) {
         super(true, id, password, name, gender);
         this.dob = dob;
         this.bloodType = bloodType;
@@ -25,7 +25,7 @@ public class Patient extends User{
     }
 
     // Getters
-    public Date getDOB() {
+    public LocalDateTime getDOB() {
         return this.dob;
     }
 
@@ -37,9 +37,13 @@ public class Patient extends User{
         return this.email;
     }
 
+    public String getContactNumber() {
+        return this.contactNumber;
+    }
+
     //Setters
 
-    public void setDob(Date dob) {
+    public void setDob(LocalDateTime dob) {
         this.dob = dob;
     }
 
@@ -49,6 +53,10 @@ public class Patient extends User{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setContactNumber(String number) {
+        this.contactNumber = number;
     }
 
     //Patient Menu opt 1
@@ -63,7 +71,7 @@ public class Patient extends User{
 
     @Override
     public String toString() {
-        return super.getId() + ", " + super.getName() + ", " + super.getGender() + ", " + dob + ", " + bloodType + ", " + email;
+        return super.getId() + ", " + super.getName() + ", " + super.getGender() + ", " + dob + ", " + bloodType + ", " + email + ", " + contactNumber;
     }
 
 }

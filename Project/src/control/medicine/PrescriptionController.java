@@ -1,94 +1,89 @@
 package control.medicine;
 
 import entity.medicine.Prescription;
-import java.util.Scanner;
-import repository.medicine.MedicineRepository;
+import entity.medicine.PrescriptionItem;
+import java.util.List;
 import repository.medicine.PrescriptionRepository;
 
 public class PrescriptionController {
+
     private final PrescriptionRepository prescriptionRepository;
-    private final MedicineRepository medicineRepository;
-    public static void main(String[] args) {
-        
-    }
+    private final PrescriptionItemController prescriptionItemController;
 
     public PrescriptionController() {
         this.prescriptionRepository = PrescriptionRepository.getInstance();
-        this.medicineRepository = MedicineRepository.getInstance();
+        this.prescriptionItemController = new PrescriptionItemController();
     }
 
-    // Method to renew prescription
-    public void renewPrescription(Prescription prescription, int additionalDoses) {
-        boolean isActive = prescription.getIsActive();
-        int totalDoses = prescription.getTotalDoses();
-        if (isActive && totalDoses <= 100) {
-            totalDoses += additionalDoses;
-            System.out.println("Prescription renewed successfully. Total doses: " + totalDoses);
+    public void save() {
+        prescriptionRepository.save();
+    }
+
+    public void createPrescription(String id, String patientId, String apptId, boolean isActive) {
+        Prescription newPrescription = new Prescription(id, patientId, apptId, isActive);
+        prescriptionRepository.add(newPrescription);
+        System.out.println("Prescription created successfully: " + id);
+    }
+
+    public void updatePrescriptionStatus(String prescriptionId, boolean isActive) {
+        Prescription prescription = getPrescriptionById(prescriptionId);
+        if (prescription != null) {
+            prescription.setIsActive(isActive);
+            System.out.println("Prescription status updated successfully.");
         } else {
-            System.out.println("Prescription can't be renewed as it is either inactive or has reached the max number of doses.");
+            System.out.println("Prescription not found.");
         }
     }
 
-    // Method to display prescription details
-    public void displayPrescriptionDetails(Prescription prescription) {
-        System.out.println("Patient ID: " + prescription.getId());
-        System.out.println("Medicine Name: " + medicineRepository.get(prescription.getMedicineId()).getMedicineName());
-        System.out.println("Total Doses: " + prescription.getTotalDoses());
-        System.out.println("Doses Taken: " + prescription.getDosesTaken());
-        System.out.println("Doses per day: " + prescription.getDosesPerDay());
-        System.out.println("Active: " + prescription.getIsActive());
-    }
-    // Method to check if the prescription is active
-    public void checkActive(Prescription prescription) {
-        if (prescription.getIsActive()) {
-            System.out.println("Prescription is active.");
-        } else {
-            System.out.println("Prescription is inactive.");
-        }
-    }
-
-    // Method to cancel prescription
-    public void cancelPrescription(Prescription prescription) {
-        boolean isActive = prescription.getIsActive();
-        if (isActive) {
+    public void cancelPrescription(String prescriptionId) {
+        Prescription prescription = getPrescriptionById(prescriptionId);
+        if (prescription != null && prescription.getIsActive()) {
             prescription.setIsActive(false);
-            System.out.println("Prescription is cancelled.");
+            System.out.println("Prescription canceled successfully.");
         } else {
-            System.out.println("Prescription is already inactive.");
+            System.out.println("Prescription is already inactive or not found.");
         }
     }
 
-    // Method to track doses taken
-    public void trackDoses(Prescription prescription) {
-        int dosesTaken = prescription.getDosesTaken();
-        int totalDoses = prescription.getTotalDoses();
-        if (dosesTaken < totalDoses) {
-            dosesTaken++;
-            System.out.println("Dose taken. Total doses taken: " + dosesTaken);
+    public void displayPrescriptionDetails(String prescriptionId) {
+        Prescription prescription = getPrescriptionById(prescriptionId);
+        if (prescription != null) {
+            System.out.println("Prescription ID: " + prescription.getId());
+            System.out.println("Patient ID: " + prescription.getPatientId());
+            System.out.println("Appointment ID: " + prescription.getApptId());
+            System.out.println("Active: " + prescription.getIsActive());
         } else {
-            System.out.println("All doses have been taken.");
+            System.out.println("Prescription not found.");
         }
     }
 
-    // Method to calculate remaining doses
-    public void remainingDoses(Prescription prescription,Scanner scanner) {
-        System.out.print("Enter the total number of doses you have taken since beginning treatment: ");
-        int dosesTaken = scanner.nextInt();
-        int totalDoses = prescription.getTotalDoses();
-        if (dosesTaken < totalDoses) {
-            int remainingDoses = totalDoses - dosesTaken;
-            System.out.println("Remaining doses to be taken: " + remainingDoses);
+    public void listAllPrescriptions() {
+        List<Prescription> prescriptions = prescriptionRepository.toList();
+        if (prescriptions.isEmpty()) {
+            System.out.println("No prescriptions found.");
         } else {
-            System.out.println("All doses have been taken.");
+            System.out.println("Listing all prescriptions:");
+            for (Prescription prescription : prescriptions) {
+                System.out.println(prescription);
+            }
         }
     }
 
-    // Method to calculate adherence rate
-    public void adherenceRate(Prescription prescription, Scanner scanner) {
-        System.out.print("Enter the total number of doses you have taken since beginning treatment: ");
-        int dosesTaken = scanner.nextInt();
+    public Prescription getPrescriptionById(String prescriptionId) {
+        return prescriptionRepository.findByField("id", prescriptionId).stream().findFirst().orElse(null);
+    }
 
-        double adhereRate = ((double) dosesTaken / prescription.getTotalDoses()) * 100;
-        System.out.println("Adherence rate: " + adhereRate + "%");
+    public void deletePrescription(String prescriptionId) {
+        Prescription prescription = getPrescriptionById(prescriptionId);
+        if (prescription != null) {
+            prescriptionRepository.remove(prescription);
+            System.out.println("Prescription deleted successfully.");
+        } else {
+            System.out.println("Prescription not found.");
+        }
+    }
+
+    public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
+        return prescriptionItemController.getPrescriptionItems(prescriptionId);
     }
 }

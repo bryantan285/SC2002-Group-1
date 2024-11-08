@@ -1,0 +1,2 @@
+id,prescriptionId,medicineId,medicineName,quantity,totalDoses,dosesTaken,dosesPerDay,isActive
+PRSCI001,PRSC001,MED001,APPT001,10,10,0,1,true

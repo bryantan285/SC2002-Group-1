@@ -1,20 +1,20 @@
 package repository.medicine;
 
-import entity.medicine.Prescription;
+import entity.medicine.PrescriptionItem;
 import java.io.IOException;
 import java.util.Iterator;
 import repository.Repository;
 
-public class PrescriptionRepository extends Repository<Prescription> {
+public class PrescriptionItemRepository extends Repository<PrescriptionItem> {
         
-    private static PrescriptionRepository repo = null;
-    private static final String FILE_PATH = "Project\\data\\Prescription_List.csv";
-    private static final String PREFIX = "PRSC";
+    private static PrescriptionItemRepository repo = null;
+    private static final String FILE_PATH = "Project\\data\\PrescriptionItem_List.csv";
+    private static final String PREFIX = "PRSCI";
 
     public static void main(String[] args) {
         try {
-            PrescriptionRepository repo = PrescriptionRepository.getInstance();
-            Iterator<Prescription> iterator = repo.iterator();
+            PrescriptionItemRepository repo = PrescriptionItemRepository.getInstance();
+            Iterator<PrescriptionItem> iterator = repo.iterator();
             
             System.out.println(repo.getSize());
             while (iterator.hasNext()) {
@@ -25,17 +25,17 @@ public class PrescriptionRepository extends Repository<Prescription> {
         }
     }
 
-    private PrescriptionRepository() throws IOException {
+    private PrescriptionItemRepository() throws IOException {
         super();
         load();
     }
     
-    public static PrescriptionRepository getInstance() {
+    public static PrescriptionItemRepository getInstance() {
         if (repo == null) {
             try {
-                repo = new PrescriptionRepository();
+                repo = new PrescriptionItemRepository();
             } catch (IOException e) {
-                System.err.println("Failed to create PrescriptionRepository instance: " + e.getMessage());
+                System.err.println("Failed to create PrescriptionItemRepository instance: " + e.getMessage());
                 throw new RuntimeException("Failed to initialize PrescriptionRepository", e);
             }
         }
@@ -53,7 +53,7 @@ public class PrescriptionRepository extends Repository<Prescription> {
     }
 
     @Override
-    public Class<Prescription> getEntityClass() {
-        return Prescription.class;
+    public Class<PrescriptionItem> getEntityClass() {
+        return PrescriptionItem.class;
     }
 }

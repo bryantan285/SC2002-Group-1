@@ -1,5 +1,5 @@
 id,name,password,role,gender,age
 D001,John Smith,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,Doctor,Male,45
 D002,Emily Clarke,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,Doctor,Female,38
-P001,Mark Lee,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,Pharmacist,Male,29
+PH001,Mark Lee,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,Pharmacist,Male,29
 A001,Sarah Lee,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,Administrator,Female,40

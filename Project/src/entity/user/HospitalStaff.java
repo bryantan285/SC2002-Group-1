@@ -1,6 +1,6 @@
 package entity.user;
 public class HospitalStaff extends User{
-    protected enum Role {DOCTOR, PHARMACIST, ADMINISTRATOR}
+    public enum Role {DOCTOR, PHARMACIST, ADMINISTRATOR}
 
     private Role role;
     private int age;
@@ -24,8 +24,8 @@ public class HospitalStaff extends User{
     }
 
     //Setters
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRole(Role Role) {
+        this.role = Role;
     }
     public void setAge(int age) {
         this.age = age;

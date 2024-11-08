@@ -1,1 +1,2 @@
-id,patientId,doctorId,apptDateTime
+id,patientId,doctorId,service,status,apptDateTime
+APPT001,P001,D001,CONSULTATION,PENDING,02-11-2024 14:30

@@ -1,4 +1,4 @@
-id,name,dob,gender,bloodType,email,password
-P1001,Alice Brown,1980-05-14,Female,A+,alice.brown@example.com,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
-P1002,Bob Stone,1975-11-22,Male,B+,bob.stone@example.com,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
-P1003,Charlie White,1990-07-08,Male,O-,charlie.white@example.com,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
+id,name,dob,gender,bloodType,email,contactNumber,password
+P1001,Alice Brown,14-05-1980 00:00,Female,A+,alice.brown@example.com,912345678,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
+P1002,Bob Stone,22-11-1975 00:00,Male,B+,bob.stone@example.com,912345677,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
+P1003,Charlie White,08-07-1990 00:00,Male,O-,charlie.white@example.com,912345676,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8

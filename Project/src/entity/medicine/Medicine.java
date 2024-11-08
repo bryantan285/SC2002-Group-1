@@ -1,14 +1,15 @@
 package entity.medicine;
 import entity.EntityObject;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import utility.DateFormat;
 
 // Medicine Class
 public class Medicine extends EntityObject {
     private String id;
     private String medicineName;
     private int stockQuantity;
-    private Date expirationDate;
+    private float unitCost;
+    private LocalDateTime expirationDate;
     private double dosage; // in mg
     private int lowStockThreshold;
 
@@ -17,9 +18,10 @@ public class Medicine extends EntityObject {
     }
 
     // Constructor
-    public Medicine(String medicineName, int stockQuantity, Date expirationDate, double dosage, int lowStockThreshold) {
+    public Medicine(String medicineName, int stockQuantity, float unitCost, LocalDateTime expirationDate, double dosage, int lowStockThreshold) {
         this.medicineName = medicineName;
         this.stockQuantity = stockQuantity;
+        this.unitCost = unitCost;
         this.expirationDate = expirationDate;
         this.dosage = dosage;
         this.lowStockThreshold = lowStockThreshold;
@@ -41,13 +43,8 @@ public class Medicine extends EntityObject {
     }
 
     // Method to get the expiration date
-    public Date getExpirationDate() {
+    public LocalDateTime getExpirationDate() {
         return expirationDate;
-    }
-
-    public String getFormattedExpirationDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        return dateFormat.format(expirationDate);
     }
 
     @Override
@@ -71,7 +68,7 @@ public class Medicine extends EntityObject {
         this.stockQuantity = stockQuantity;
     }
 
-    public void setExpirationDate(Date expirationDate) {
+    public void setExpirationDate(LocalDateTime expirationDate) {
         this.expirationDate = expirationDate;
     }
 
@@ -242,7 +239,15 @@ public class Medicine extends EntityObject {
     
     @Override
     public String toString() {
-        return id + ", " + medicineName + ", " + stockQuantity + ", " + getFormattedExpirationDate() + ", " + dosage + " mg, " + lowStockThreshold;
+        return id + ", " + medicineName + ", " + stockQuantity + ", " + unitCost + ", " + DateFormat.format(expirationDate) + ", " + dosage + " mg, " + lowStockThreshold;
+    }
+
+    public float getUnitCost() {
+        return unitCost;
+    }
+
+    public void setUnitCost(float unitCost) {
+        this.unitCost = unitCost;
     }
     
 }

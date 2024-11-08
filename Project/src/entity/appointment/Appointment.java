@@ -1,13 +1,20 @@
 package entity.appointment;
 import entity.EntityObject;
-import java.util.Date;
+import java.time.LocalDateTime;
+import utility.DateFormat;
 
 public class Appointment extends EntityObject {
+    public enum Service {
+        CONSULTATION,
+        XRAY,
+        LABTEST
+    }
+
     private String id;
     private String patientId;
     private String doctorId;
-    private Date apptDateTime;
-
+    private LocalDateTime apptDateTime;
+    private Service service;
     
     // Below fields can only be changed by doctors
     public enum Status {PENDING, CONFIRMED, COMPLETED, CANCELED}
@@ -18,10 +25,11 @@ public class Appointment extends EntityObject {
         
     }
 
-    public Appointment(String id, String patient, String doctor, Date dateTime){
+    public Appointment(String id, String patient, String doctor, Service service, LocalDateTime dateTime){
         this.id = id;
         this.patientId = patient;
         this.doctorId = doctor;
+        this.service = service;
         this.apptDateTime = dateTime;
         
         // TODO - update admin's appt list
@@ -42,7 +50,7 @@ public class Appointment extends EntityObject {
     public String getDoctorId() {
         return doctorId;
     }
-    public Date getApptDateTime() {
+    public LocalDateTime getApptDateTime() {
         return apptDateTime;
     }
     public Status getStatus() {
@@ -50,6 +58,9 @@ public class Appointment extends EntityObject {
     }
     public String getApptOutcome() {
         return apptOutcome;
+    }
+    public Service getService() {
+        return service;
     }
 
 
@@ -63,7 +74,7 @@ public class Appointment extends EntityObject {
     public void setDoctorId(String doctorId) {
         this.doctorId = doctorId;
     }
-    public void setApptDate(Date apptDateTime) {
+    public void setApptDate(LocalDateTime apptDateTime) {
         this.apptDateTime = apptDateTime;
     }
     public void setStatus(Status set){
@@ -72,6 +83,22 @@ public class Appointment extends EntityObject {
     public void setApptOutcome(String apptOutcome) {
         this.apptOutcome = apptOutcome;
     }
+
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    @Override
+    public String toString() {
+        return id + ", " +
+               patientId + ", " +
+               doctorId + ", " +
+               DateFormat.formatWithTime(apptDateTime) + ", " +
+               service.toString() + ", " +
+               status.name() + ", " +
+               apptOutcome;
+    }
+
 
     public static void main(String[] args) {
         // Date date = Date.of(2024, 10,30,11, 40);

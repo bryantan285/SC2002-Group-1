@@ -1,9 +1,12 @@
 package repository.user;
 
 import entity.user.HospitalStaff;
+import entity.user.StaffFactory;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import repository.Repository;
+import utility.CSV_handler;
 
 public class StaffRepository extends Repository<HospitalStaff> {
     private static StaffRepository repo = null;
@@ -38,6 +41,32 @@ public class StaffRepository extends Repository<HospitalStaff> {
             }
         }
         return repo;
+    }
+    @Override
+    public String getPrefix() {
+        throw new UnsupportedOperationException("Use getPrefix(String role) instead for StaffRepository.");
+    }
+
+    public String getPrefix(HospitalStaff.Role role) {
+        switch (role) {
+            case DOCTOR:
+                return "D";
+            case PHARMACIST:
+                return "PH";
+            case ADMINISTRATOR:
+                return "A";
+            default:
+                throw new IllegalArgumentException("Invalid staff role: " + role);
+        }
+    }
+    public HospitalStaff createStaffByPrefix(String id) {
+        return StaffFactory.createStaffByPrefix(id);
+    }
+
+    @Override
+    public void load() throws IOException {
+        List<HospitalStaff> objs = CSV_handler.readHospitalStaffFromCSV(getFilePath());
+        setObjects(objs);
     }
 
     @Override

@@ -1,78 +1,74 @@
 package control.user;
 
+import control.appointment.AppointmentController;
+import control.medicine.MedicineController;
+import control.request.MedicineRequestController;
 import entity.appointment.Appointment;
 import entity.medicine.Medicine;
+import entity.user.Administrator;
 import entity.user.HospitalStaff;
-import java.util.ArrayList;
+import interfaces.control.IController;
 import java.util.List;
-import repository.appointment.AppointmentRepository;
-import repository.medicine.MedicineRepository;
 import repository.user.StaffRepository;
 
-public class AdministratorController {
+public class AdministratorController implements IController {
     public static void main(String[] args) {
+        String adminId = "A001";
+        String reqId = "MREQ001";
         AdministratorController ac = new AdministratorController();
-        List<HospitalStaff> list = new ArrayList<>();
-        list = ac.getHospitalStaff();
-        
-        System.out.println(list.size());
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i).toString());
-        }
-
-        List<Appointment> alist = new ArrayList<>();
-        alist = ac.getAppointments();
-
-        System.out.println(alist.size());
-        for (int i = 0; i < alist.size(); i++) {
-            System.out.println(alist.get(i).toString());
-        }
-
-        List<Medicine> mlist = new ArrayList<>();
-        mlist = ac.getMedInventory();
-
-        System.out.println(mlist.size());
-        for (int o = 0; o < mlist.size(); o++) {
-            System.out.println(mlist.get(o).toString());
-        }
-
+        ac.setCurrentAdmin(adminId);
+        ac.approveReplenishmentReq(reqId);
     }
 
     private final StaffRepository staffRepository; 
-    private final AppointmentRepository appointmentRepository;
-    private final MedicineRepository medicineRepository;
+    private final AppointmentController appointmentController;
+    private final MedicineController medicineController;
+    private final MedicineRequestController medicineRequestController;
+    private Administrator currentAdmin;
 
     public AdministratorController() {
         this.staffRepository = StaffRepository.getInstance();
-        this.appointmentRepository = AppointmentRepository.getInstance();
-        this.medicineRepository = MedicineRepository.getInstance();
+        this.appointmentController = new AppointmentController();
+        this.medicineController = new MedicineController();
+        this.medicineRequestController = new MedicineRequestController();
+        this.currentAdmin = null;
     }
 
+    public void setCurrentAdmin(String adminId) {
+        HospitalStaff staff = staffRepository.findByField("id", adminId).get(0);
+        if (staff instanceof Administrator) {
+            this.currentAdmin = (Administrator) staff;
+            System.out.println("Administrator set successfully: " + this.currentAdmin.getId());
+        } else {
+            System.out.println("Staff member with ID " + adminId + " is not a Administrator.");
+            this.currentAdmin = null;
+        }
+    }
+
+    @Override
+    public void save() {
+        staffRepository.save();
+    }
+    
     public List<HospitalStaff> getHospitalStaff() {
-        List<HospitalStaff> staffList = staffRepository.toList();
-        
-        return staffList;
+        return staffRepository.toList();
     }
 
     public List<Appointment> getAppointments() { 
-        List<Appointment> apptList = appointmentRepository.toList();
-        
-        return apptList;
+        return appointmentController.getAllAppts();
     }
 
     public List<Medicine> getMedInventory() { 
-        List<Medicine> medicineList = medicineRepository.toList();
-        
-        return medicineList;
+        return medicineController.getAllMedicines();
     }
 
     // Add into UML (Modify)
-    public void approveReplenishmentReq() {
-
+    public void approveReplenishmentReq(String requestId) {
+        medicineRequestController.approveReplenishmentRequest(currentAdmin.getId(), requestId);
     }
 
     // Add into UML
-    public void declineReplenishmentReq() {
-
+    public void rejectReplenishmentReq(String requestId) {
+        medicineRequestController.rejectReplenishmentRequest(currentAdmin.getId(), requestId);
     }
 }

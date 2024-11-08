@@ -9,6 +9,7 @@ public class MedicineRepository extends Repository<Medicine> {
     
     private static MedicineRepository repo = null;
     private static final String FILE_PATH = "Project\\data\\Medicine_List.csv";
+    private static final String PREFIX = "MED";
 
     public static void main(String[] args) {
         try {
@@ -39,6 +40,11 @@ public class MedicineRepository extends Repository<Medicine> {
             }
         }
         return repo;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
     }
     
     @Override

@@ -1,3 +1,4 @@
+package boundary.user.patient;
 import entity.user.Patient;
 import java.io.BufferedReader;
 import java.io.FileReader;

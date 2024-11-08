@@ -1,7 +1,7 @@
 package entity.request;
 
 import entity.EntityObject;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public abstract class Request extends EntityObject {
     public enum STATUS {
@@ -14,14 +14,14 @@ public abstract class Request extends EntityObject {
     private String requestorId;
     private String approverId;
     private STATUS status;
-    private Date timeCreated;
-    private Date timeModified;
+    private LocalDateTime timeCreated;
+    private LocalDateTime timeModified;
 
     public Request() {
 
     }
 
-    public Request(String id, String requestorId, String approverId, STATUS status, Date timeCreated, Date timeModified) {
+    public Request(String id, String requestorId, String approverId, STATUS status, LocalDateTime timeCreated, LocalDateTime timeModified) {
         this.id = id;
         this.requestorId = requestorId;
         this.approverId = approverId;
@@ -55,19 +55,19 @@ public abstract class Request extends EntityObject {
         this.approverId = approverId;
     }
 
-    public Date getTimeCreated() {
+    public LocalDateTime getTimeCreated() {
         return timeCreated;
     }
 
-    public void setTimeCreated(Date timeCreated) {
+    public void setTimeCreated(LocalDateTime timeCreated) {
         this.timeCreated = timeCreated;
     }
 
-    public Date getTimeModified() {
+    public LocalDateTime getTimeModified() {
         return timeModified;
     }
 
-    public void setTimeModified(Date timeModified) {
+    public void setTimeModified(LocalDateTime timeModified) {
         this.timeModified = timeModified;
     }
 
