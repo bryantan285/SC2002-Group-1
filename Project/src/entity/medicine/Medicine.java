@@ -61,6 +61,9 @@ public class Medicine extends EntityObject {
     }
 
     public void setStockQuantity(int stockQuantity) {
+        if (stockQuantity < 0) {
+            throw new IllegalArgumentException("New quantity cannot be negative.");
+        }
         this.stockQuantity = stockQuantity;
     }
 

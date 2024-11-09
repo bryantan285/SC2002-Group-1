@@ -5,6 +5,7 @@ import control.medicine.MedicineController;
 import control.request.MedicineRequestController;
 import entity.appointment.Appointment;
 import entity.medicine.Medicine;
+import entity.request.MedicineRequest;
 import entity.user.Administrator;
 import entity.user.HospitalStaff;
 import interfaces.control.IController;
@@ -90,19 +91,31 @@ public class AdministratorController implements IController {
         return medicineController.getMedicineById(medicineId);
     }
 
-    public void modifyMedStockAlert(String medicineId, int newLevel) {
-        medicineController.setLowStockThreshold(medicineId, newLevel);
+    public Boolean modifyMedStockAlert(String medicineId, int newLevel) {
+        return medicineController.setLowStockThreshold(medicineId, newLevel);
     }
 
-    public void addMedStock(String medicineId, int amount) {
-        medicineController.incMedStock(medicineId, amount);
+    public Boolean addMedStock(String medicineId, int amount) {
+        return medicineController.incMedStock(medicineId, amount);
     }
 
-    public void removeMedStock(String medicineId, int amount) {
-        medicineController.decMedStock(medicineId, amount);
+    public Boolean decMedStock(String medicineId, int amount) {
+        return medicineController.decMedStock(medicineId, amount);
+    }
+
+    public Boolean updateMedStock(String medicineId, int amount) {
+        return medicineController.updateMedStock(medicineId, amount);
     }
 
     // Request
+
+    public List<MedicineRequest> getPendingReplenishingRequests() {
+        return medicineRequestController.getPendingRequests();
+    }
+
+    public Medicine getMedicine(String medicineId) {
+        return medicineController.getMedicineById(medicineId);
+    }
 
     public void approveReplenishmentReq(String requestId) {
         medicineRequestController.approveReplenishmentRequest(currentAdmin.getId(), requestId);

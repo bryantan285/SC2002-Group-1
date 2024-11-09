@@ -5,16 +5,16 @@ import utility.DateFormat;
 
 public class MedicineRequest extends Request {
     private String medicineId;
-    private int amount;
+    private int quantity;
 
     public MedicineRequest() {
         super();
     }
 
-    public MedicineRequest(String id, String requestorId, String approverId, STATUS status, LocalDateTime timeCreated, LocalDateTime timeModified, String medicineId, int amount) {
+    public MedicineRequest(String id, String requestorId, String approverId, STATUS status, LocalDateTime timeCreated, LocalDateTime timeModified, String medicineId, int quantity) {
         super(id, requestorId, approverId, status, timeCreated, timeModified);
         this.medicineId = medicineId;
-        this.amount = amount;
+        this.quantity = quantity;
     }
 
     public String getMedicineId() {
@@ -25,12 +25,12 @@ public class MedicineRequest extends Request {
         this.medicineId = medicineId;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
     
     @Override
@@ -42,7 +42,7 @@ public class MedicineRequest extends Request {
                DateFormat.formatWithTime(super.getTimeCreated()) + ", " +
                DateFormat.formatWithTime(super.getTimeModified()) + ", " +
                medicineId + ", " +
-               amount;
+               quantity;
     }
 
     

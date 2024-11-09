@@ -176,6 +176,21 @@ public class MedicineController implements IController {
         return false;
     }
 
+    public Boolean updateMedStock(String medicineId, int amount) {
+        Medicine med = getMedicineById(medicineId);
+        if (med == null) {
+            return null;
+        }
+        try {
+            med.setStockQuantity(amount);
+            save();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
     public List<Medicine> searchMedicineByName(String name) {
         return medicineRepository.findByField("medicineName", name);
     }

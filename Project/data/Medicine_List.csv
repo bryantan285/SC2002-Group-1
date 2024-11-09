@@ -1,4 +1,4 @@
 id,medicineName,stockQuantity,unitCost,expirationDate,dosage,lowStockThreshold
-MED001,Paracetamol,395,1.0,10-11-2024 00:00,10.0,20
+MED001,Paracetamol,415,1.0,10-11-2024 00:00,10.0,20
 MED003,Amoxicillin,75,1.0,10-11-2024 00:00,10.0,15
 MED002,Ibuprofen,50,1.0,10-11-2024 00:00,10.0,10

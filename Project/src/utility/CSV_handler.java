@@ -46,7 +46,7 @@ public class CSV_handler {
 
     private static HospitalStaff createHospitalStaffFromCSV(String[] values, String[] headers) {
         try {
-            String id = values[0].trim();
+            String id = values[1].trim();
             HospitalStaff staff = StaffFactory.createStaffByPrefix(id);
 
             for (int i = 0; i < headers.length; i++) {

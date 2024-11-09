@@ -1,6 +1,8 @@
 package repository.request;
 
 import entity.request.MedicineRequest;
+import entity.request.Request;
+
 import java.io.IOException;
 import java.util.Iterator;
 import repository.Repository;
@@ -23,6 +25,7 @@ public class MedicineRequestRepository extends Repository<MedicineRequest> {
         } catch (Exception e) {
             System.out.println(e);
         }
+        System.out.println(repo.findByField("status", Request.STATUS.PENDING));
     }
 
     private MedicineRequestRepository() throws IOException {

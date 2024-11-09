@@ -89,7 +89,7 @@ public class EntryUI {
         } else if (inputId.startsWith("PH")) {
             nextUI = new PH_HomeUI();
         } else if (inputId.startsWith("A")) {
-            nextUI = new A_HomeUI();
+            nextUI = new A_HomeUI(inputId);
         } else {
             nextUI = new P_HomeUI();
         }

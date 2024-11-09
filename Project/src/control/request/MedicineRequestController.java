@@ -33,7 +33,7 @@ public class MedicineRequestController implements IController {
         this.medicineController = new MedicineController();
     }
 
-    public String createReplenishmentRequest(String requestorId,String medicineId, int amount) {
+    public String createReplenishmentRequest(String requestorId,String medicineId, int quantity) {
         MedicineRequest req = new MedicineRequest();
         req.setId(medicineRequestRepository.getNextClassId());
         req.setRequestorId(requestorId);
@@ -42,7 +42,7 @@ public class MedicineRequestController implements IController {
         req.setTimeCreated(LocalDateTime.now());
         req.setTimeCreated(LocalDateTime.now());
         req.setMedicineId(medicineId);
-        req.setAmount(amount);
+        req.setQuantity(quantity);
         medicineRequestRepository.add(req);
         save();
         return req.getId();
@@ -69,7 +69,7 @@ public class MedicineRequestController implements IController {
         req.setApproverId(approverId);
         req.setTimeModified(LocalDateTime.now());
 
-        int incAmt = req.getAmount();
+        int incAmt = req.getQuantity();
         String medId = req.getMedicineId();
         medicineController.addMedicine(medId, incAmt);
 
@@ -101,8 +101,8 @@ public class MedicineRequestController implements IController {
         return medicineRequestRepository.get(requestId);
     }
 
-    public List<MedicineRequest> listPendingRequests() {
-        return medicineRequestRepository.findByField("status", Request.STATUS.PENDING.name());
+    public List<MedicineRequest> getPendingRequests() {
+        return medicineRequestRepository.findByField("status", Request.STATUS.PENDING);
     }
 
     public void updateRequestStatus(String requestId, Request.STATUS newStatus) {
