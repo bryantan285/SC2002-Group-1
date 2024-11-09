@@ -33,7 +33,7 @@ public class MedicineRequestController implements IController {
         this.medicineController = new MedicineController();
     }
 
-    public void createReplenishmentRequest(String requestorId,String medicineId, int amount) {
+    public String createReplenishmentRequest(String requestorId,String medicineId, int amount) {
         MedicineRequest req = new MedicineRequest();
         req.setId(medicineRequestRepository.getNextClassId());
         req.setRequestorId(requestorId);
@@ -45,6 +45,7 @@ public class MedicineRequestController implements IController {
         req.setAmount(amount);
         medicineRequestRepository.add(req);
         save();
+        return req.getId();
     }
 
     public void removeReplenishmentRequest(String requestId) {

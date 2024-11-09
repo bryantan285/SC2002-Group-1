@@ -1,7 +1,11 @@
 package control.user;
 
 import control.appointment.AppointmentController;
+import control.medicine.MedicineController;
 import control.medicine.PrescriptionController;
+import control.medicine.PrescriptionItemController;
+import control.request.MedicineRequestController;
+import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.user.HospitalStaff;
@@ -13,12 +17,18 @@ public class PharmacistController implements IController {
     private final AppointmentController appointmentController;
     private final PrescriptionController prescriptionController;
     private final HospitalStaffController hospitalStaffController;
+    private final PrescriptionItemController prescriptionItemController;
+    private final MedicineController medicineController;
+    private final MedicineRequestController medicineRequestController;
     private Pharmacist currentPH;
 
     public PharmacistController() {
         this.appointmentController = new AppointmentController();
         this.prescriptionController = new PrescriptionController();
         this.hospitalStaffController = new HospitalStaffController();
+        this.prescriptionItemController = new PrescriptionItemController();
+        this.medicineController = new MedicineController();
+        this.medicineRequestController = new MedicineRequestController();
         this.currentPH = null;
     }
 
@@ -44,5 +54,21 @@ public class PharmacistController implements IController {
         return prescriptionController.getPrescriptionItems(prescriptionId);
     }
 
-    
+    public Boolean dispensePrescriptionItem(String itemId) {
+        if (prescriptionItemController.dispensePrescriptionItem(itemId)) {
+            PrescriptionItem item = prescriptionItemController.getPrescriptionItemById(itemId);
+            prescriptionController.checkCompleted(item.getPrescriptionId());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public List<Medicine> getAllMedicine() {
+        return medicineController.getAllMedicines();
+    }
+
+    public String createReplenishmentRequest(String medicineId, int amount) {
+        return medicineRequestController.createReplenishmentRequest(currentPH.getId(), medicineId, amount);
+    }
 }

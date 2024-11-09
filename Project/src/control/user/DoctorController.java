@@ -7,6 +7,8 @@ import entity.user.HospitalStaff;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
 import interfaces.control.IController;
+import repository.user.PatientRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import utility.DateFormat;
@@ -16,6 +18,7 @@ public class DoctorController implements IController {
     private final UnavailableDateController unavailableDateController;
     private final AppointmentController appointmentController;
     private final HospitalStaffController hospitalStaffController;
+    private final PatientRepository patientRepository;
     private Doctor currentDoc;
 
     public static void main(String[] args) {
@@ -28,6 +31,7 @@ public class DoctorController implements IController {
         this.unavailableDateController = new UnavailableDateController();
         this.appointmentController = new AppointmentController();
         this.hospitalStaffController = new HospitalStaffController();
+        this.patientRepository = PatientRepository.getInstance();
         this.currentDoc = null;
     }
 
@@ -61,9 +65,13 @@ public class DoctorController implements IController {
 
     public void viewUpcomingAppts() {
         List<Appointment> appointmentDates = appointmentController.getDoctorAppts(currentDoc.getId());
-        System.out.println("You have an appointment with:");
-        for (Appointment appt : appointmentDates){
-            System.out.printf("%s at %s%n", appt.getPatientId(), DateFormat.formatWithTime(appt.getApptDateTime()));
+        LocalDateTime now = LocalDateTime.now();
+    
+        System.out.println("You have upcoming appointments with:");
+        for (Appointment appt : appointmentDates) {
+            if (appt.getApptDateTime().isAfter(now)) {
+                System.out.printf("%s at %s%n", appt.getPatientId(), DateFormat.formatWithTime(appt.getApptDateTime()));
+            }
         }
         System.out.println();
     }
@@ -81,8 +89,8 @@ public class DoctorController implements IController {
         appointmentController.completeAppointment(apptId, outcome);
     }
 
-    public void viewPatientMedicalRecord(Patient patient) {
-        
+    public Patient getPatient(String patientId) {
+        return patientRepository.get(patientId); // Only place where controller usage only is violated
     }
 
     // Update medical record by adding a new diagnosis, prescription, or treatment
