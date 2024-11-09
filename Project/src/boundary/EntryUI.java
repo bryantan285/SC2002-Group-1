@@ -85,13 +85,13 @@ public class EntryUI {
     public void nextStep(String inputId) {
         IUserInterface nextUI;
         if (inputId.startsWith("D")) {
-            nextUI = new D_HomeUI();
+            nextUI = new D_HomeUI(inputId);
         } else if (inputId.startsWith("PH")) {
-            nextUI = new PH_HomeUI();
+            nextUI = new PH_HomeUI(inputId);
         } else if (inputId.startsWith("A")) {
             nextUI = new A_HomeUI(inputId);
         } else {
-            nextUI = new P_HomeUI();
+            nextUI = new P_HomeUI(inputId);
         }
         nextUI.show_options();
     }

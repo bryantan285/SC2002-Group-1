@@ -2,10 +2,18 @@ package boundary.user.patient;
 
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
+
+import control.user.PatientController;
 import utility.InputHandler;
 
 public class P_HomeUI implements IUserInterface {
     private final Scanner scanner = InputHandler.getInstance();
+    private final PatientController patientController;
+
+    public P_HomeUI(String id) {
+        this.patientController = new PatientController();
+        this.patientController.setCurrentPatient(id);
+    }
 
     public static void main(String[] args) {
         

@@ -2,10 +2,18 @@ package boundary.user.pharmacist;
 
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
+
+import control.user.PharmacistController;
 import utility.InputHandler;
 
 public class PH_HomeUI implements IUserInterface {
     private final Scanner scanner = InputHandler.getInstance();
+    private final PharmacistController pharmacistController;
+
+    public PH_HomeUI(String id) {
+        this.pharmacistController = new PharmacistController();
+        this.pharmacistController.setCurrentPharmacist(id);
+    }
 
     public static void main(String[] args) {
         
@@ -26,7 +34,7 @@ public class PH_HomeUI implements IUserInterface {
             System.out.print("Please select an option: ");
 
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine(); 
             if (choice == 5) exit = true;
             handle_option(choice);
         }
