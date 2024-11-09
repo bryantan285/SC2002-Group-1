@@ -61,6 +61,32 @@ public class StaffRepository extends Repository<HospitalStaff> {
         return StaffFactory.createStaffByPrefix(id);
     }
 
+    /**
+ * Returns the next unique ID for the given HospitalStaff class or role.
+ */
+    public String getNextId(HospitalStaff.Role role) {
+        String prefix = getPrefix(role);
+        int maxIdNumber = 0;
+    
+        for (HospitalStaff staff : getInstance()) {
+            String currentId = staff.getId();
+            if (currentId.startsWith(prefix)) {
+                try {
+                    int idNumber = Integer.parseInt(currentId.substring(prefix.length()));
+                    if (idNumber > maxIdNumber) {
+                        maxIdNumber = idNumber;
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid ID format: " + currentId);
+                }
+            }
+        }
+    
+        int nextIdNumber = maxIdNumber + 1;
+        return prefix + nextIdNumber;
+    }
+
+
     // @Override
     // public void load() throws IOException {
     //     List<HospitalStaff> objs = CSV_handler.readHospitalStaffFromCSV(getFilePath());

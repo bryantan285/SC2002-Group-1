@@ -45,11 +45,10 @@ public class MedicineController implements IController {
         return med.getStockQuantity();
     }
 
-    public boolean checkLowStock(String medicineId) {
+    public Boolean checkLowStock(String medicineId) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
-            System.out.println("Medicine not found.");
-            return false;
+            return null;
         }
         return med.getStockQuantity() < med.getLowStockThreshold();
     }
@@ -60,30 +59,31 @@ public class MedicineController implements IController {
             System.out.println("Medicine not found.");
             return null;
         }
-        if (med.decStock(quantity)) {
+        try {
+            med.decStock(quantity);
             save();
             System.out.println("Dispensed " + quantity + " units of " + med.getMedicineName() + ". Remaining stock: " + med.getStockQuantity());
             return quantity;
-        } else {
+        } catch (Exception e) {
             System.out.println("Not enough stock to dispense " + quantity + " units of " + med.getMedicineName());
-            return 0;
         }
+        return 0;
     }
 
-    public void checkAvailability(String medicineId) {
+    public Boolean checkAvailability(String medicineId) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
-            System.out.println("Medicine not found.");
+            return null;
         } else {
-            med.checkAvailability();
+            return med.checkAvailability();
         }
     }
 
-    public boolean updateMedicineDetails(String medicineId, String newName, double newDosage, int newLowStockThreshold) {
+    public Boolean updateMedicineDetails(String medicineId, String newName, double newDosage, int newLowStockThreshold) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
             System.out.println("Medicine not found.");
-            return false;
+            return null;
         }
         med.setMedicineName(newName);
         med.setDosage(newDosage);
@@ -93,11 +93,10 @@ public class MedicineController implements IController {
         return true;
     }
 
-    public boolean removeMedicine(String medicineId) {
+    public Boolean removeMedicine(String medicineId) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
-            System.out.println("Medicine not found.");
-            return false;
+            return null;
         }
         medicineRepository.remove(med);
         save();
@@ -113,23 +112,26 @@ public class MedicineController implements IController {
         return medicineRepository.toList();
     }
 
-    public boolean setLowStockThreshold(String medicineId, int newThreshold) {
+    public Boolean setLowStockThreshold(String medicineId, int newThreshold) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
             System.out.println("Medicine not found.");
-            return false;
+            return null;
         }
-        med.setLowStockThreshold(newThreshold);
-        save();
-        System.out.println("Low stock threshold updated successfully.");
-        return true;
+        try {
+            med.setLowStockThreshold(newThreshold);
+            save();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
-    public boolean isMedicineExpired(String medicineId) {
+    public Boolean isMedicineExpired(String medicineId) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
-            System.out.println("Medicine not found.");
-            return false;
+            return null;
         }
         return med.getExpirationDate().isBefore(LocalDateTime.now());
     }
@@ -146,6 +148,32 @@ public class MedicineController implements IController {
         if (!foundExpired) {
             System.out.println("No expired medicines found.");
         }
+    }
+
+    public Boolean incMedStock(String medicineId, int amount) {
+        Medicine med = getMedicineById(medicineId);
+        if (med == null) {
+            return null;
+        }
+        
+        med.incStock(amount);
+        save();
+        return true;
+    }
+
+    public Boolean decMedStock(String medicineId, int amount) {
+        Medicine med = getMedicineById(medicineId);
+        if (med == null) {
+            return null;
+        }
+        try {
+            med.decStock(amount);
+            save();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
     public List<Medicine> searchMedicineByName(String name) {

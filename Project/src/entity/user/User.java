@@ -9,16 +9,16 @@ public abstract class User extends EntityObject {
     private String id;
     private String password;
     private String name;
-    private String gender; //true = male; false = female
+    private String gender;
 
     public User() {
         
     }
 
-    public User(boolean isPatient, String id, String password, String name, String gender){
+    public User(boolean isPatient, String id, String name, String gender){
         this.isPatient = isPatient;
         this.id = id;
-        this.password = password;
+        this.password = Password_hash.hashPassword("password");
         this.name = name;
         this.gender = gender;
     }

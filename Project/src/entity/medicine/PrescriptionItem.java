@@ -6,37 +6,31 @@ public class PrescriptionItem extends EntityObject {
     private String id;
     private String prescriptionId;
     private String medicineId;
-    private String medicineName;
-    private int totalDoses;
-    private int dosesTaken;
-    private int dosesPerDay;
     private int quantity;
-    private boolean isActive;
+    public enum ItemStatus {PENDING, CANCELLED, DISPENSED};
+    private ItemStatus status;
+    private String notes;
 
-    public PrescriptionItem() {
-
-    }
+    public PrescriptionItem() {}
 
     // Constructor
-    public PrescriptionItem(String id, String prescriptionId, String medicineId, String medicineName, int totalDoses, int dosesPerDay, int quantity) {
+    public PrescriptionItem(String id, String prescriptionId, String medicineId, int quantity, ItemStatus status, String notes) {
         this.id = id;
         this.prescriptionId = prescriptionId;
         this.medicineId = medicineId;
-        this.medicineName = medicineName;
-        this.totalDoses = totalDoses;
-        this.dosesTaken = 0; // Initialized to 0
-        this.dosesPerDay = dosesPerDay;
         this.quantity = quantity;
-        this.isActive = true; // Active by default
+        this.status = status;
+        this.notes = notes;
     }
 
     // Getter and Setter methods
     @Override
-    public String getId() { 
-        return id; 
+    public String getId() {
+        return id;
     }
+
     public void setId(String id) {
-        this.id = id; 
+        this.id = id;
     }
 
     public String getPrescriptionId() {
@@ -55,38 +49,6 @@ public class PrescriptionItem extends EntityObject {
         this.medicineId = medicineId;
     }
 
-    public String getMedicineName() {
-        return medicineName;
-    }
-
-    public void setMedicineName(String medicineName) {
-        this.medicineName = medicineName;
-    }
-
-    public int getTotalDoses() {
-        return totalDoses;
-    }
-
-    public void setTotalDoses(int totalDoses) {
-        this.totalDoses = totalDoses;
-    }
-
-    public int getDosesTaken() {
-        return dosesTaken;
-    }
-
-    public void setDosesTaken(int dosesTaken) {
-        this.dosesTaken = dosesTaken;
-    }
-
-    public int getDosesPerDay() {
-        return dosesPerDay;
-    }
-
-    public void setDosesPerDay(int dosesPerDay) {
-        this.dosesPerDay = dosesPerDay;
-    }
-
     public int getQuantity() {
         return quantity;
     }
@@ -95,25 +57,28 @@ public class PrescriptionItem extends EntityObject {
         this.quantity = quantity;
     }
 
-    public boolean getIsActive() {
-        return isActive;
+    public ItemStatus getStatus() {
+        return status;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setStatus(ItemStatus status) {
+        this.status = status;
     }
 
-    // toString() method
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
     @Override
     public String toString() {
         return id + ", " +
                prescriptionId + ", " +
                medicineId + ", " +
-               medicineName + ", " +
-               totalDoses + ", " +
-               dosesTaken + ", " +
-               dosesPerDay + ", " +
                quantity + ", " +
-               isActive;
+               status;
     }
 }

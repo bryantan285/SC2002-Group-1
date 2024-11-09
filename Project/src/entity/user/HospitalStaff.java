@@ -9,8 +9,8 @@ public class HospitalStaff extends User{
         super();
     }
 
-    public HospitalStaff(boolean isPatient, String userId, String password, String name, String gender, Role role, int age) {
-        super(isPatient, userId, password, name, gender);
+    public HospitalStaff(boolean isPatient, String userId, String name, String gender, Role role, int age) {
+        super(isPatient, userId, name, gender);
         this.role = role;
         this.age = age;
     }

@@ -9,14 +9,13 @@ import entity.user.UnavailableDate;
 import interfaces.control.IController;
 import java.time.LocalDateTime;
 import java.util.List;
-import repository.user.StaffRepository;
 import utility.DateFormat;
 
 public class DoctorController implements IController {
     
-    private final StaffRepository staffRepository;
     private final UnavailableDateController unavailableDateController;
     private final AppointmentController appointmentController;
+    private final HospitalStaffController hospitalStaffController;
     private Doctor currentDoc;
 
     public static void main(String[] args) {
@@ -26,24 +25,22 @@ public class DoctorController implements IController {
     }
 
     public DoctorController() {
-        this.staffRepository = StaffRepository.getInstance();
         this.unavailableDateController = new UnavailableDateController();
         this.appointmentController = new AppointmentController();
+        this.hospitalStaffController = new HospitalStaffController();
         this.currentDoc = null;
     }
 
     @Override
     public void save() {
-        staffRepository.save();
+        // No implementation
     }
 
     public void setCurrentDoctor(String doctorId) {
-        HospitalStaff staff = staffRepository.findByField("id", doctorId).get(0);
+        HospitalStaff staff = hospitalStaffController.findById(doctorId);
         if (staff instanceof Doctor) {
             this.currentDoc = (Doctor) staff;
-            System.out.println("Admin set successfully: " + this.currentDoc.getId());
         } else {
-            System.out.println("Staff member with ID " + doctorId + " is not a Doctor.");
             this.currentDoc = null;
         }
     }

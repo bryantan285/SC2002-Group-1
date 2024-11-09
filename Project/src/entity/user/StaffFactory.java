@@ -14,4 +14,19 @@ public class StaffFactory {
             throw new IllegalArgumentException("Invalid prefix in ID: " + id);
         }
     }
+
+    public static HospitalStaff createStaffByRole(HospitalStaff.Role role) {
+        if (null == role) {
+            throw new IllegalArgumentException("Invalid role");
+        } else switch (role) {
+            case DOCTOR:
+                return new Doctor();
+            case PHARMACIST:
+                return new Pharmacist();
+            case ADMINISTRATOR:
+                return new Administrator();
+            default:
+                throw new IllegalArgumentException("Invalid role");
+        }
+    }
 }

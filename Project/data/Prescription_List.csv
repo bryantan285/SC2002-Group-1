@@ -1,2 +1,2 @@
-id,patientId,apptId,isActive
-PRSC001,P1001,APPT001,true
+id,apptId,isActive
+PRSC001,APPT001,true

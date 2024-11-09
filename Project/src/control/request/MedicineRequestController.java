@@ -3,6 +3,7 @@ package control.request;
 import control.medicine.MedicineController;
 import entity.request.MedicineRequest;
 import entity.request.Request;
+import entity.request.Request.STATUS;
 import interfaces.control.IController;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,25 @@ public class MedicineRequestController implements IController {
     public MedicineRequestController() {
         this.medicineRequestRepository = MedicineRequestRepository.getInstance();
         this.medicineController = new MedicineController();
+    }
+
+    public void createReplenishmentRequest(String requestorId,String medicineId, int amount) {
+        MedicineRequest req = new MedicineRequest();
+        req.setId(medicineRequestRepository.getNextClassId());
+        req.setRequestorId(requestorId);
+        req.setApproverId(null);
+        req.setStatus(STATUS.PENDING);
+        req.setTimeCreated(LocalDateTime.now());
+        req.setTimeCreated(LocalDateTime.now());
+        req.setMedicineId(medicineId);
+        req.setAmount(amount);
+        medicineRequestRepository.add(req);
+        save();
+    }
+
+    public void removeReplenishmentRequest(String requestId) {
+        MedicineRequest req = getRequestById(requestId);
+        medicineRequestRepository.remove(req);
     }
 
     public void approveReplenishmentRequest(String approverId, String requestId) {
@@ -77,28 +97,11 @@ public class MedicineRequestController implements IController {
     }
 
     public MedicineRequest getRequestById(String requestId) {
-        return medicineRequestRepository.findByField("id", requestId).stream().findFirst().orElse(null);
+        return medicineRequestRepository.get(requestId);
     }
 
     public List<MedicineRequest> listPendingRequests() {
         return medicineRequestRepository.findByField("status", Request.STATUS.PENDING.name());
-    }
-
-    public void displayRequestDetails(String requestId) {
-        MedicineRequest req = getRequestById(requestId);
-        if (req == null) {
-            System.out.println("Request not found: " + requestId);
-            return;
-        }
-
-        System.out.println("Request ID: " + req.getId());
-        System.out.println("Requestor ID: " + req.getRequestorId());
-        System.out.println("Approver ID: " + req.getApproverId());
-        System.out.println("Status: " + req.getStatus());
-        System.out.println("Medicine ID: " + req.getMedicineId());
-        System.out.println("Amount: " + req.getAmount());
-        System.out.println("Time Created: " + req.getTimeCreated());
-        System.out.println("Time Modified: " + req.getTimeModified());
     }
 
     public void updateRequestStatus(String requestId, Request.STATUS newStatus) {

@@ -6,7 +6,7 @@ public class Administrator extends HospitalStaff {
         super();
     }
 
-    public Administrator(boolean isPatient, String userId, String password, String name, String gender, int age) {
-        super(isPatient, userId, password, name, gender, Role.ADMINISTRATOR, age);
+    public Administrator(boolean isPatient, String userId, String name, String gender, int age) {
+        super(isPatient, userId, name, gender, Role.ADMINISTRATOR, age);
     }
 }

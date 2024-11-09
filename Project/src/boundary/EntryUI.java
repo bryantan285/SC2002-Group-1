@@ -7,10 +7,11 @@ import boundary.user.pharmacist.PH_HomeUI;
 import control.user.UserController;
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
+import utility.InputHandler;
 
 public class EntryUI {
     private final UserController userController;
-    private final Scanner scanner;
+    private final Scanner scanner = InputHandler.getInstance();
 
     public static void main(String[] args) {
         EntryUI entryUI = new EntryUI();
@@ -19,7 +20,6 @@ public class EntryUI {
 
     public EntryUI() {
         this.userController = new UserController();
-        this.scanner = new Scanner(System.in);
     }
 
     public void login() {
@@ -93,6 +93,6 @@ public class EntryUI {
         } else {
             nextUI = new P_HomeUI();
         }
-        nextUI.show_options();;
+        nextUI.show_options();
     }
 }

@@ -34,12 +34,8 @@ public class Medicine extends EntityObject {
     }
 
     // Method to check if medicine is available
-    public void checkAvailability() {
-        if (stockQuantity > 0) {
-            System.out.println("Medicine is available. Stock: " + stockQuantity);
-        } else {
-            System.out.println("Medicine is not available.");
-        }
+    public boolean checkAvailability() {
+        return stockQuantity > 0;
     }
 
     // Method to get the expiration date
@@ -84,8 +80,11 @@ public class Medicine extends EntityObject {
         return lowStockThreshold;
     }
 
-    public void setLowStockThreshold(int lowStockThreshold) {
-        this.lowStockThreshold = lowStockThreshold;
+    public void setLowStockThreshold(int newLevel) {
+        if (newLevel < 0) {
+            throw new IllegalArgumentException("Low stock threshold cannot be negative.");
+        }
+        this.lowStockThreshold = newLevel;
     }
 
     // Getter for medicine name for selection purposes
@@ -97,13 +96,11 @@ public class Medicine extends EntityObject {
         this.stockQuantity += value;
     }
 
-    public boolean decStock(int value) {
-        if (this.stockQuantity >= value) {
-            this.stockQuantity -= value;
-            return true;
-        } else {
-            return false;
+    public void decStock(int value) {
+        if (stockQuantity - value < 0) {
+            throw new IllegalArgumentException("New quantity cannot be negative.");
         }
+        this.stockQuantity -= value;
     }
 
     // // Main method for managing multiple medicines

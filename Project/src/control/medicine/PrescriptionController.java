@@ -2,6 +2,7 @@ package control.medicine;
 
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
+import entity.medicine.PrescriptionItem.ItemStatus;
 import java.util.List;
 import repository.medicine.PrescriptionRepository;
 
@@ -19,19 +20,17 @@ public class PrescriptionController {
         prescriptionRepository.save();
     }
 
-    public void createPrescription(String id, String patientId, String apptId, boolean isActive) {
-        Prescription newPrescription = new Prescription(id, patientId, apptId, isActive);
+    public void createPrescription(String id, String apptId, boolean isActive) {
+        Prescription newPrescription = new Prescription(id, apptId, isActive);
         prescriptionRepository.add(newPrescription);
-        System.out.println("Prescription created successfully: " + id);
+        save();
     }
 
     public void updatePrescriptionStatus(String prescriptionId, boolean isActive) {
         Prescription prescription = getPrescriptionById(prescriptionId);
         if (prescription != null) {
             prescription.setIsActive(isActive);
-            System.out.println("Prescription status updated successfully.");
         } else {
-            System.out.println("Prescription not found.");
         }
     }
 
@@ -39,9 +38,7 @@ public class PrescriptionController {
         Prescription prescription = getPrescriptionById(prescriptionId);
         if (prescription != null && prescription.getIsActive()) {
             prescription.setIsActive(false);
-            System.out.println("Prescription canceled successfully.");
         } else {
-            System.out.println("Prescription is already inactive or not found.");
         }
     }
 
@@ -49,7 +46,6 @@ public class PrescriptionController {
         Prescription prescription = getPrescriptionById(prescriptionId);
         if (prescription != null) {
             System.out.println("Prescription ID: " + prescription.getId());
-            System.out.println("Patient ID: " + prescription.getPatientId());
             System.out.println("Appointment ID: " + prescription.getApptId());
             System.out.println("Active: " + prescription.getIsActive());
         } else {
@@ -85,5 +81,15 @@ public class PrescriptionController {
 
     public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
         return prescriptionItemController.getPrescriptionItems(prescriptionId);
+    }
+
+    public List<Prescription> getActivePrescriptions() {
+        return prescriptionRepository.findByField("isActive", true);
+    }
+
+    // Returns true if none of the item are Pending, active should be false after this
+    public Boolean checkCompleted(String prescriptionId) {
+        List<PrescriptionItem> itemList = getPrescriptionItems(prescriptionId);
+        return itemList.stream().noneMatch(item -> item.getStatus() == ItemStatus.PENDING);
     }
 }

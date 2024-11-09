@@ -5,8 +5,8 @@ public class Doctor extends HospitalStaff {
         super();
     }
 
-    public Doctor(boolean isPatient, String userId, String password, String name, String gender, int age) {
-        super(isPatient, userId, password, name, gender, Role.DOCTOR, age);
+    public Doctor(boolean isPatient, String userId, String name, String gender, int age) {
+        super(isPatient, userId, name, gender, Role.DOCTOR, age);
     }
 
 }

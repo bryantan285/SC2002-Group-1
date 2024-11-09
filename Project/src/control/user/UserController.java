@@ -8,8 +8,8 @@ import utility.Password_hash;
 
 public class UserController implements IController {
     
-    private StaffRepository staffRepository;
-    private PatientRepository patientRepository;
+    private final StaffRepository staffRepository;
+    private final PatientRepository patientRepository;
     private User currentUser;
 
     public static void main(String[] args) {

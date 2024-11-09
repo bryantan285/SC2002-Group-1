@@ -9,7 +9,7 @@ import entity.user.Administrator;
 import entity.user.HospitalStaff;
 import interfaces.control.IController;
 import java.util.List;
-import repository.user.StaffRepository;
+import utility.FieldHandler;
 
 public class AdministratorController implements IController {
     public static void main(String[] args) {
@@ -20,54 +20,94 @@ public class AdministratorController implements IController {
         ac.approveReplenishmentReq(reqId);
     }
 
-    private final StaffRepository staffRepository; 
     private final AppointmentController appointmentController;
     private final MedicineController medicineController;
     private final MedicineRequestController medicineRequestController;
+    private final HospitalStaffController hospitalStaffController;
     private Administrator currentAdmin;
 
     public AdministratorController() {
-        this.staffRepository = StaffRepository.getInstance();
         this.appointmentController = new AppointmentController();
         this.medicineController = new MedicineController();
         this.medicineRequestController = new MedicineRequestController();
+        this.hospitalStaffController = new HospitalStaffController();
         this.currentAdmin = null;
     }
 
     public void setCurrentAdmin(String adminId) {
-        HospitalStaff staff = staffRepository.findByField("id", adminId).get(0);
+        HospitalStaff staff = hospitalStaffController.findById(adminId);
         if (staff instanceof Administrator) {
             this.currentAdmin = (Administrator) staff;
-            System.out.println("Administrator set successfully: " + this.currentAdmin.getId());
         } else {
-            System.out.println("Staff member with ID " + adminId + " is not a Administrator.");
             this.currentAdmin = null;
         }
     }
 
     @Override
     public void save() {
-        staffRepository.save();
-    }
-    
-    public List<HospitalStaff> getHospitalStaff() {
-        return staffRepository.toList();
+        // No implementation
     }
 
-    public List<Appointment> getAppointments() { 
+    // Staff
+    
+    public List<HospitalStaff> getHospitalStaff() {
+        return hospitalStaffController.getAllStaff();
+    }
+
+    public boolean addStaff(String name, String gender, HospitalStaff.Role role, int age) {
+        return hospitalStaffController.addStaff(name, gender, role, age);
+    }
+
+    public boolean removeStaff(String staffId) {
+        return hospitalStaffController.removeStaff(staffId);
+    }
+
+    public List<HospitalStaff> filterStaffBy(String field, String value) {
+        return hospitalStaffController.findByField(field, value);
+    }
+
+    public List<String> getFields() {
+        return FieldHandler.getFieldNames(HospitalStaff.class);
+    }
+
+    // Appointment
+
+    public List<Appointment> getAllAppointments() { 
         return appointmentController.getAllAppts();
     }
+
+    public Appointment getAppointment(String apptId) {
+        return appointmentController.getAppt(apptId);
+    }
+
+    // Inventory
 
     public List<Medicine> getMedInventory() { 
         return medicineController.getAllMedicines();
     }
 
-    // Add into UML (Modify)
+    public Medicine getMed(String medicineId) {
+        return medicineController.getMedicineById(medicineId);
+    }
+
+    public void modifyMedStockAlert(String medicineId, int newLevel) {
+        medicineController.setLowStockThreshold(medicineId, newLevel);
+    }
+
+    public void addMedStock(String medicineId, int amount) {
+        medicineController.incMedStock(medicineId, amount);
+    }
+
+    public void removeMedStock(String medicineId, int amount) {
+        medicineController.decMedStock(medicineId, amount);
+    }
+
+    // Request
+
     public void approveReplenishmentReq(String requestId) {
         medicineRequestController.approveReplenishmentRequest(currentAdmin.getId(), requestId);
     }
 
-    // Add into UML
     public void rejectReplenishmentReq(String requestId) {
         medicineRequestController.rejectReplenishmentRequest(currentAdmin.getId(), requestId);
     }
