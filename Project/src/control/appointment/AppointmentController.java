@@ -19,7 +19,6 @@ public class AppointmentController implements IController {
         appointmentRepository.save();
     }
 
-    // Add a new appointment
     public void addAppointment(String doctorId, String patientId, Appointment.Service service) {
         Appointment newAppointment = new Appointment(appointmentRepository.getNextClassId(), patientId, doctorId, service, LocalDateTime.now());
         appointmentRepository.add(newAppointment);
@@ -27,22 +26,18 @@ public class AppointmentController implements IController {
         System.out.println("Appointment added successfully: " + newAppointment.getId());
     }
 
-    // Get all appointments
     public List<Appointment> getAllAppts() {
         return appointmentRepository.toList();
     }
 
-    // Get appointments for a specific doctor
     public List<Appointment> getDoctorAppts(String doctorId) {
         return appointmentRepository.findByField("doctorId", doctorId);
     }
 
-    // Get an appointment by ID
     public Appointment getAppt(String apptId) {
         return appointmentRepository.findByField("id", apptId).stream().findFirst().orElse(null);
     }
 
-    // Handle appointment request decision (accept or decline)
     public void apptRequestDecision(String apptId, boolean isAccepted) {
         Appointment appt = getAppt(apptId);
         if (appt == null) {
@@ -60,7 +55,6 @@ public class AppointmentController implements IController {
         save();
     }
 
-    // Complete an appointment and record the outcome
     public void completeAppointment(String apptId, String outcome) {
         Appointment appt = getAppt(apptId);
         if (appt == null) {
@@ -74,7 +68,6 @@ public class AppointmentController implements IController {
         System.out.println("Appointment marked as completed.");
     }
 
-    // Cancel an appointment
     public void cancelAppointment(String apptId) {
         Appointment appt = getAppt(apptId);
         if (appt == null) {
@@ -87,7 +80,6 @@ public class AppointmentController implements IController {
         System.out.println("Appointment canceled successfully.");
     }
 
-    // Reschedule an appointment
     public void rescheduleAppointment(String apptId, LocalDateTime newDateTime) {
         Appointment appt = getAppt(apptId);
         if (appt == null) {
@@ -101,7 +93,6 @@ public class AppointmentController implements IController {
         System.out.println("Appointment rescheduled to: " + newDateTime);
     }
 
-    // Check the status of an appointment
     public Appointment.Status checkAppointmentStatus(String apptId) {
         Appointment appt = getAppt(apptId);
         if (appt == null) {
@@ -111,12 +102,10 @@ public class AppointmentController implements IController {
         return appt.getStatus();
     }
 
-    // List all pending appointments
     public List<Appointment> listPendingAppointments() {
         return appointmentRepository.findByField("status", Appointment.Status.PENDING.name());
     }
 
-    // Check for overlapping appointments for a doctor
     public boolean checkOverlappingAppointments(String doctorId, LocalDateTime dateTime) {
         List<Appointment> doctorAppointments = getDoctorAppts(doctorId);
         for (Appointment appt : doctorAppointments) {

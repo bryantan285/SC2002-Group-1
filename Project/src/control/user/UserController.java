@@ -48,8 +48,7 @@ public class UserController implements IController {
     }
 
     public void passwordChange(String userId, String newPassword) {
-        String hashedNewPassword = Password_hash.hashPassword(newPassword);
-        currentUser.changePassword(hashedNewPassword);
+        currentUser.changePassword(newPassword);
         save();
     }
 }

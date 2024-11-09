@@ -1,9 +1,9 @@
 package boundary;
 
-import boundary.user.administrator.A_Home;
-import boundary.user.doctor.D_Home;
-import boundary.user.patient.P_Home;
-import boundary.user.pharmacist.PH_Home;
+import boundary.user.administrator.A_HomeUI;
+import boundary.user.doctor.D_HomeUI;
+import boundary.user.patient.P_HomeUI;
+import boundary.user.pharmacist.PH_HomeUI;
 import control.user.UserController;
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
@@ -31,12 +31,15 @@ public class EntryUI {
         System.out.println("╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝");
         System.out.println("===========================");
         
+        String inputId;
+        String inputPassword;
+
         while (true) {
             System.out.print("Enter your User ID: ");
-            String inputId = scanner.nextLine();
+            inputId = scanner.nextLine();
 
             System.out.print("Enter your Password: ");
-            String inputPassword = scanner.nextLine();
+            inputPassword = scanner.nextLine();
 
             boolean isLoggedIn = userController.login(inputId, inputPassword);
 
@@ -51,6 +54,7 @@ public class EntryUI {
                 System.out.println("Invalid User ID or Password. Please try again.\n");
             }
         }
+        nextStep(inputId);
     }
     
     public void changePassword(String userId) {
@@ -81,13 +85,13 @@ public class EntryUI {
     public void nextStep(String inputId) {
         IUserInterface nextUI;
         if (inputId.startsWith("D")) {
-            nextUI = new D_Home();
+            nextUI = new D_HomeUI();
         } else if (inputId.startsWith("PH")) {
-            nextUI = new PH_Home();
+            nextUI = new PH_HomeUI();
         } else if (inputId.startsWith("A")) {
-            nextUI = new A_Home();
+            nextUI = new A_HomeUI();
         } else {
-            nextUI = new P_Home();
+            nextUI = new P_HomeUI();
         }
         nextUI.show_options();;
     }

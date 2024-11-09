@@ -4,9 +4,7 @@ import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import repository.Repository;
-import utility.CSV_handler;
 
 public class StaffRepository extends Repository<HospitalStaff> {
     private static StaffRepository repo = null;
@@ -63,11 +61,11 @@ public class StaffRepository extends Repository<HospitalStaff> {
         return StaffFactory.createStaffByPrefix(id);
     }
 
-    @Override
-    public void load() throws IOException {
-        List<HospitalStaff> objs = CSV_handler.readHospitalStaffFromCSV(getFilePath());
-        setObjects(objs);
-    }
+    // @Override
+    // public void load() throws IOException {
+    //     List<HospitalStaff> objs = CSV_handler.readHospitalStaffFromCSV(getFilePath());
+    //     setObjects(objs);
+    // }
 
     @Override
     public String getFilePath() {

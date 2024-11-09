@@ -104,5 +104,21 @@ public class PrescriptionItemController implements IController {
 
     public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
         return prescriptionItemRepository.findByField("prescriptionId", prescriptionId);
+    }    
+
+    public void deletePrescriptionItem(String itemId) {
+       PrescriptionItem item = getPrescriptionItemById(itemId);
+       if (item == null) {
+           System.out.println("Prescription item not found.");
+           return;
+       }
+
+       prescriptionItemRepository.remove(item);
+       System.out.println("Prescription item deleted successfully.");
+    }
+
+    public void createPrescriptionItem(PrescriptionItem item) {
+        prescriptionItemRepository.add(item);
+        System.out.println("Prescription item created successfully.");
     }
 }
