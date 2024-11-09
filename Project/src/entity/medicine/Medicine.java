@@ -1,7 +1,5 @@
 package entity.medicine;
 import entity.EntityObject;
-import java.time.LocalDateTime;
-import utility.DateFormat;
 
 // Medicine Class
 public class Medicine extends EntityObject {
@@ -9,7 +7,6 @@ public class Medicine extends EntityObject {
     private String medicineName;
     private int stockQuantity;
     private float unitCost;
-    private LocalDateTime expirationDate;
     private double dosage; // in mg
     private int lowStockThreshold;
 
@@ -18,11 +15,10 @@ public class Medicine extends EntityObject {
     }
 
     // Constructor
-    public Medicine(String medicineName, int stockQuantity, float unitCost, LocalDateTime expirationDate, double dosage, int lowStockThreshold) {
+    public Medicine(String medicineName, int stockQuantity, float unitCost, double dosage, int lowStockThreshold) {
         this.medicineName = medicineName;
         this.stockQuantity = stockQuantity;
         this.unitCost = unitCost;
-        this.expirationDate = expirationDate;
         this.dosage = dosage;
         this.lowStockThreshold = lowStockThreshold;
     }
@@ -37,12 +33,6 @@ public class Medicine extends EntityObject {
     public boolean checkAvailability() {
         return stockQuantity > 0;
     }
-
-    // Method to get the expiration date
-    public LocalDateTime getExpirationDate() {
-        return expirationDate;
-    }
-
     @Override
     public String getId() {
         return id;
@@ -65,10 +55,6 @@ public class Medicine extends EntityObject {
             throw new IllegalArgumentException("New quantity cannot be negative.");
         }
         this.stockQuantity = stockQuantity;
-    }
-
-    public void setExpirationDate(LocalDateTime expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
     public double getDosage() {
@@ -239,7 +225,7 @@ public class Medicine extends EntityObject {
     
     @Override
     public String toString() {
-        return id + ", " + medicineName + ", " + stockQuantity + ", " + unitCost + ", " + DateFormat.format(expirationDate) + ", " + dosage + " mg, " + lowStockThreshold;
+        return id + ", " + medicineName + ", " + stockQuantity + ", " + unitCost + ", " + dosage + " mg, " + lowStockThreshold;
     }
 
     public float getUnitCost() {

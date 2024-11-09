@@ -2,7 +2,6 @@ package control.medicine;
 
 import entity.medicine.Medicine;
 import interfaces.control.IController;
-import java.time.LocalDateTime;
 import java.util.List;
 import repository.medicine.MedicineRepository;
 
@@ -89,7 +88,6 @@ public class MedicineController implements IController {
         med.setDosage(newDosage);
         med.setLowStockThreshold(newLowStockThreshold);
         save();
-        System.out.println("Medicine details updated successfully.");
         return true;
     }
 
@@ -100,7 +98,6 @@ public class MedicineController implements IController {
         }
         medicineRepository.remove(med);
         save();
-        System.out.println("Medicine removed successfully.");
         return true;
     }
 
@@ -115,7 +112,6 @@ public class MedicineController implements IController {
     public Boolean setLowStockThreshold(String medicineId, int newThreshold) {
         Medicine med = getMedicineById(medicineId);
         if (med == null) {
-            System.out.println("Medicine not found.");
             return null;
         }
         try {
@@ -126,28 +122,6 @@ public class MedicineController implements IController {
             System.out.println(e.getMessage());
         }
         return false;
-    }
-
-    public Boolean isMedicineExpired(String medicineId) {
-        Medicine med = getMedicineById(medicineId);
-        if (med == null) {
-            return null;
-        }
-        return med.getExpirationDate().isBefore(LocalDateTime.now());
-    }
-
-    public void listExpiredMedicines() {
-        List<Medicine> medicines = getAllMedicines();
-        boolean foundExpired = false;
-        for (Medicine med : medicines) {
-            if (med.getExpirationDate().isBefore(LocalDateTime.now())) {
-                System.out.println(med);
-                foundExpired = true;
-            }
-        }
-        if (!foundExpired) {
-            System.out.println("No expired medicines found.");
-        }
     }
 
     public Boolean incMedStock(String medicineId, int amount) {
