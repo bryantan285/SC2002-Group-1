@@ -51,12 +51,12 @@ public class PatientController implements IController {
         appointmentController.addAppointment(doctorId, currentPatient.getId(), service);
     }
 
-    public void rescheduleAppointment(String apptId, LocalDateTime newDateTime) {
-        appointmentController.rescheduleAppointment(apptId, newDateTime);
+    public void rescheduleAppointment(Appointment appt, LocalDateTime newDateTime) {
+        appointmentController.rescheduleAppointment(appt, newDateTime);
     }
 
-    public void cancelAppointment(String apptId) {
-        appointmentController.cancelAppointment(apptId);
+    public void cancelAppointment(Appointment appt) {
+        appointmentController.cancelAppointment(appt);
     }
 
     public Appointment.Status checkAppointmentStatus(String apptId) {

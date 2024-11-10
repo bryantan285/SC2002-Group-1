@@ -20,30 +20,29 @@ public class PrescriptionController {
         prescriptionRepository.save();
     }
 
-    public void createPrescription(String id, String apptId, boolean isActive) {
-        Prescription newPrescription = new Prescription(id, apptId, isActive);
+    public void createPrescription(String apptId, boolean isActive) {
+        Prescription newPrescription = new Prescription(prescriptionRepository.getNextClassId(), apptId, isActive);
         prescriptionRepository.add(newPrescription);
         save();
     }
 
-    public void updatePrescriptionStatus(String prescriptionId, boolean isActive) {
-        Prescription prescription = getPrescriptionById(prescriptionId);
+    public Boolean updatePrescriptionStatus(Prescription prescription, boolean isActive) {
         if (prescription != null) {
             prescription.setIsActive(isActive);
+            return isActive;
         } else {
+            return null;
         }
     }
 
-    public void cancelPrescription(String prescriptionId) {
-        Prescription prescription = getPrescriptionById(prescriptionId);
+    public void cancelPrescription(Prescription prescription) {
         if (prescription != null && prescription.getIsActive()) {
             prescription.setIsActive(false);
         } else {
         }
     }
 
-    public void displayPrescriptionDetails(String prescriptionId) {
-        Prescription prescription = getPrescriptionById(prescriptionId);
+    public void displayPrescriptionDetails(Prescription prescription) {
         if (prescription != null) {
             System.out.println("Prescription ID: " + prescription.getId());
             System.out.println("Appointment ID: " + prescription.getApptId());
@@ -66,11 +65,10 @@ public class PrescriptionController {
     }
 
     public Prescription getPrescriptionById(String prescriptionId) {
-        return prescriptionRepository.findByField("id", prescriptionId).stream().findFirst().orElse(null);
+        return prescriptionRepository.get(prescriptionId);
     }
 
-    public void deletePrescription(String prescriptionId) {
-        Prescription prescription = getPrescriptionById(prescriptionId);
+    public void deletePrescription(Prescription prescription) {
         if (prescription != null) {
             prescriptionRepository.remove(prescription);
             System.out.println("Prescription deleted successfully.");
@@ -79,8 +77,8 @@ public class PrescriptionController {
         }
     }
 
-    public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
-        return prescriptionItemController.getPrescriptionItems(prescriptionId);
+    public List<PrescriptionItem> getPrescriptionItems(Prescription prescription) {
+        return prescriptionItemController.getPrescriptionItems(prescription);
     }
 
     public List<Prescription> getActivePrescriptions() {
@@ -88,8 +86,8 @@ public class PrescriptionController {
     }
 
     // Returns true if none of the item are Pending, active should be false after this
-    public Boolean checkCompleted(String prescriptionId) {
-        List<PrescriptionItem> itemList = getPrescriptionItems(prescriptionId);
+    public Boolean checkCompleted(Prescription prescription) {
+        List<PrescriptionItem> itemList = getPrescriptionItems(prescription);
         return itemList.stream().noneMatch(item -> item.getStatus() == ItemStatus.PENDING);
     }
 }

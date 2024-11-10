@@ -1,6 +1,7 @@
 package control.request;
 
 import control.medicine.MedicineController;
+import entity.medicine.Medicine;
 import entity.request.MedicineRequest;
 import entity.request.Request;
 import entity.request.Request.STATUS;
@@ -18,7 +19,7 @@ public class MedicineRequestController implements IController {
         MedicineRequestRepository mrr = MedicineRequestRepository.getInstance();
         MedicineRequest mreq = mrr.get("MREQ001");
 
-        mc.approveReplenishmentRequest("A001", mreq.getId());
+        mc.approveReplenishmentRequest("A001", mreq);
 
         System.out.println("Status of Request 1: " + mreq.getStatus());
     }
@@ -53,15 +54,12 @@ public class MedicineRequestController implements IController {
         medicineRequestRepository.remove(req);
     }
 
-    public void approveReplenishmentRequest(String approverId, String requestId) {
-        MedicineRequest req = getRequestById(requestId);
+    public void approveReplenishmentRequest(String approverId, MedicineRequest req) {
         if (req == null) {
-            System.out.println("Request not found: " + requestId);
             return;
         }
 
         if (req.getStatus() != Request.STATUS.PENDING) {
-            System.out.println("Request is not in a pending state: " + requestId);
             return;
         }
 
@@ -70,22 +68,19 @@ public class MedicineRequestController implements IController {
         req.setTimeModified(LocalDateTime.now());
 
         int incAmt = req.getQuantity();
-        String medId = req.getMedicineId();
-        medicineController.addMedicine(medId, incAmt);
+
+        Medicine med = medicineController.getMedicineById(req.getMedicineId());
+        medicineController.incMedStock(med, incAmt);
 
         save();
-        System.out.println("Request approved: " + requestId);
     }
 
-    public void rejectReplenishmentRequest(String approverId, String requestId) {
-        MedicineRequest req = getRequestById(requestId);
+    public void rejectReplenishmentRequest(String approverId, MedicineRequest req) {
         if (req == null) {
-            System.out.println("Request not found: " + requestId);
             return;
         }
 
         if (req.getStatus() != Request.STATUS.PENDING) {
-            System.out.println("Request is not in a pending state: " + requestId);
             return;
         }
 
@@ -94,7 +89,6 @@ public class MedicineRequestController implements IController {
         req.setTimeModified(LocalDateTime.now());
 
         save();
-        System.out.println("Request rejected: " + requestId);
     }
 
     public MedicineRequest getRequestById(String requestId) {

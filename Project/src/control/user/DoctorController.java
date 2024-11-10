@@ -7,10 +7,9 @@ import entity.user.HospitalStaff;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
 import interfaces.control.IController;
-import repository.user.PatientRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import repository.user.PatientRepository;
 import utility.DateFormat;
 
 public class DoctorController implements IController {
@@ -81,12 +80,12 @@ public class DoctorController implements IController {
         unavailableDateController.addUnavailablity(currentDoc.getId(), startDateTime, endDateTime);
     }
 
-    public void acceptDeclineApptRequest(String apptId, boolean isAccepted){
-        appointmentController.apptRequestDecision(apptId, isAccepted);
+    public void acceptDeclineApptRequest(Appointment appt, boolean isAccepted){
+        appointmentController.apptRequestDecision(appt, isAccepted);
     }
 
-    public void recordApptOutcome(String apptId, String outcome){
-        appointmentController.completeAppointment(apptId, outcome);
+    public void recordApptOutcome(Appointment appt, String outcome){
+        appointmentController.completeAppointment(appt, outcome);
     }
 
     public Patient getPatient(String patientId) {

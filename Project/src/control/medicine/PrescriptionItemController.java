@@ -1,5 +1,7 @@
 package control.medicine;
 
+import entity.medicine.Medicine;
+import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.medicine.PrescriptionItem.ItemStatus;
 import interfaces.control.IController;
@@ -20,8 +22,7 @@ public class PrescriptionItemController implements IController {
         prescriptionItemRepository.save();
     }
 
-    public void displayPrescriptionItemDetails(String itemId) {
-        PrescriptionItem item = getPrescriptionItemById(itemId);
+    public void displayPrescriptionItemDetails(PrescriptionItem item) {
         System.out.println("Item ID: " + item.getId());
         System.out.println("Prescription ID: " + item.getPrescriptionId());
         System.out.println("Medicine ID: " + item.getMedicineId());
@@ -32,12 +33,11 @@ public class PrescriptionItemController implements IController {
         return prescriptionItemRepository.findByField("id", itemId).stream().findFirst().orElse(null);
     }
 
-    public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
-        return prescriptionItemRepository.findByField("prescriptionId", prescriptionId);
+    public List<PrescriptionItem> getPrescriptionItems(Prescription prescription) {
+        return prescriptionItemRepository.findByField("prescriptionId", prescription.getId());
     }    
 
-    public void deletePrescriptionItem(String itemId) {
-       PrescriptionItem item = getPrescriptionItemById(itemId);
+    public void deletePrescriptionItem(PrescriptionItem item) {
        if (item == null) {
            System.out.println("Prescription item not found.");
            return;
@@ -59,10 +59,10 @@ public class PrescriptionItemController implements IController {
         save();
     }
 
-    public Boolean dispensePrescriptionItem(String itemId) {
-        PrescriptionItem item = getPrescriptionItemById(itemId);
+    public Boolean dispensePrescriptionItem(PrescriptionItem item) {
         if (item == null) return null;
-        if (medicineController.decMedStock(itemId, item.getQuantity())) {
+        Medicine med = medicineController.getMedicineById(item.getMedicineId());
+        if (medicineController.decMedStock(med, item.getQuantity())) {
             item.setStatus(ItemStatus.DISPENSED);
             save();
             return true;

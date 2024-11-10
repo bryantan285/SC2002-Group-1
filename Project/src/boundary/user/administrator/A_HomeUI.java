@@ -1,14 +1,12 @@
 package boundary.user.administrator;
 
-import interfaces.boundary.IUserInterface;
-
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
-
 import control.user.AdministratorController;
 import entity.medicine.Medicine;
 import entity.request.MedicineRequest;
+import interfaces.boundary.IUserInterface;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
 import utility.InputHandler;
 
 public class A_HomeUI implements IUserInterface {
@@ -145,7 +143,8 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Quantity must be a positive number.");
                 return;
             }
-            if (adminController.addMedStock(medicineId, quantity)) {
+            Medicine medicine = adminController.getMedicine(medicineId);
+            if (adminController.addMedStock(medicine, quantity)) {
                 System.out.printf("Increased stock for medicine ID %s by %d units.%n", medicineId, quantity);
             }
         } catch (InputMismatchException e) {
@@ -173,7 +172,8 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Quantity must be a positive number.");
                 return;
             }
-            if (adminController.decMedStock(medicineId, quantity)) {
+            Medicine medicine = adminController.getMedicine(medicineId);
+            if (adminController.decMedStock(medicine, quantity)) {
                 System.out.printf("Decreased stock for medicine ID %s by %d units.%n", medicineId, quantity);
             }
 
@@ -202,7 +202,8 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Stock quantity cannot be negative.");
                 return;
             }
-            if (adminController.updateMedStock(medicineId, newQuantity)) {
+            Medicine medicine = adminController.getMedicine(medicineId);
+            if (adminController.updateMedStock(medicine, newQuantity)) {
                 System.out.printf("Updated stock for medicine ID %s to %d units.%n", medicineId, newQuantity);
             }
         } catch (InputMismatchException e) {
@@ -269,19 +270,22 @@ public class A_HomeUI implements IUserInterface {
             int actionChoice = scanner.nextInt();
             scanner.nextLine();
 
-            if (actionChoice == 1) {
-                adminController.approveReplenishmentReq(selectedRequest.getId());
-                System.out.println("Request approved. Stock has been updated.");
-                actionExit = true;
-            } else if (actionChoice == 2) {
-                adminController.rejectReplenishmentReq(selectedRequest.getId());
-                System.out.println("Request rejected.");
-                actionExit = true;
-            } else if (actionChoice == 3) {
-                System.out.println("Returning to the previous menu.");
-                actionExit = true;
-            } else {
-                System.out.println("Invalid choice. Please enter 1, 2, or 3.");
+            switch (actionChoice) {
+                case 1 -> {
+                    adminController.approveReplenishmentReq(selectedRequest);
+                    System.out.println("Request approved. Stock has been updated.");
+                    actionExit = true;
+                }
+                case 2 -> {
+                    adminController.rejectReplenishmentReq(selectedRequest);
+                    System.out.println("Request rejected.");
+                    actionExit = true;
+                }
+                case 3 -> {
+                    System.out.println("Returning to the previous menu.");
+                    actionExit = true;
+                }
+                default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
             }
         }
 

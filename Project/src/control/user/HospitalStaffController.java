@@ -40,8 +40,7 @@ public class HospitalStaffController implements IController {
         return false;
     }
 
-    public Boolean removeStaff(String staffId) {
-        HospitalStaff staff = staffRepository.get(staffId);
+    public Boolean removeStaff(HospitalStaff staff) {
         if (staff == null) return false;
         staffRepository.remove(staff);
         return true;

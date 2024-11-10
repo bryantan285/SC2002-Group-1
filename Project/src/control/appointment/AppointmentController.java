@@ -38,8 +38,7 @@ public class AppointmentController implements IController {
         return appointmentRepository.findByField("id", apptId).stream().findFirst().orElse(null);
     }
 
-    public void apptRequestDecision(String apptId, boolean isAccepted) {
-        Appointment appt = getAppt(apptId);
+    public void apptRequestDecision(Appointment appt, boolean isAccepted) {
         if (appt == null) {
             System.out.println("Appointment not found.");
             return;
@@ -55,8 +54,7 @@ public class AppointmentController implements IController {
         save();
     }
 
-    public void completeAppointment(String apptId, String outcome) {
-        Appointment appt = getAppt(apptId);
+    public void completeAppointment(Appointment appt, String outcome) {
         if (appt == null) {
             System.out.println("Appointment not found.");
             return;
@@ -68,8 +66,7 @@ public class AppointmentController implements IController {
         System.out.println("Appointment marked as completed.");
     }
 
-    public void cancelAppointment(String apptId) {
-        Appointment appt = getAppt(apptId);
+    public void cancelAppointment(Appointment appt) {
         if (appt == null) {
             System.out.println("Appointment not found.");
             return;
@@ -80,8 +77,7 @@ public class AppointmentController implements IController {
         System.out.println("Appointment canceled successfully.");
     }
 
-    public void rescheduleAppointment(String apptId, LocalDateTime newDateTime) {
-        Appointment appt = getAppt(apptId);
+    public void rescheduleAppointment(Appointment appt, LocalDateTime newDateTime) {
         if (appt == null) {
             System.out.println("Appointment not found.");
             return;

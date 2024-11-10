@@ -22,8 +22,7 @@ public class MedicineController implements IController {
         return med != null ? med.getStockQuantity() : null;
     }
 
-    public Integer restockMedicine(String medicineId, int quantity) {
-        Medicine med = getMedicineById(medicineId);
+    public Integer restockMedicine(Medicine med, int quantity) {
         if (med == null) {
             System.out.println("Medicine not found.");
             return null;
@@ -33,27 +32,14 @@ public class MedicineController implements IController {
         return med.getStockQuantity();
     }
 
-    public Integer addMedicine(String medicineId, int value) {
-        Medicine med = getMedicineById(medicineId);
-        if (med == null) {
-            System.out.println("Medicine not found.");
-            return null;
-        }
-        med.incStock(value);
-        save();
-        return med.getStockQuantity();
-    }
-
-    public Boolean checkLowStock(String medicineId) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean checkLowStock(Medicine med) {
         if (med == null) {
             return null;
         }
         return med.getStockQuantity() < med.getLowStockThreshold();
     }
 
-    public Integer dispenseMedicine(String medicineId, int quantity) {
-        Medicine med = getMedicineById(medicineId);
+    public Integer dispenseMedicine(Medicine med, int quantity) {
         if (med == null) {
             System.out.println("Medicine not found.");
             return null;
@@ -69,8 +55,7 @@ public class MedicineController implements IController {
         return 0;
     }
 
-    public Boolean checkAvailability(String medicineId) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean checkAvailability(Medicine med) {
         if (med == null) {
             return null;
         } else {
@@ -78,8 +63,7 @@ public class MedicineController implements IController {
         }
     }
 
-    public Boolean updateMedicineDetails(String medicineId, String newName, double newDosage, int newLowStockThreshold) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean updateMedicineDetails(Medicine med, String newName, double newDosage, int newLowStockThreshold) {
         if (med == null) {
             System.out.println("Medicine not found.");
             return null;
@@ -91,8 +75,7 @@ public class MedicineController implements IController {
         return true;
     }
 
-    public Boolean removeMedicine(String medicineId) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean removeMedicine(Medicine med) {
         if (med == null) {
             return null;
         }
@@ -109,8 +92,7 @@ public class MedicineController implements IController {
         return medicineRepository.toList();
     }
 
-    public Boolean setLowStockThreshold(String medicineId, int newThreshold) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean setLowStockThreshold(Medicine med, int newThreshold) {
         if (med == null) {
             return null;
         }
@@ -124,8 +106,7 @@ public class MedicineController implements IController {
         return false;
     }
 
-    public Boolean incMedStock(String medicineId, int amount) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean incMedStock(Medicine med, int amount) {
         if (med == null) {
             return null;
         }
@@ -135,8 +116,7 @@ public class MedicineController implements IController {
         return true;
     }
 
-    public Boolean decMedStock(String medicineId, int amount) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean decMedStock(Medicine med, int amount) {
         if (med == null) {
             return null;
         }
@@ -150,8 +130,7 @@ public class MedicineController implements IController {
         return false;
     }
 
-    public Boolean updateMedStock(String medicineId, int amount) {
-        Medicine med = getMedicineById(medicineId);
+    public Boolean updateMedStock(Medicine med, int amount) {
         if (med == null) {
             return null;
         }

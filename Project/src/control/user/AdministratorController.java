@@ -18,7 +18,7 @@ public class AdministratorController implements IController {
         String reqId = "MREQ001";
         AdministratorController ac = new AdministratorController();
         ac.setCurrentAdmin(adminId);
-        ac.approveReplenishmentReq(reqId);
+        ac.approveReplenishmentReq(ac.getRequest(reqId));
     }
 
     private final AppointmentController appointmentController;
@@ -59,8 +59,8 @@ public class AdministratorController implements IController {
         return hospitalStaffController.addStaff(name, gender, role, age);
     }
 
-    public boolean removeStaff(String staffId) {
-        return hospitalStaffController.removeStaff(staffId);
+    public boolean removeStaff(HospitalStaff staff) {
+        return hospitalStaffController.removeStaff(staff);
     }
 
     public List<HospitalStaff> filterStaffBy(String field, String value) {
@@ -87,41 +87,41 @@ public class AdministratorController implements IController {
         return medicineController.getAllMedicines();
     }
 
-    public Medicine getMed(String medicineId) {
+    public Medicine getMedicine(String medicineId) {
         return medicineController.getMedicineById(medicineId);
     }
 
-    public Boolean modifyMedStockAlert(String medicineId, int newLevel) {
-        return medicineController.setLowStockThreshold(medicineId, newLevel);
+    public Boolean modifyMedStockAlert(Medicine medicine, int newLevel) {
+        return medicineController.setLowStockThreshold(medicine, newLevel);
     }
 
-    public Boolean addMedStock(String medicineId, int amount) {
-        return medicineController.incMedStock(medicineId, amount);
+    public Boolean addMedStock(Medicine medicine, int amount) {
+        return medicineController.incMedStock(medicine, amount);
     }
 
-    public Boolean decMedStock(String medicineId, int amount) {
-        return medicineController.decMedStock(medicineId, amount);
+    public Boolean decMedStock(Medicine medicine, int amount) {
+        return medicineController.decMedStock(medicine, amount);
     }
 
-    public Boolean updateMedStock(String medicineId, int amount) {
-        return medicineController.updateMedStock(medicineId, amount);
+    public Boolean updateMedStock(Medicine medicine, int amount) {
+        return medicineController.updateMedStock(medicine, amount);
     }
 
     // Request
+
+    public MedicineRequest getRequest(String id) {
+        return medicineRequestController.getRequestById(id);
+    }
 
     public List<MedicineRequest> getPendingReplenishingRequests() {
         return medicineRequestController.getPendingRequests();
     }
 
-    public Medicine getMedicine(String medicineId) {
-        return medicineController.getMedicineById(medicineId);
+    public void approveReplenishmentReq(MedicineRequest req) {
+        medicineRequestController.approveReplenishmentRequest(currentAdmin.getId(), req);
     }
 
-    public void approveReplenishmentReq(String requestId) {
-        medicineRequestController.approveReplenishmentRequest(currentAdmin.getId(), requestId);
-    }
-
-    public void rejectReplenishmentReq(String requestId) {
-        medicineRequestController.rejectReplenishmentRequest(currentAdmin.getId(), requestId);
+    public void rejectReplenishmentReq(MedicineRequest req) {
+        medicineRequestController.rejectReplenishmentRequest(currentAdmin.getId(), req);
     }
 }

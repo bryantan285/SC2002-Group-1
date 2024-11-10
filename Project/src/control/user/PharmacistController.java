@@ -50,14 +50,14 @@ public class PharmacistController implements IController {
         return prescriptionController.getActivePrescriptions();
     }
 
-    public List<PrescriptionItem> getPrescriptionItems(String prescriptionId) {
-        return prescriptionController.getPrescriptionItems(prescriptionId);
+    public List<PrescriptionItem> getPrescriptionItems(Prescription prescription) {
+        return prescriptionController.getPrescriptionItems(prescription);
     }
 
-    public Boolean dispensePrescriptionItem(String itemId) {
-        if (prescriptionItemController.dispensePrescriptionItem(itemId)) {
-            PrescriptionItem item = prescriptionItemController.getPrescriptionItemById(itemId);
-            prescriptionController.checkCompleted(item.getPrescriptionId());
+    public Boolean dispensePrescriptionItem(PrescriptionItem item) {
+        if (prescriptionItemController.dispensePrescriptionItem(item)) {
+            Prescription prescription = prescriptionController.getPrescriptionById(item.getPrescriptionId());
+            prescriptionController.checkCompleted(prescription);
             return true;
         } else {
             return false;

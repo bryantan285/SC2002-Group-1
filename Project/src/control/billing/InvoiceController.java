@@ -4,6 +4,7 @@ import control.medicine.MedicineController;
 import control.medicine.PrescriptionController;
 import entity.billing.Invoice;
 import entity.medicine.Medicine;
+import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import interfaces.control.IController;
 import java.time.LocalDateTime;
@@ -28,7 +29,8 @@ public class InvoiceController implements IController {
     }
 
     public void createInvoice(String customerId, String prescriptionId, double taxRate) {
-        List<PrescriptionItem> prescriptionItems = prescriptionController.getPrescriptionItems(prescriptionId);
+        Prescription prescription = prescriptionController.getPrescriptionById(prescriptionId);
+        List<PrescriptionItem> prescriptionItems = prescriptionController.getPrescriptionItems(prescription);
         if (prescriptionItems.isEmpty()) {
             System.out.println("No items found for prescription ID: " + prescriptionId);
             return;
@@ -74,38 +76,34 @@ public class InvoiceController implements IController {
         return invoiceRepository.findByField("invoiceId", invoiceId).stream().findFirst().orElse(null);
     }
 
-    public void markAsPaid(String invoiceId) {
-        Invoice invoice = getInvoiceById(invoiceId);
+    public Boolean markAsPaid(Invoice invoice) {
         if (invoice == null) {
-            System.out.println("Invoice not found: " + invoiceId);
-            return;
+            return null;
         }
 
         if (invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
             System.out.println("Invoice is already marked as paid.");
-            return;
+            return true;
         }
 
         invoice.setStatus(Invoice.InvoiceStatus.PAID);
         save();
-        System.out.println("Invoice marked as paid: " + invoiceId);
+        return true;
     }
 
-    public void cancelInvoice(String invoiceId) {
+    public Boolean cancelInvoice(String invoiceId) {
         Invoice invoice = getInvoiceById(invoiceId);
         if (invoice == null) {
-            System.out.println("Invoice not found: " + invoiceId);
-            return;
+            return null;
         }
 
         if (invoice.getStatus() == Invoice.InvoiceStatus.CANCELED) {
-            System.out.println("Invoice is already canceled.");
-            return;
+            return true;
         }
 
         invoice.setStatus(Invoice.InvoiceStatus.CANCELED);
         save();
-        System.out.println("Invoice canceled: " + invoiceId);
+        return true;
     }
 
     public void listOverdueInvoices() {
@@ -124,16 +122,14 @@ public class InvoiceController implements IController {
         }
     }
 
-    public void updateDueDate(String invoiceId, LocalDateTime newDueDate) {
-        Invoice invoice = getInvoiceById(invoiceId);
+    public Boolean updateDueDate(Invoice invoice, LocalDateTime newDueDate) {
         if (invoice == null) {
-            System.out.println("Invoice not found: " + invoiceId);
-            return;
+            return null;
         }
 
         invoice.setDueDate(newDueDate);
         save();
-        System.out.println("Due date updated for invoice: " + invoiceId);
+        return true;
     }
 
     public void displayInvoiceDetails(String invoiceId) {
@@ -158,11 +154,9 @@ public class InvoiceController implements IController {
         return invoiceRepository.toList();
     }
 
-    public boolean isInvoiceOverdue(String invoiceId) {
-        Invoice invoice = getInvoiceById(invoiceId);
+    public Boolean isInvoiceOverdue(Invoice invoice) {
         if (invoice == null) {
-            System.out.println("Invoice not found: " + invoiceId);
-            return false;
+            return null;
         }
 
         return invoice.getDueDate().isBefore(LocalDateTime.now()) && invoice.getStatus() != Invoice.InvoiceStatus.PAID;
