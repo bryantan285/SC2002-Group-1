@@ -98,8 +98,8 @@ public class AppointmentController implements IController {
         return appt.getStatus();
     }
 
-    public List<Appointment> listPendingAppointments() {
-        return appointmentRepository.findByField("status", Appointment.Status.PENDING.name());
+    public List<Appointment> getPendingAppointments() {
+        return appointmentRepository.findByField("status", Appointment.Status.PENDING);
     }
 
     public boolean checkOverlappingAppointments(String doctorId, LocalDateTime dateTime) {
