@@ -1,12 +1,12 @@
 package control.user;
 
 import entity.user.User;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import repository.user.PatientRepository;
 import repository.user.StaffRepository;
 import utility.Password_hash;
 
-public class UserController implements IController {
+public class UserController implements ISavable {
     
     private final StaffRepository staffRepository;
     private final PatientRepository patientRepository;

@@ -6,13 +6,12 @@ import entity.user.Doctor;
 import entity.user.HospitalStaff;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
-import interfaces.control.IController;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.user.PatientRepository;
 import utility.DateFormat;
 
-public class DoctorController implements IController {
+public class DoctorController {
     
     private final UnavailableDateController unavailableDateController;
     private final AppointmentController appointmentController;
@@ -32,11 +31,6 @@ public class DoctorController implements IController {
         this.hospitalStaffController = new HospitalStaffController();
         this.patientRepository = PatientRepository.getInstance();
         this.currentDoc = null;
-    }
-
-    @Override
-    public void save() {
-        // No implementation
     }
 
     public void setCurrentDoctor(String doctorId) {

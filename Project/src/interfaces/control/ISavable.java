@@ -1,5 +1,5 @@
 package interfaces.control;
 
-public interface IController {
+public interface ISavable {
     public void save();
 }

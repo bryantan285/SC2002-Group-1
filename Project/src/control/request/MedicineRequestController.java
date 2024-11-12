@@ -5,12 +5,12 @@ import entity.medicine.Medicine;
 import entity.request.MedicineRequest;
 import entity.request.Request;
 import entity.request.Request.STATUS;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.request.MedicineRequestRepository;
 
-public class MedicineRequestController implements IController {
+public class MedicineRequestController implements ISavable {
     private final MedicineRequestRepository medicineRequestRepository;
     private final MedicineController medicineController;
 

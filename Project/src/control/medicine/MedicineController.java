@@ -1,11 +1,11 @@
 package control.medicine;
 
 import entity.medicine.Medicine;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.util.List;
 import repository.medicine.MedicineRepository;
 
-public class MedicineController implements IController {
+public class MedicineController implements ISavable {
     private final MedicineRepository medicineRepository;
 
     public MedicineController() {

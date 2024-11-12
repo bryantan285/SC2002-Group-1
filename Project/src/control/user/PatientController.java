@@ -3,11 +3,11 @@ package control.user;
 import control.appointment.AppointmentController;
 import entity.appointment.Appointment;
 import entity.user.Patient;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.time.LocalDateTime;
 import repository.user.PatientRepository;
 
-public class PatientController implements IController {
+public class PatientController implements ISavable {
     private final PatientRepository patientRepository;
     private final AppointmentController appointmentController;
     private Patient currentPatient;

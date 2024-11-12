@@ -1,12 +1,12 @@
 package control.user;
 
 import entity.user.UnavailableDate;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.user.UnavailableDateRepository;
 
-public class UnavailableDateController implements IController {
+public class UnavailableDateController implements ISavable {
     private final UnavailableDateRepository unavailableDateRepository;
 
     public UnavailableDateController() {

@@ -4,11 +4,11 @@ import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.medicine.PrescriptionItem.ItemStatus;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.util.List;
 import repository.medicine.PrescriptionItemRepository;
 
-public class PrescriptionItemController implements IController {
+public class PrescriptionItemController implements ISavable {
     private final PrescriptionItemRepository prescriptionItemRepository;
     private final MedicineController medicineController;
 

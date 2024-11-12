@@ -2,11 +2,11 @@ package control.user;
 
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.util.List;
 import repository.user.StaffRepository;
 
-public class HospitalStaffController implements IController {
+public class HospitalStaffController implements ISavable {
     private final StaffRepository staffRepository;
 
     public HospitalStaffController() {

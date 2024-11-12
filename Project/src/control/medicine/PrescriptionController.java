@@ -3,10 +3,11 @@ package control.medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.medicine.PrescriptionItem.ItemStatus;
+import interfaces.control.ISavable;
 import java.util.List;
 import repository.medicine.PrescriptionRepository;
 
-public class PrescriptionController {
+public class PrescriptionController implements ISavable {
 
     private final PrescriptionRepository prescriptionRepository;
     private final PrescriptionItemController prescriptionItemController;
@@ -16,6 +17,7 @@ public class PrescriptionController {
         this.prescriptionItemController = new PrescriptionItemController();
     }
 
+    @Override
     public void save() {
         prescriptionRepository.save();
     }

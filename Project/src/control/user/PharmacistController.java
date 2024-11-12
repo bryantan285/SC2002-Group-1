@@ -10,10 +10,9 @@ import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.user.HospitalStaff;
 import entity.user.Pharmacist;
-import interfaces.control.IController;
 import java.util.List;
 
-public class PharmacistController implements IController {
+public class PharmacistController {
     private final AppointmentController appointmentController;
     private final PrescriptionController prescriptionController;
     private final HospitalStaffController hospitalStaffController;
@@ -30,11 +29,6 @@ public class PharmacistController implements IController {
         this.medicineController = new MedicineController();
         this.medicineRequestController = new MedicineRequestController();
         this.currentPH = null;
-    }
-
-    @Override
-    public void save() {
-        // No implementation
     }
 
     public void setCurrentPharmacist(String pharId) {

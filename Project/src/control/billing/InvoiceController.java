@@ -6,12 +6,12 @@ import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.billing.InvoiceRepository;
 
-public class InvoiceController implements IController {
+public class InvoiceController implements ISavable {
 
     private final InvoiceRepository invoiceRepository;
     private final PrescriptionController prescriptionController;

@@ -8,11 +8,10 @@ import entity.medicine.Medicine;
 import entity.request.MedicineRequest;
 import entity.user.Administrator;
 import entity.user.HospitalStaff;
-import interfaces.control.IController;
 import java.util.List;
 import utility.FieldHandler;
 
-public class AdministratorController implements IController {
+public class AdministratorController {
     public static void main(String[] args) {
         String adminId = "A001";
         String reqId = "MREQ001";
@@ -42,11 +41,6 @@ public class AdministratorController implements IController {
         } else {
             this.currentAdmin = null;
         }
-    }
-
-    @Override
-    public void save() {
-        // No implementation
     }
 
     // Staff

@@ -1,12 +1,12 @@
 package control.appointment;
 
 import entity.appointment.Appointment;
-import interfaces.control.IController;
+import interfaces.control.ISavable;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.appointment.AppointmentRepository;
 
-public class AppointmentController implements IController {
+public class AppointmentController implements ISavable {
 
     private final AppointmentRepository appointmentRepository;
 
