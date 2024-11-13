@@ -6,6 +6,10 @@ public class Patient extends User {
     private String contactNumber;
     private String email;
 
+    public Patient() {
+        super();
+    }
+
     public Patient(String id, String name, String gender, String dob, String bloodType, String contactNumber, String email) {
         super(true, id, name, gender);
         this.dob = dob;
