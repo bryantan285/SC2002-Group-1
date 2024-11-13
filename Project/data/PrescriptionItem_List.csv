@@ -1,2 +1,2 @@
-id,prescriptionId,medicineId,quantity,status
-PRSCI001,PRSC001,MED001,10,PENDING
+id,prescriptionId,medicineId,quantity,status,notes
+PRSCI001,PRSC001,MED001,10,DISPENSED,

@@ -15,12 +15,10 @@ import repository.appointment.AppointmentRepository;
 public class AppointmentController implements ISavable {
     private final AppointmentRepository appointmentRepository;
     private final UnavailableDateController unavailableDateController;
-    private final AppointmentController appointmentController;
 
     public AppointmentController() {
         this.appointmentRepository = AppointmentRepository.getInstance();
         this.unavailableDateController = new UnavailableDateController();
-        this.appointmentController = new AppointmentController();
     }
 
     @Override
@@ -33,7 +31,7 @@ public class AppointmentController implements ISavable {
         List<UnavailableDate> unavailableSlots = unavailableDateController.getUnavailableDates(doctorId);
 
         // Get all existing appointments for the doctor
-        List<Appointment> doctorAppointments = appointmentController.getDoctorAppts(doctorId);
+        List<Appointment> doctorAppointments = getDoctorAppts(doctorId);
 
         // Create a list of all slots within a given range (e.g., doctor's working hours, for simplicity we assume a 9 AM to 5 PM working day)
         List<LocalDateTime> allSlots = generateAllSlotsForDay(); // You can define this function to generate all slots based on working hours
