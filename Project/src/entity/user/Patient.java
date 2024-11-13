@@ -7,7 +7,11 @@ public class Patient extends User {
     private String email;
 
     public Patient() {
+<<<<<<< HEAD
         super();
+=======
+        
+>>>>>>> df4c1d5976daf4a693b26207cdf222a26e0026a3
     }
 
     public Patient(String id, String name, String gender, String dob, String bloodType, String contactNumber, String email) {
