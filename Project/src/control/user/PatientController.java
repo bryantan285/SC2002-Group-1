@@ -47,19 +47,37 @@ public class PatientController implements ISavable {
 
     // Appointment
 
-    public void scheduleAppointment(String doctorId, Appointment.Service service) {
-        appointmentController.addAppointment(doctorId, currentPatient.getId(), service);
+    public void scheduleAppointment(String doctorId, Appointment.Service service, LocalDateTime selectedSlot) {
+        appointmentController.scheduleAppointment(doctorId, currentPatient.getId(), service, selectedSlot);
     }
 
-    public void rescheduleAppointment(Appointment appt, LocalDateTime newDateTime) {
-        appointmentController.rescheduleAppointment(appt, newDateTime);
+    public void rescheduleAppointment(String apptId, LocalDateTime newDateTime) {
+        Appointment appt = appointmentController.getAppt(apptId);
+        if (appt != null) {
+            appointmentController.rescheduleAppointment(appt, newDateTime);
+        } else {
+            System.out.println("Appointment not found.");
+        }
     }
 
-    public void cancelAppointment(Appointment appt) {
-        appointmentController.cancelAppointment(appt);
+    public void cancelAppointment(String apptId) {
+        Appointment appt = appointmentController.getAppt(apptId);
+        if (appt != null) {
+            appointmentController.cancelAppointment(appt);
+        } else {
+            System.out.println("Appointment not found.");
+        }
     }
 
     public Appointment.Status checkAppointmentStatus(String apptId) {
         return appointmentController.checkAppointmentStatus(apptId);
+    }
+
+    public void viewScheduledAppointments() {
+        appointmentController.getScheduledAppointments(currentPatient.getId()).forEach(System.out::println);
+    }
+
+    public void viewPastAppointmentOutcomeRecords() {
+        appointmentController.getPastAppointments(currentPatient.getId()).forEach(System.out::println);
     }
 }

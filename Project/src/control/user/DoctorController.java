@@ -35,11 +35,15 @@ public class DoctorController {
 
     public void setCurrentDoctor(String doctorId) {
         HospitalStaff staff = hospitalStaffController.findById(doctorId);
-        if (staff instanceof Doctor) {
-            this.currentDoc = (Doctor) staff;
+        if (staff instanceof Doctor doctor) {
+            this.currentDoc = doctor;
         } else {
             this.currentDoc = null;
         }
+    }
+
+    public Doctor getCurrentDoctor() {
+        return currentDoc;
     }
 
     public void viewSchedule() {

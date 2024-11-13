@@ -1,49 +1,38 @@
 package entity.user;
-// import java.time.LocalDate;
-// import java.util.ArrayList;
-// import java.util.List;
 
-import java.time.LocalDateTime;
-
-public class Patient extends User{
-    private LocalDateTime dob;
-    private String contactNumber;
+public class Patient extends User {
+    private String dob;
     private String bloodType;
+    private String contactNumber;
     private String email;
-    // private List<Appointment> appointments; 
 
-    public Patient() {
-        super();
-    }
-
-    public Patient(String id, String name, String gender, LocalDateTime dob, String bloodType, String email) {
+    public Patient(String id, String name, String gender, String dob, String bloodType, String contactNumber, String email) {
         super(true, id, name, gender);
         this.dob = dob;
         this.bloodType = bloodType;
+        this.contactNumber = contactNumber;
         this.email = email;
-        // this.appointments = new ArrayList<>();
     }
 
     // Getters
-    public LocalDateTime getDOB() {
-        return this.dob;
+    public String getDob() {
+        return dob;
     }
 
     public String getBloodType() {
-        return this.bloodType;
+        return bloodType;
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public String getContactNumber() {
-        return this.contactNumber;
+        return contactNumber;
     }
 
-    //Setters
-
-    public void setDob(LocalDateTime dob) {
+    // Setters
+    public void setDob(String dob) {
         this.dob = dob;
     }
 
@@ -55,23 +44,22 @@ public class Patient extends User{
         this.email = email;
     }
 
-    public void setContactNumber(String number) {
-        this.contactNumber = number;
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
-    //Patient Menu opt 1
-    public void viewMedicalRecord() {
-        System.out.println("Patient ID: " + getId());
-        System.out.println("Name: " + getName());
-        System.out.println("Date of Birth: " + dob);
-        System.out.println("Gender: " + getGender());
-        System.out.println("Blood Type: " + bloodType);
-        System.out.println("Email: " + getEmail());
+    public String viewMedicalRecord() {
+        return "Patient ID: " + getId() + "\n" +
+               "Name: " + getName() + "\n" +
+               "Date of Birth: " + dob + "\n" +
+               "Gender: " + getGender() + "\n" +
+               "Blood Type: " + bloodType + "\n" +
+               "Email: " + email + "\n" +
+               "Contact Number: " + contactNumber;
     }
 
     @Override
     public String toString() {
-        return super.getId() + ", " + super.getName() + ", " + super.getGender() + ", " + dob + ", " + bloodType + ", " + email + ", " + contactNumber;
+        return getId() + ", " + getName() + ", " + getGender() + ", " + dob + ", " + bloodType + ", " + email + ", " + contactNumber;
     }
-
 }

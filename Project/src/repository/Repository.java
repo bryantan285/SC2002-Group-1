@@ -14,7 +14,7 @@ import utility.CSV_handler;
 
 public abstract class Repository<T extends EntityObject> implements Iterable<T> {
 
-    private Map<String,T> objMap;
+    private final Map<String,T> objMap;
 
     public static void main(String[] args) {
         System.out.println("Testing");

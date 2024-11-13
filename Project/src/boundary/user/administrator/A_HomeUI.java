@@ -288,10 +288,6 @@ public class A_HomeUI implements IUserInterface {
                 default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
             }
         }
-
-
     
     }
-    
-    
 }

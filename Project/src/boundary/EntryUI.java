@@ -71,7 +71,7 @@ public class EntryUI {
             confirmPassword = scanner.nextLine();
     
             if (!newPassword.equals(confirmPassword)) {
-                System.out.println("Passwords do not match. Please try again.");;
+                System.out.println("Passwords do not match. Please try again.");
             } else {
                 break;
             }

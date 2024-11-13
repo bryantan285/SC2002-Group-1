@@ -1,6 +1,6 @@
 package control.user;
 
-import control.appointment.AppointmentController;
+// import control.appointment.AppointmentController;
 import control.medicine.MedicineController;
 import control.medicine.PrescriptionController;
 import control.medicine.PrescriptionItemController;
@@ -13,7 +13,7 @@ import entity.user.Pharmacist;
 import java.util.List;
 
 public class PharmacistController {
-    private final AppointmentController appointmentController;
+    // private final AppointmentController appointmentController;
     private final PrescriptionController prescriptionController;
     private final HospitalStaffController hospitalStaffController;
     private final PrescriptionItemController prescriptionItemController;
@@ -22,7 +22,7 @@ public class PharmacistController {
     private Pharmacist currentPH;
 
     public PharmacistController() {
-        this.appointmentController = new AppointmentController();
+        // this.appointmentController = new AppointmentController();
         this.prescriptionController = new PrescriptionController();
         this.hospitalStaffController = new HospitalStaffController();
         this.prescriptionItemController = new PrescriptionItemController();
@@ -33,8 +33,8 @@ public class PharmacistController {
 
     public void setCurrentPharmacist(String pharId) {
         HospitalStaff staff = hospitalStaffController.findById(pharId);
-        if (staff instanceof Pharmacist) {
-            this.currentPH = (Pharmacist) staff;
+        if (staff instanceof Pharmacist pharmacist) {
+            this.currentPH = pharmacist;
         } else {
             this.currentPH = null;
         }
