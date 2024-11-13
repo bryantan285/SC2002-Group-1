@@ -7,7 +7,7 @@ public class Patient extends User {
     private String email;
 
     public Patient() {
-        
+        super();
     }
 
     public Patient(String id, String name, String gender, String dob, String bloodType, String contactNumber, String email) {
