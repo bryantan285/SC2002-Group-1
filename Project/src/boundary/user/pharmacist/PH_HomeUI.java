@@ -68,7 +68,7 @@ public class PH_HomeUI implements IUserInterface {
             System.out.println("No active prescriptions.");
         } else {
             for (Prescription prescription : activePrescriptions) {
-                System.out.printf("Prescription ID: %s, Appointment ID: %s, Status: %s%n",
+                System.out.printf("Prescription ID: %s, Appointment ID: %s, Active: %s%n",
                         prescription.getId(),
                         prescription.getApptId(),
                         prescription.getIsActive());
