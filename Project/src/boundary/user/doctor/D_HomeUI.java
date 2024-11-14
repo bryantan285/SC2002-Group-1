@@ -16,9 +16,13 @@ import exception.user.NoUserLoggedInException;
 import interfaces.boundary.IClearConsole;
 import interfaces.boundary.IKeystrokeWait;
 import interfaces.boundary.IUserInterface;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import utility.DateFormat;
 import utility.InputHandler;
 
@@ -102,10 +106,13 @@ public class D_HomeUI implements IUserInterface {
         try {
             User user = session.getCurrentUser();
             List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates((HospitalStaff) user);
+            unavailableDates.sort(Comparator.comparing(UnavailableDate::getDate));
+            LocalDateTime threshold = LocalDateTime.now().minusDays(1);
             System.out.println("You are unavailable on:");
             for (UnavailableDate date : unavailableDates) {
-                System.out.println("=============================");
-                System.out.printf("%s%n", DateFormat.formatNoTime(date.getDate()));
+                if (date.getDate().isAfter(threshold)) {
+                    System.out.printf("%s%n", DateFormat.formatNoTime(date.getDate()));
+                }
             }
             System.out.println("=============================");
             IKeystrokeWait.waitForKeyPress();
@@ -117,17 +124,40 @@ public class D_HomeUI implements IUserInterface {
 
     private void addUnavailability() {
         try {
-            System.out.print("Enter date and time (YYYY-MM-DD HH:MM): ");
-            String dateTime = scanner.nextLine();
+            System.out.print("Enter date (yyyy-MM-dd): ");
+            String inputDate = scanner.nextLine().trim();
             
-            LocalDateTime localDateTime = LocalDateTime.parse(dateTime + ":00");
+            LocalDate date = LocalDate.parse(inputDate);
+            if (date.isBefore(LocalDate.now())) {
+                System.out.println("Cannot add date before today.");
+                return;
+            } else if (date.isEqual(LocalDate.now())) {
+                System.out.println("Cannot add today.");
+                return;
+            }
+            LocalDateTime dateTime = date.atStartOfDay();
+
+            List<UnavailableDate> list = UnavailableDateController.getUnavailableDates((HospitalStaff) session.getCurrentUser())
+                                        .stream()
+                                        .filter(item -> !item.getDate().toLocalDate().isBefore(LocalDate.now()))
+                                        .collect(Collectors.toList());;
+
+            for (UnavailableDate item : list) {
+                if (item.getDate().isEqual(dateTime)) {
+                    System.out.println("Cannot add existing unavailable date.");
+                    return;
+                }
+            }
             
-            UnavailableDateController.addUnavailability((HospitalStaff) session.getCurrentUser(), localDateTime);
+            UnavailableDateController.addUnavailability((HospitalStaff) session.getCurrentUser(), dateTime);
             System.out.println("Unavailability added.");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (NoUserLoggedInException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
+        } catch (DateTimeParseException e) {
+            System.out.println("Error: Invalid input.");
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -167,7 +197,7 @@ public class D_HomeUI implements IUserInterface {
             
             System.out.print("Enter 1 to accept or 0 to decline: ");
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
             boolean isAccepted = (choice == 1);
             AppointmentController.apptRequestDecision(selectedAppt, isAccepted);
             System.out.println(isAccepted ? "Appointment accepted." : "Appointment declined.");
