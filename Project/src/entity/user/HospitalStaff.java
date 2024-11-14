@@ -33,6 +33,12 @@ public class HospitalStaff extends User{
 
     @Override
     public String toString() {
-        return super.getId() + ", " + super.getName() + ", " + super.getGender() + ", " + role + ", " + age;
+        return "User ID: " + super.getId() + "\n" +
+               "Name: " + super.getName() + "\n" +
+               "Gender: " + super.getGender() + "\n" +
+               "Role: " + role + "\n" +
+               "Age: " + age;
     }
+    
+    
 }

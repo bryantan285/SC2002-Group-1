@@ -5,110 +5,110 @@ import entity.medicine.Medicine;
 import entity.request.MedicineRequest;
 import entity.request.Request;
 import entity.request.Request.STATUS;
-import interfaces.control.ISavable;
+import entity.user.HospitalStaff;
+import exception.EntityNotFoundException;
+import exception.InvalidInputException;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.request.MedicineRequestRepository;
 
-public class MedicineRequestController implements ISavable {
-    private final MedicineRequestRepository medicineRequestRepository;
-    private final MedicineController medicineController;
+public class MedicineRequestController {
 
-    public static void main(String[] args) {
-        MedicineRequestController mc = new MedicineRequestController();
-        MedicineRequestRepository mrr = MedicineRequestRepository.getInstance();
-        MedicineRequest mreq = mrr.get("MREQ001");
+    private static final MedicineRequestRepository repo = MedicineRequestRepository.getInstance();
 
-        mc.approveReplenishmentRequest("A001", mreq);
+    public static String createReplenishmentRequest(HospitalStaff staff, String medicineId, int quantity) throws InvalidInputException {
+        if (staff.getId() == null || staff.getId().isEmpty()) {
+            throw new InvalidInputException("Requestor ID cannot be null or empty.");
+        }
+        if (medicineId == null || medicineId.isEmpty()) {
+            throw new InvalidInputException("Medicine ID cannot be null or empty.");
+        }
+        if (quantity <= 0) {
+            throw new InvalidInputException("Quantity must be greater than zero.");
+        }
 
-        System.out.println("Status of Request 1: " + mreq.getStatus());
-    }
-
-    @Override
-    public void save() {
-        medicineRequestRepository.save();
-    }
-
-    public MedicineRequestController() {
-        this.medicineRequestRepository = MedicineRequestRepository.getInstance();
-        this.medicineController = new MedicineController();
-    }
-
-    public String createReplenishmentRequest(String requestorId,String medicineId, int quantity) {
         MedicineRequest req = new MedicineRequest();
-        req.setId(medicineRequestRepository.getNextClassId());
-        req.setRequestorId(requestorId);
+        req.setId(repo.getNextClassId());
+        req.setRequestorId(staff.getId());
         req.setApproverId(null);
         req.setStatus(STATUS.PENDING);
         req.setTimeCreated(LocalDateTime.now());
-        req.setTimeCreated(LocalDateTime.now());
         req.setMedicineId(medicineId);
         req.setQuantity(quantity);
-        medicineRequestRepository.add(req);
-        save();
+        repo.add(req);
+        repo.save();
         return req.getId();
     }
 
-    public void removeReplenishmentRequest(String requestId) {
-        MedicineRequest req = getRequestById(requestId);
-        medicineRequestRepository.remove(req);
-    }
-
-    public void approveReplenishmentRequest(String approverId, MedicineRequest req) {
-        if (req == null) {
-            return;
+    public static MedicineRequest getRequestById(String requestId) throws EntityNotFoundException, InvalidInputException {
+        if (requestId == null || requestId.isEmpty()) {
+            throw new InvalidInputException("Request ID cannot be null or empty.");
         }
 
-        if (req.getStatus() != Request.STATUS.PENDING) {
-            return;
+        MedicineRequest req = repo.get(requestId);
+        if (req == null) {
+            throw new EntityNotFoundException("MedicineRequest", requestId);
+        }
+        return req;
+    }
+
+    public static List<MedicineRequest> getPendingRequests() {
+        return repo.findByField("status", Request.STATUS.PENDING);
+    }
+
+    public static void approveReplenishmentRequest(HospitalStaff user, MedicineRequest req) throws InvalidInputException, EntityNotFoundException {
+        if (user == null) {
+            throw new InvalidInputException("Approver cannot be null.");
+        }
+        if (req == null || req.getStatus() != Request.STATUS.PENDING) {
+            throw new InvalidInputException("Request is either null or not in PENDING status.");
         }
 
         req.setStatus(Request.STATUS.APPROVED);
-        req.setApproverId(approverId);
+        req.setApproverId(user.getId());
         req.setTimeModified(LocalDateTime.now());
 
-        int incAmt = req.getQuantity();
-
-        Medicine med = medicineController.getMedicineById(req.getMedicineId());
-        medicineController.incMedStock(med, incAmt);
-
-        save();
-    }
-
-    public void rejectReplenishmentRequest(String approverId, MedicineRequest req) {
-        if (req == null) {
-            return;
+        Medicine med = MedicineController.getMedicineById(req.getMedicineId());
+        if (med == null) {
+            throw new EntityNotFoundException("Medicine", req.getMedicineId());
         }
 
-        if (req.getStatus() != Request.STATUS.PENDING) {
-            return;
+        MedicineController.incMedStock(med, req.getQuantity());
+        repo.save();
+    }
+
+    public static void rejectReplenishmentRequest(HospitalStaff user, MedicineRequest req) throws InvalidInputException {
+        if (user == null) {
+            throw new InvalidInputException("Approver cannot be null.");
+        }
+        if (req == null || req.getStatus() != Request.STATUS.PENDING) {
+            throw new InvalidInputException("Request is either null or not in PENDING status.");
         }
 
         req.setStatus(Request.STATUS.REJECTED);
-        req.setApproverId(approverId);
+        req.setApproverId(user.getId());
         req.setTimeModified(LocalDateTime.now());
-
-        save();
+        repo.save();
     }
 
-    public MedicineRequest getRequestById(String requestId) {
-        return medicineRequestRepository.get(requestId);
-    }
-
-    public List<MedicineRequest> getPendingRequests() {
-        return medicineRequestRepository.findByField("status", Request.STATUS.PENDING);
-    }
-
-    public void updateRequestStatus(String requestId, Request.STATUS newStatus) {
-        MedicineRequest req = getRequestById(requestId);
-        if (req == null) {
-            System.out.println("Request not found: " + requestId);
-            return;
+    public static void updateRequestStatus(String requestId, Request.STATUS newStatus) throws InvalidInputException, EntityNotFoundException {
+        if (requestId == null || requestId.isEmpty()) {
+            throw new InvalidInputException("Request ID cannot be null or empty.");
         }
 
+        MedicineRequest req = getRequestById(requestId);
         req.setStatus(newStatus);
         req.setTimeModified(LocalDateTime.now());
-        save();
-        System.out.println("Request status updated: " + requestId + " to " + newStatus);
+        repo.save();
+    }
+
+    public static void removeReplenishmentRequest(String requestId) throws InvalidInputException, EntityNotFoundException {
+        if (requestId == null || requestId.isEmpty()) {
+            throw new InvalidInputException("Request ID cannot be null or empty.");
+        }
+
+        MedicineRequest req = getRequestById(requestId);
+        repo.remove(req);
+        repo.save();
     }
 }

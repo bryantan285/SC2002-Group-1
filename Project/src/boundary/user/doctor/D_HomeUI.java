@@ -1,26 +1,33 @@
 package boundary.user.doctor;
 
 import control.appointment.AppointmentController;
-import control.user.DoctorController;
+import control.user.PatientController;
+import control.user.SessionManager;
+import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
 import entity.user.Doctor;
+import entity.user.HospitalStaff;
 import entity.user.Patient;
+import entity.user.UnavailableDate;
+import entity.user.User;
+import exception.EntityNotFoundException;
+import exception.InvalidInputException;
+import exception.user.NoUserLoggedInException;
+import interfaces.boundary.IClearConsole;
+import interfaces.boundary.IKeystrokeWait;
 import interfaces.boundary.IUserInterface;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
 import utility.DateFormat;
+import utility.InputHandler;
 
 public class D_HomeUI implements IUserInterface {
-    private final Scanner scanner;
-    private final DoctorController doctorController;
-    private final AppointmentController appointmentController;
+    private final Scanner scanner = InputHandler.getInstance();
+    private final SessionManager session;
 
-    public D_HomeUI(String id) {
-        this.scanner = new Scanner(System.in);
-        this.doctorController = new DoctorController();
-        this.appointmentController = new AppointmentController();
-        this.doctorController.setCurrentDoctor(id);
+    public D_HomeUI(SessionManager session) {
+        this.session = session;
     }
 
     @Override
@@ -63,99 +70,152 @@ public class D_HomeUI implements IUserInterface {
     }
 
     private void viewSchedule() {
-        doctorController.viewSchedule();
+        try {
+            User user = session.getCurrentUser();
+            List<Appointment> appointments = AppointmentController.getDoctorAppts((Doctor) user);
+            
+            if (appointments.isEmpty()) {
+                System.out.println("No scheduled appointments.");
+                return;
+            }
+            
+            System.out.println("Schedule for Dr. " + user.getName() + ":");
+            for (Appointment appt : appointments) {
+                System.out.println("=============================");
+                System.out.println(appt.toString());
+                //     System.out.printf("ID: %s, Patient: %s, Date: %s, Service: %s%n",
+                //             appt.getId(),
+                //             appt.getPatientId(),
+                //             DateFormat.formatWithTime(appt.getApptDateTime()),
+                //             appt.getService().name());
+            }
+            System.out.println("=============================");
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (NoUserLoggedInException | InvalidInputException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void viewUnavailableDates() {
-        doctorController.viewUnavailableDates();
+        try {
+            User user = session.getCurrentUser();
+            List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates((HospitalStaff) user);
+            System.out.println("You are unavailable from:");
+            for (UnavailableDate date : unavailableDates) {
+                System.out.println("=============================");
+                System.out.printf("%s%n", DateFormat.formatNoTime(date.getDate()));
+            }
+            System.out.println("=============================");
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (InvalidInputException | NoUserLoggedInException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void addUnavailability() {
-        System.out.print("Enter start date and time (YYYY-MM-DD HH:MM): ");
-        String startDateTimeStr = scanner.nextLine();
-        System.out.print("Enter end date and time (YYYY-MM-DD HH:MM): ");
-        String endDateTimeStr = scanner.nextLine();
-
-        // Parse the input strings to LocalDateTime
-        LocalDateTime startDateTime = LocalDateTime.parse(startDateTimeStr + ":00");
-        LocalDateTime endDateTime = LocalDateTime.parse(endDateTimeStr + ":00");
-
-        doctorController.addUnavailability(startDateTime, endDateTime);
-        System.out.println("Unavailability added.");
+        try {
+            System.out.print("Enter date and time (YYYY-MM-DD HH:MM): ");
+            String dateTime = scanner.nextLine();
+            
+            LocalDateTime localDateTime = LocalDateTime.parse(dateTime + ":00");
+            
+            UnavailableDateController.addUnavailability((HospitalStaff) session.getCurrentUser(), localDateTime);
+            System.out.println("Unavailability added.");
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (NoUserLoggedInException | InvalidInputException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private void acceptDeclineApptRequest() {
-        Doctor doctor = doctorController.getCurrentDoctor();
-        List<Appointment> pendingAppointments = appointmentController.getDoctorAppts(doctor.getId());
-
-        System.out.println("Pending Appointments for Dr. " + doctor.getName() + ":");
-
-        if (pendingAppointments.isEmpty()) {
-            System.out.println("No pending appointments.");
-            return;
+        try {
+            User user = session.getCurrentUser();
+            List<Appointment> pendingAppointments = AppointmentController.getDoctorAppts((Doctor) user);
+            
+            System.out.println("Pending Appointments for Dr. " + user.getName() + ":");
+            
+            if (pendingAppointments.isEmpty()) {
+                System.out.println("No pending appointments.");
+                return;
+            }
+            
+            for (Appointment appt : pendingAppointments) {
+                System.out.printf("ID: %s, Patient: %s, Date: %s, Service: %s%n",
+                        appt.getId(),
+                        appt.getPatientId(),
+                        DateFormat.formatWithTime(appt.getApptDateTime()),
+                        appt.getService().name());
+            }
+            
+            System.out.print("Enter appointment ID to accept/decline (or '0' to cancel): ");
+            String appointmentId = scanner.nextLine();
+            if (appointmentId.equals("0")) {
+                System.out.println("Returning to main menu.");
+                return;
+            }
+            
+            Appointment selectedAppt = AppointmentController.getAppt(appointmentId);
+            
+            if (selectedAppt == null) {
+                System.out.println("Invalid appointment ID.");
+                return;
+            }
+            
+            System.out.print("Enter 1 to accept or 0 to decline: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+            boolean isAccepted = (choice == 1);
+            AppointmentController.apptRequestDecision(selectedAppt, isAccepted);
+            System.out.println(isAccepted ? "Appointment accepted." : "Appointment declined.");
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (InvalidInputException | NoUserLoggedInException | EntityNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-
-        for (Appointment appt : pendingAppointments) {
-            System.out.printf("ID: %s, Patient: %s, Date: %s, Service: %s%n",
-                    appt.getId(),
-                    appt.getPatientId(),
-                    DateFormat.formatWithTime(appt.getApptDateTime()),
-                    appt.getService().name());
-        }
-
-        // Allow the doctor to choose an appointment to accept or decline
-        System.out.print("Enter appointment ID to accept/decline (or '0' to cancel): ");
-        String appointmentId = scanner.nextLine();
-        if (appointmentId.equals("0")) {
-            System.out.println("Returning to main menu.");
-            return;
-        }
-
-        Appointment selectedAppt = appointmentController.getAppt(appointmentId);
-
-        if (selectedAppt == null) {
-            System.out.println("Invalid appointment ID.");
-            return;
-        }
-
-        System.out.print("Enter 1 to accept or 0 to decline: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-        boolean isAccepted = (choice == 1);
-        doctorController.acceptDeclineApptRequest(selectedAppt, isAccepted);
-        System.out.println(isAccepted ? "Appointment accepted." : "Appointment declined.");
     }
 
     private void recordApptOutcome() {
-        System.out.print("Enter appointment ID: ");
-        String appointmentId = scanner.nextLine();
-        Appointment appt = appointmentController.getAppt(appointmentId);
-
-        if (appt == null) {
-            System.out.println("Invalid appointment ID.");
-            return;
+        try {
+            System.out.print("Enter appointment ID: ");
+            String appointmentId = scanner.nextLine();
+            Appointment appt = AppointmentController.getAppt(appointmentId);
+            
+            if (appt == null) {
+                System.out.println("Invalid appointment ID.");
+                return;
+            }
+            
+            System.out.print("Enter appointment outcome: ");
+            String outcome = scanner.nextLine();
+            AppointmentController.completeAppointment(appt, outcome);
+            System.out.println("Outcome recorded.");
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (InvalidInputException | EntityNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-
-        System.out.print("Enter appointment outcome: ");
-        String outcome = scanner.nextLine();
-        doctorController.recordApptOutcome(appt, outcome);
-        System.out.println("Outcome recorded.");
     }
 
     private void viewPatientMedicalRecords() {
-        System.out.print("Enter patient ID to view medical records: ");
-        String patientId = scanner.nextLine();
-        Patient patient = doctorController.getPatient(patientId);
-
-        if (patient == null) {
-            System.out.println("Invalid patient ID.");
-            return;
+        try {
+            System.out.print("Enter patient ID to view medical records: ");
+            String patientId = scanner.nextLine();
+            Patient patient = PatientController.getById(patientId);
+            
+            if (patient == null) {
+                System.out.println("Invalid patient ID.");
+                return;
+            }
+            
+            System.out.println("Medical Record for " + patient.getName() + ":");
+            System.out.println(patient.toString());
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
+        } catch (EntityNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-
-        System.out.println("Medical Record for " + patient.getName() + ":");
-        // Display medical records (You can expand this with details from patient object)
-        // System.out.println("Diagnosis: " + patient.getMedicalRecord().getDiagnosis());
-        // System.out.println("Prescription: " + patient.getMedicalRecord().getPrescription());
-        // System.out.println("Treatment: " + patient.getMedicalRecord().getTreatment());
     }
 }

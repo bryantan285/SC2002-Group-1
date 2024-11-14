@@ -1,5 +1,9 @@
 package interfaces.control;
 
+import repository.Repository;
+
 public interface ISavable {
-    public void save();
+    public static void save(Repository repo) {
+        repo.save();
+    }
 }

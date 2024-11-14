@@ -4,19 +4,17 @@ import java.time.LocalDateTime;
 
 public class UnavailableDate extends EntityObject {
     private String id;
-    private String doctorId;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private String staffId;
+    private LocalDateTime date;
 
     public UnavailableDate() {
 
     }
 
-    public UnavailableDate(String id, String doctorId, LocalDateTime start, LocalDateTime end) {
+    public UnavailableDate(String id, String staffId, LocalDateTime date) {
         this.id = id;
-        this.doctorId = doctorId;
-        this.startDate = start;
-        this.endDate = end;
+        this.staffId = staffId;
+        this.date = date;
     }
 
     
@@ -26,12 +24,8 @@ public class UnavailableDate extends EntityObject {
         return true;
     }
 
-    public LocalDateTime getstartDate() {
-        return startDate;
-    }
-
-    public LocalDateTime getendDate() {
-        return endDate;
+    public LocalDateTime getDate() {
+        return date;
     }
 
     @Override
@@ -43,27 +37,15 @@ public class UnavailableDate extends EntityObject {
         this.id = id;
     }
 
-    public String getDoctorId() {
-        return doctorId;
+    public String getstaffId() {
+        return staffId;
     }
 
-    public void setDoctorId(String doctorId) {
-        this.doctorId = doctorId;
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
     }
 
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 }

@@ -39,8 +39,9 @@ public class Prescription extends EntityObject {
 
     @Override
     public String toString() {
-        return id + ", " +
-               apptId + ", " +
-               isActive;
+        return "Prescription ID: " + id + "\n" +
+               "Appointment ID: " + apptId + "\n" +
+               "Active: " + isActive;
     }
+    
 }

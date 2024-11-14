@@ -96,4 +96,17 @@ public class Invoice extends EntityObject {
     public boolean checkDue() {
         return issueDate.isAfter(dueDate);
     }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + "\n" +
+               "Customer ID: " + customerId + "\n" +
+               "Prescription ID: " + prescriptionId + "\n" +
+               "Total Amount: $" + totalAmount + "\n" +
+               "Tax Amount: $" + taxAmount + "\n" +
+               "Total Payable: $" + totalPayable + "\n" +
+               "Issue Date: " + issueDate + "\n" +
+               "Due Date: " + dueDate + "\n" +
+               "Status: " + status;
+    }
 }

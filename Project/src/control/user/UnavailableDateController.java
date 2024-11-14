@@ -1,42 +1,64 @@
 package control.user;
 
+import entity.user.HospitalStaff;
 import entity.user.UnavailableDate;
-import interfaces.control.ISavable;
+import exception.EntityNotFoundException;
+import exception.InvalidInputException;
 import java.time.LocalDateTime;
 import java.util.List;
 import repository.user.UnavailableDateRepository;
 
-public class UnavailableDateController implements ISavable {
-    private final UnavailableDateRepository unavailableDateRepository;
+public class UnavailableDateController {
 
-    public UnavailableDateController() {
-        this.unavailableDateRepository = UnavailableDateRepository.getInstance();
+    private static final UnavailableDateRepository repo = UnavailableDateRepository.getInstance();
+
+    public static String addUnavailability(HospitalStaff staff, LocalDateTime date) throws InvalidInputException {
+        if (staff == null) {
+            throw new InvalidInputException("Hospital staff cannot be null.");
+        }
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
+        }
+        if (isDateUnavailable(staff.getId(), date)) {
+            throw new InvalidInputException("The specified date is already marked as unavailable.");
+        }
+
+        String newId = repo.getNextClassId();
+        repo.add(new UnavailableDate(newId, staff.getId(), date));
+        repo.save();
+        return "Added successfully.";
     }
 
-    
+    public static Boolean removeUnavailability(String unavabilityId) throws EntityNotFoundException, InvalidInputException {
+        if (unavabilityId == null || unavabilityId.isEmpty()) {
+            throw new InvalidInputException("Block ID cannot be null or empty.");
+        }
+        UnavailableDate unavailableDate = repo.get(unavabilityId);
+        if (unavailableDate == null) {
+            throw new EntityNotFoundException("UnavailableDate", unavabilityId);
+        }
 
-    @Override
-    public void save() {
-        unavailableDateRepository.save();
+        repo.remove(unavailableDate);
+        repo.save();
+        return true;
     }
 
-    public String addUnavailablity(String doctorId, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        if (UnavailableDate.isValidDuration(startDateTime, endDateTime)) {
-            String newId = unavailableDateRepository.getNextClassId();
-            unavailableDateRepository.add(new UnavailableDate(newId, doctorId, startDateTime, endDateTime));
-            unavailableDateRepository.save();
-            return "Added successfully";
-        } else
-            return "Invalid duration.";
+    public static List<UnavailableDate> getUnavailableDates(HospitalStaff staff) throws InvalidInputException {
+        if (staff == null) {
+            throw new InvalidInputException("Hospital staff cannot be null.");
+        }
+        return repo.findByField("staffId", staff.getId());
     }
 
-    public String removeUnavailability(String doctorId, String blockId) {
-        unavailableDateRepository.remove(unavailableDateRepository.get(blockId));
-        unavailableDateRepository.save();
-        return "Removed successfully";
-    }
+    public static boolean isDateUnavailable(String staffId, LocalDateTime date) throws InvalidInputException {
+        if (staffId == null || staffId.isEmpty()) {
+            throw new InvalidInputException("Staff ID cannot be null or empty.");
+        }
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
+        }
 
-    public List<UnavailableDate> getUnavailableDates(String doctorId) {
-        return unavailableDateRepository.findByField("doctorId", doctorId);
+        List<UnavailableDate> unavailableDates = repo.findByField("staffId", staffId);
+        return unavailableDates.stream().anyMatch(unavailable -> unavailable.getDate().isEqual(date));
     }
 }

@@ -1,54 +1,51 @@
 package control.user;
 
 import entity.user.User;
-import interfaces.control.ISavable;
+import exception.EntityNotFoundException;
+import exception.InvalidInputException;
 import repository.user.PatientRepository;
 import repository.user.StaffRepository;
 import utility.Password_hash;
 
-public class UserController implements ISavable {
-    
-    private final StaffRepository staffRepository;
-    private final PatientRepository patientRepository;
-    private User currentUser;
+public class UserController {
 
-    public static void main(String[] args) {
-        UserController userController = new UserController();
-        userController.login("D001","password"); // Sets currentUser as a Doctor
-        userController.login("PH001","password"); // Sets currentUser as a Pharmacist
-        userController.login("P123","password"); // Sets currentUser as a Patient
-    }
+    public static User login(String inputId, String inputPassword) throws InvalidInputException, EntityNotFoundException {
+        if (inputId == null || inputId.isEmpty()) {
+            throw new InvalidInputException("User ID cannot be null or empty.");
+        }
+        if (inputPassword == null || inputPassword.isEmpty()) {
+            throw new InvalidInputException("Password cannot be null or empty.");
+        }
 
-    public UserController() {
-        this.staffRepository = StaffRepository.getInstance();
-        this.patientRepository = PatientRepository.getInstance();
-        this.currentUser = null;
-    }
-
-    @Override
-    public void save() {
-        staffRepository.save();
-        patientRepository.save();
-    }
-    
-    public boolean login(String inputId, String inputPassword) {
+        User currentUser;
         if (inputId.startsWith("D") || inputId.startsWith("PH") || inputId.startsWith("A")) {
-            currentUser = staffRepository.findByField("id", inputId).stream().findFirst().orElse(null);
+            currentUser = StaffRepository.getInstance().findByField("id", inputId).stream().findFirst().orElse(null);
         } else {
-            currentUser = patientRepository.findByField("id", inputId).stream().findFirst().orElse(null);
+            currentUser = PatientRepository.getInstance().findByField("id", inputId).stream().findFirst().orElse(null);
         }
+
         if (currentUser == null) {
-            return false;
+            throw new EntityNotFoundException("Invalid username or password");
         }
+
         String hashedPassword = Password_hash.hashPassword(inputPassword);
-        if (hashedPassword.equals(currentUser.getPassword())) {
-            return true;
+        if (!hashedPassword.equals(currentUser.getPassword())) {
+            throw new InvalidInputException("Invalid username or password.");
         }
-        return false;
+
+        return currentUser;
     }
 
-    public void passwordChange(String userId, String newPassword) {
-        currentUser.changePassword(newPassword);
-        save();
+    public static void passwordChange(User user, String newPassword) throws InvalidInputException {
+        if (user == null) {
+            throw new InvalidInputException("User cannot be null.");
+        }
+        if (newPassword == null || newPassword.isEmpty() || newPassword.length() < 8) {
+            throw new InvalidInputException("Password must be at least 8 characters long.");
+        }
+
+        user.changePassword(newPassword);
+        StaffRepository.getInstance().save();
+        PatientRepository.getInstance().save();
     }
 }

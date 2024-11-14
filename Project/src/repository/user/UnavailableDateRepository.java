@@ -8,7 +8,7 @@ import repository.Repository;
 public class UnavailableDateRepository extends Repository<UnavailableDate> {
 
     private static UnavailableDateRepository repo = null;
-    private static final String FILE_PATH = "Project\\data\\UnavailableBlock_List.csv";
+    private static final String FILE_PATH = "Project\\data\\UnavailableDate_List.csv";
     private static final String PREFIX = "UD";
 
     public static void main(String[] args) {

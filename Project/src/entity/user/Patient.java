@@ -52,7 +52,8 @@ public class Patient extends User {
         this.contactNumber = contactNumber;
     }
 
-    public String viewMedicalRecord() {
+    @Override
+    public String toString() {
         return "Patient ID: " + getId() + "\n" +
                "Name: " + getName() + "\n" +
                "Date of Birth: " + dob + "\n" +
@@ -60,10 +61,5 @@ public class Patient extends User {
                "Blood Type: " + bloodType + "\n" +
                "Email: " + email + "\n" +
                "Contact Number: " + contactNumber;
-    }
-
-    @Override
-    public String toString() {
-        return getId() + ", " + getName() + ", " + getGender() + ", " + dob + ", " + bloodType + ", " + email + ", " + contactNumber;
     }
 }

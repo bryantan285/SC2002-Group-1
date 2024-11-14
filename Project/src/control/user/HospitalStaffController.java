@@ -2,37 +2,42 @@ package control.user;
 
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
-import interfaces.control.ISavable;
+import exception.EntityNotFoundException;
+import exception.InvalidInputException;
 import java.util.List;
 import repository.user.StaffRepository;
 
-public class HospitalStaffController implements ISavable {
-    private final StaffRepository staffRepository;
+public class HospitalStaffController {
 
-    public HospitalStaffController() {
-        this.staffRepository = StaffRepository.getInstance();
+    public static List<HospitalStaff> getAllStaff() {
+        return StaffRepository.getInstance().toList();
     }
 
-    @Override
-    public void save() {
-        staffRepository.save();
-    }
+    public static Boolean addStaff(String name, String gender, HospitalStaff.Role role, int age) throws InvalidInputException {
+        if (name == null || name.isEmpty()) {
+            throw new InvalidInputException("Name cannot be null or empty.");
+        }
+        if (gender == null || (!gender.equalsIgnoreCase("male") && !gender.equalsIgnoreCase("female"))) {
+            throw new InvalidInputException("Invalid gender. Must be 'male' or 'female'.");
+        }
+        if (role == null) {
+            throw new InvalidInputException("Role cannot be null.");
+        }
+        if (age < 18 || age > 100) {
+            throw new InvalidInputException("Age must be between 18 and 100.");
+        }
 
-    public List<HospitalStaff> getAllStaff() {
-        return staffRepository.toList();
-    }
-
-    public Boolean addStaff(String name, String gender, HospitalStaff.Role role, int age) {
         try {
+            StaffRepository repo = StaffRepository.getInstance();
             HospitalStaff newStaff = StaffFactory.createStaffByRole(role);
             newStaff.setIsPatient(false);
             newStaff.setName(name);
-            newStaff.setId(staffRepository.getNextId(role));
+            newStaff.setId(repo.getNextId(role));
             newStaff.setGender(gender);
             newStaff.setRole(role);
             newStaff.setAge(age);
-            staffRepository.add(newStaff);
-            save();
+            repo.add(newStaff);
+            repo.save();
             return true;
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -40,17 +45,31 @@ public class HospitalStaffController implements ISavable {
         return false;
     }
 
-    public Boolean removeStaff(HospitalStaff staff) {
-        if (staff == null) return false;
-        staffRepository.remove(staff);
+    public static Boolean removeStaff(HospitalStaff staff) throws EntityNotFoundException {
+        if (staff == null) {
+            throw new EntityNotFoundException("Staff", "null");
+        }
+        StaffRepository repo = StaffRepository.getInstance();
+        if (repo.get(staff.getId()) == null) {
+            throw new EntityNotFoundException("Staff", staff.getId());
+        }
+        repo.remove(staff);
+        repo.save();
         return true;
     }
 
-    public HospitalStaff findById(String id) {
-        return staffRepository.get(id);
+    public static HospitalStaff findById(String id) throws EntityNotFoundException {
+        HospitalStaff staff = StaffRepository.getInstance().get(id);
+        if (staff == null) {
+            throw new EntityNotFoundException("Staff", id);
+        }
+        return staff;
     }
 
-    public List<HospitalStaff> findByField(String field, String value) {
-        return staffRepository.findByField(field, value);
+    public static List<HospitalStaff> findByField(String field, String value) throws InvalidInputException {
+        if (field == null || field.isEmpty() || value == null || value.isEmpty()) {
+            throw new InvalidInputException("Field and value cannot be null or empty.");
+        }
+        return StaffRepository.getInstance().findByField(field, value);
     }
 }

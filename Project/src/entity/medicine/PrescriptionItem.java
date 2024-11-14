@@ -75,10 +75,11 @@ public class PrescriptionItem extends EntityObject {
 
     @Override
     public String toString() {
-        return id + ", " +
-               prescriptionId + ", " +
-               medicineId + ", " +
-               quantity + ", " +
-               status;
+        return "ID: " + id + "\n" +
+               "Prescription ID: " + prescriptionId + "\n" +
+               "Medicine ID: " + medicineId + "\n" +
+               "Quantity: " + quantity + "\n" +
+               "Status: " + status;
     }
+    
 }

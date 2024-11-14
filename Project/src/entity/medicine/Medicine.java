@@ -225,8 +225,16 @@ public class Medicine extends EntityObject {
     
     @Override
     public String toString() {
-        return id + ", " + medicineName + ", " + stockQuantity + ", " + unitCost + ", " + dosage + " mg, " + lowStockThreshold;
+        return "ID: " + id + "\n" +
+               "Name: " + medicineName + "\n" +
+               "Stock Quantity: " + stockQuantity + "\n" +
+               "Unit Cost: $" + unitCost + "\n" +
+               "Dosage: " + dosage + " mg\n" +
+               "Low Stock Threshold: " + lowStockThreshold;
     }
+    
+    
+    
 
     public float getUnitCost() {
         return unitCost;

@@ -1,7 +1,6 @@
 package entity.appointment;
 import entity.EntityObject;
 import java.time.LocalDateTime;
-import utility.DateFormat;
 
 public class Appointment extends EntityObject {
     public enum Service {
@@ -90,43 +89,13 @@ public class Appointment extends EntityObject {
 
     @Override
     public String toString() {
-        return id + ", " +
-               patientId + ", " +
-               doctorId + ", " +
-               DateFormat.formatWithTime(apptDateTime) + ", " +
-               service.toString() + ", " +
-               status.name() + ", " +
-               apptOutcome;
+        return "ID: " + id + "\n" +
+               "Patient ID: " + patientId + "\n" +
+               "Doctor ID: " + doctorId + "\n" +
+               "Appointment Date & Time: " + apptDateTime + "\n" +
+               "Service: " + service + "\n" +
+               "Status: " + status + "\n" +
+               "Appointment Outcome: " + apptOutcome;
     }
 
-
-    public static void main(String[] args) {
-        // Date date = Date.of(2024, 10,30,11, 40);
-
-        // Appointment a = new Appointment("P001", "D001", date);
-        // Appointment b = new Appointment("P002", "D002", date);
-        // Appointment c = new Appointment("P003", "D003", date);
-
-        // System.out.println(a.getid());
-        // System.out.println(a.getApptOutcome());
-        // System.out.println(a.getDoctorId());
-        // System.out.println(a.getPatientId());
-        // System.out.println(a.getApptDateTime());
-        // System.out.println(a.getStatus());
-
-        // System.out.println(b.getid());
-        // System.out.println(b.getApptOutcome());
-        // System.out.println(b.getDoctorId());
-        // System.out.println(b.getPatientId());
-        // System.out.println(b.getApptDateTime());
-        // System.out.println(b.getStatus());
-
-        // System.out.println(c.getid());
-        // System.out.println(c.getApptOutcome());
-        // System.out.println(c.getDoctorId());
-        // System.out.println(c.getPatientId());
-        // System.out.println(c.getApptDateTime());
-        // System.out.println(c.getStatus());
-        
-    }
 }
