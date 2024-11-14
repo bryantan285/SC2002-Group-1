@@ -9,6 +9,8 @@ import entity.user.HospitalStaff;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
+import interfaces.boundary.IClearConsole;
+import interfaces.boundary.IKeystrokeWait;
 import interfaces.boundary.IUserInterface;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -40,6 +42,8 @@ public class A_HomeUI implements IUserInterface {
             int choice = scanner.nextInt();
             scanner.nextLine();
             if (choice == 5) exit = true;
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
             handle_option(choice);
         }
 

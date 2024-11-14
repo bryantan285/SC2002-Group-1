@@ -47,8 +47,9 @@ public class D_HomeUI implements IUserInterface {
             System.out.print("Please select an option: ");
 
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
             if (choice == 7) exit = true;
+            IClearConsole.clearConsole();
             handle_option(choice);
         }
 
@@ -101,7 +102,7 @@ public class D_HomeUI implements IUserInterface {
         try {
             User user = session.getCurrentUser();
             List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates((HospitalStaff) user);
-            System.out.println("You are unavailable from:");
+            System.out.println("You are unavailable on:");
             for (UnavailableDate date : unavailableDates) {
                 System.out.println("=============================");
                 System.out.printf("%s%n", DateFormat.formatNoTime(date.getDate()));

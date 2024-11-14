@@ -47,6 +47,7 @@ public class P_HomeUI implements IUserInterface {
             int choice = scanner.nextInt();
             scanner.nextLine();
             if (choice == 9) exit = true;
+            IClearConsole.clearConsole();
             handle_option(choice);
         }
 
