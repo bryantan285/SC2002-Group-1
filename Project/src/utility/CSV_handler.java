@@ -150,7 +150,7 @@ public class CSV_handler {
 
             String line;
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
+                String[] values = line.split(",", -1);
                 T entity = createEntityFromCSV(values, headers, clazz);
                 entities.add(entity); // Add the new entity to the list
             }
