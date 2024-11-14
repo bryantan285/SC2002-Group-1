@@ -114,9 +114,10 @@ public class PH_HomeUI implements IUserInterface {
             }
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
     }
 
     private void dispensePrescriptionItem() {
@@ -139,10 +140,11 @@ public class PH_HomeUI implements IUserInterface {
             } else {
                 System.out.println("Failed to dispense item.");
             }
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (EntityNotFoundException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -156,10 +158,11 @@ public class PH_HomeUI implements IUserInterface {
             
             String requestId = MedicineRequestController.createReplenishmentRequest((HospitalStaff) session.getCurrentUser(), medicineId, amount);
             System.out.println("Replenishment request created. Request ID: " + requestId);
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 

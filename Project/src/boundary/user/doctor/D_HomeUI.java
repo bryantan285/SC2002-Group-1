@@ -95,10 +95,11 @@ public class D_HomeUI implements IUserInterface {
                 //             appt.getService().name());
             }
             System.out.println("=============================");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (NoUserLoggedInException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -115,10 +116,11 @@ public class D_HomeUI implements IUserInterface {
                 }
             }
             System.out.println("=============================");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -201,10 +203,11 @@ public class D_HomeUI implements IUserInterface {
             boolean isAccepted = (choice == 1);
             AppointmentController.apptRequestDecision(selectedAppt, isAccepted);
             System.out.println(isAccepted ? "Appointment accepted." : "Appointment declined.");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (InvalidInputException | NoUserLoggedInException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -223,10 +226,11 @@ public class D_HomeUI implements IUserInterface {
             String outcome = scanner.nextLine();
             AppointmentController.completeAppointment(appt, outcome);
             System.out.println("Outcome recorded.");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -243,10 +247,11 @@ public class D_HomeUI implements IUserInterface {
             
             System.out.println("Medical Record for " + patient.getName() + ":");
             System.out.println(patient.toString());
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
         } catch (EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 }

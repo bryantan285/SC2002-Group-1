@@ -161,6 +161,9 @@ public class A_HomeUI implements IUserInterface {
             scanner.nextLine();
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -190,6 +193,9 @@ public class A_HomeUI implements IUserInterface {
 
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -218,6 +224,9 @@ public class A_HomeUI implements IUserInterface {
             }
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     }
 
@@ -299,6 +308,9 @@ public class A_HomeUI implements IUserInterface {
             }
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            IKeystrokeWait.waitForKeyPress();
+            IClearConsole.clearConsole();
         }
     
     }
