@@ -1,2 +1,5 @@
-id,patientId,doctorId,service,status,apptDateTime
-APPT001,P001,D001,CONSULTATION,PENDING,2024-11-02T14:30
+id,patientId,doctorId,apptDateTime,service,status,apptOutcome
+APPT001,P001,D002,2024-11-02T14:30,CONSULTATION,CONFIRMED,
+APPT002,P1003,D002,2024-11-15T11:00,XRAY,COMPLETED,flue~will gws soon~[Prescription ID: PRSC002
+Appointment ID: APPT002
+Active: true]

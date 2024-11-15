@@ -1,8 +1,14 @@
 package control.appointment;
 
+import control.medicine.MedicineController;
+import control.prescription.PrescriptionController;
+import control.prescription.PrescriptionItemController;
 import control.user.HospitalStaffController;
 import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
+import entity.appointment.Appointment.AppointmentOutcome;
+import entity.medicine.Medicine;
+import entity.medicine.Prescription;
 import entity.user.Doctor;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
@@ -12,9 +18,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import repository.appointment.AppointmentRepository;
+import repository.user.PatientRepository;
 
 public class AppointmentController {
 
@@ -51,6 +59,15 @@ public class AppointmentController {
             throw new InvalidInputException("Doctor cannot be null.");
         }
         return appointmentRepository.findByField("doctorId", doc.getId());
+    }
+
+    public static List<Appointment> getPendingAppts(Doctor doc) throws InvalidInputException {
+        if (doc == null) {
+            throw new InvalidInputException("Doctor cannot be null.");
+        }
+        return appointmentRepository.findByField("doctorId", doc.getId()).stream()
+                .filter(appt -> appt.getStatus() == Appointment.Status.PENDING)
+                .collect(Collectors.toList());
     }
 
     public static List<Appointment> getScheduledAppointments(Patient patient) throws InvalidInputException {
@@ -146,7 +163,7 @@ public class AppointmentController {
     }
     
 
-    public static void completeAppointment(Appointment appt, String outcome) throws InvalidInputException {
+    public static void completeAppointment(Appointment appt, String diagnosis, String consultationNotes, List<Prescription> prescriptions, String outcome) throws InvalidInputException, EntityNotFoundException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
         }
@@ -154,9 +171,42 @@ public class AppointmentController {
             throw new InvalidInputException("Outcome cannot be null or empty.");
         }
 
-        appt.setApptOutcome(outcome);
+        // Create an AppointmentOutcome object using the provided details
+        Appointment.AppointmentOutcome apptOutcome = new AppointmentOutcome(diagnosis, consultationNotes, prescriptions);
+
+        // Set the appointment outcome as a list
+        appt.setApptOutcome(Collections.singletonList(apptOutcome));
+
+        // Set the appointment status to COMPLETED
         appt.setStatus(Appointment.Status.COMPLETED);
+
+        // Save the appointment (assuming appointmentRepository.save() is defined elsewhere)
         appointmentRepository.save();
+
+        // Check if prescription needs to be created based on appointment outcome
+        if (outcome.equalsIgnoreCase("Medication Prescribed")) {
+            createPrescriptionForAppointment(appt);
+        }
+    }
+
+    // Helper method to create a prescription from the appointment
+    private static void createPrescriptionForAppointment(Appointment appt) throws InvalidInputException, EntityNotFoundException {
+        // Assuming prescription is created when medication is prescribed
+        String apptId = appt.getId();
+        PrescriptionController.createPrescription(apptId, true);  // Active prescription
+
+        Prescription prescription = PrescriptionController.getPrescriptionById(apptId);
+        
+        // Add medications to prescription (example logic, you may modify based on your prescription items)
+        List<Medicine> medicines = getMedicinesForPrescription(appt); // Assuming a method to fetch medicines for the prescription
+        for (Medicine med : medicines) {
+            // Add each medicine to the prescription as a prescription item
+            PrescriptionItemController.createPrescriptionItem(prescription.getId(), med.getId(), 1, "Medication prescribed for treatment.");
+        }
+    }
+
+    private static List<Medicine> getMedicinesForPrescription(Appointment appt) {
+        return MedicineController.getAllMedicines(); // Example, you might have logic to filter by specific needs
     }
 
     public static void cancelAppointment(Appointment appt) throws InvalidInputException {
@@ -176,4 +226,22 @@ public class AppointmentController {
         List<Appointment> doctorAppointments = getDoctorAppts(doc);
         return doctorAppointments.stream().anyMatch(appt -> appt.getApptDateTime().isEqual(dateTime));
     }
+
+    public static List<Appointment> getApptByDate(Doctor doc, LocalDate date) throws InvalidInputException {
+        if (doc == null) {
+            throw new InvalidInputException("Doctor cannot be null.");
+        }
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
+        }
+    
+        // Fetch all appointments for the doctor
+        List<Appointment> doctorAppointments = getDoctorAppts(doc);
+    
+        // Filter appointments matching the specified date
+        return doctorAppointments.stream()
+                .filter(appt -> appt.getApptDateTime().toLocalDate().isEqual(date))
+                .collect(Collectors.toList());
+    }
+    
 }

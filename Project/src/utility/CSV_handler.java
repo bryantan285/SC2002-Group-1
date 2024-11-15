@@ -1,6 +1,8 @@
 package utility;
 
 import entity.EntityObject;
+import entity.appointment.Appointment.AppointmentOutcome;
+import entity.medicine.Prescription;
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
 import java.io.BufferedReader;
@@ -97,6 +99,9 @@ public class CSV_handler {
                 return LocalDateTime.parse(value);
             } else if (fieldType == Date.class) {
                 return new Date(value);
+            }  else if (List.class.isAssignableFrom(fieldType)) {
+                // Handle List deserialization (custom logic for AppointmentOutcome)
+                return deserializeList(value);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid format for value: " + value + " of type " + fieldType.getName(), e);
@@ -194,9 +199,58 @@ public class CSV_handler {
             if (value == null) {
                 return "";
             }
+
+            if (value instanceof List) {
+                // Handle List serialization (custom logic for AppointmentOutcome)
+                return serializeList((List<?>) value);
+            }
+
             return value.toString();
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Error accessing field value", e);
         }
+    }
+
+    private static List<AppointmentOutcome> deserializeList(String value) {
+        List<AppointmentOutcome> list = new ArrayList<>();
+        if (value == null || value.isEmpty()) {
+            return list;
+        }
+
+        String[] items = value.split("\\|"); // Split by '|'
+        for (String item : items) {
+            String[] parts = item.split("~"); // Split by '~'
+            if (parts.length >= 3) {
+                String diagnosis = parts[0];
+                String consultationNotes = parts[1];
+                List<Prescription> prescriptions = parsePrescriptions(parts[2]);
+                list.add(new AppointmentOutcome(diagnosis, consultationNotes, prescriptions));
+            }
+        }
+        return list;
+    }
+
+    // Helper method to parse prescriptions (adjust as per your Prescription class)
+    private static List<Prescription> parsePrescriptions(String prescriptionsString) {
+        // Implement logic to parse prescriptions
+        return new ArrayList<>(); // Stub implementation
+    }
+
+    private static String serializeList(List<?> list) {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
+        List<String> serializedItems = new ArrayList<>();
+        for (Object item : list) {
+            if (item instanceof AppointmentOutcome) {
+                AppointmentOutcome outcome = (AppointmentOutcome) item;
+                serializedItems.add(String.join("~",
+                    outcome.getDiagnosis(),
+                    outcome.getConsultationNotes(),
+                    outcome.getPrescriptions().toString() // Customize as needed
+                ));
+            }
+        }
+        return String.join("|", serializedItems); // Use '|' as separator
     }
 }

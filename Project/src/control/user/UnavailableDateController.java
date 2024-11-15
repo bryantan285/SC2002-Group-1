@@ -4,8 +4,10 @@ import entity.user.HospitalStaff;
 import entity.user.UnavailableDate;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import repository.user.UnavailableDateRepository;
 
 public class UnavailableDateController {
@@ -48,6 +50,20 @@ public class UnavailableDateController {
             throw new InvalidInputException("Hospital staff cannot be null.");
         }
         return repo.findByField("staffId", staff.getId());
+    }
+
+    public static List<UnavailableDate> getUnavailableDatesByDate(HospitalStaff staff, LocalDate date) throws InvalidInputException {
+        if (staff == null) {
+            throw new InvalidInputException("Hospital staff cannot be null.");
+        }
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
+        }
+
+        // Fetch all unavailable dates for the given staff
+        return repo.findByField("staffId", staff.getId()).stream()
+                .filter(unavailableDate -> unavailableDate.getDate().toLocalDate().isEqual(date))
+                .collect(Collectors.toList());
     }
 
     public static boolean isDateUnavailable(String staffId, LocalDateTime date) throws InvalidInputException {
