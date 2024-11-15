@@ -31,6 +31,7 @@ public class HospitalStaffController {
             StaffRepository repo = StaffRepository.getInstance();
             HospitalStaff newStaff = StaffFactory.createStaffByRole(role);
             newStaff.setIsPatient(false);
+            newStaff.changePassword("password");
             newStaff.setName(name);
             newStaff.setId(repo.getNextId(role));
             newStaff.setGender(gender);

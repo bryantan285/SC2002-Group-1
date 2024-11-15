@@ -85,7 +85,7 @@ public class StaffRepository extends Repository<HospitalStaff> {
         }
     
         int nextIdNumber = maxIdNumber + 1;
-        return prefix + nextIdNumber;
+        return prefix + String.format("%03d", nextIdNumber);
     }
 
 
