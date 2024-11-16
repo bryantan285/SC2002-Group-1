@@ -12,29 +12,58 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import utility.CSV_handler;
 
+/**
+ * Repository is an abstract class that serves as a generic repository for managing a collection of entities
+ * that extend from EntityObject. It provides methods to load, save, add, remove, update, and retrieve objects.
+ * The repository interacts with a CSV file to store and retrieve data.
+ *
+ * @param <T> the type of entity the repository manages, extending EntityObject
+ */
 public abstract class Repository<T extends EntityObject> implements Iterable<T> {
 
-    private final Map<String,T> objMap;
+    private final Map<String, T> objMap;
 
-    public static void main(String[] args) {
-        System.out.println("Testing");
-        }
-
+    /**
+     * Constructor initializes the repository and creates an empty map to store entities.
+     */
     public Repository() {
         objMap = new HashMap<>();
     }
 
+    /**
+     * Abstract method that returns the file path where the data is stored.
+     * 
+     * @return the file path as a string
+     */
     public abstract String getFilePath();
 
+    /**
+     * Abstract method that returns the class type of the entity managed by this repository.
+     * 
+     * @return the class type of the entity
+     */
     public abstract Class<T> getEntityClass();
 
+    /**
+     * Abstract method that returns the prefix used for identifying entities in the repository.
+     * 
+     * @return the prefix as a string
+     */
     public abstract String getPrefix();
 
+    /**
+     * Loads entities from the CSV file into the repository by reading data and setting objects.
+     * 
+     * @throws IOException if there is an error reading the file
+     */
     public void load() throws IOException {
         List<T> objs = CSV_handler.readFromCSV(getFilePath(), getEntityClass());
         setObjects(objs);
     }
 
+    /**
+     * Saves the current state of the repository back to the CSV file.
+     */
     public void save() {
         try {
             CSV_handler.writeToCSV(getFilePath(), objMap, getEntityClass());
@@ -44,35 +73,71 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         }
     }
 
+    /**
+     * Returns the map containing all entities with their respective IDs as keys.
+     * 
+     * @return a map of entity ID to entity object
+     */
     public Map<String, T> getObjects() {
         return objMap;
     }
 
+    /**
+     * Converts the map of entities into a list.
+     * 
+     * @return a list of all entities in the repository
+     */
     public List<T> toList() {
         List<T> objs = new ArrayList<>();
-        objMap.forEach((k,v) -> {
+        objMap.forEach((k, v) -> {
             objs.add(v);
         });
 
         return objs;
     }
 
+    /**
+     * Returns the number of entities in the repository.
+     * 
+     * @return the size of the repository
+     */
     public int getSize() {
         return objMap.size();
     }
 
+    /**
+     * Removes an entity from the repository.
+     * 
+     * @param obj the entity to remove
+     */
     public void remove(T obj) {
         objMap.remove(obj.getId());
     }
 
+    /**
+     * Adds a new entity to the repository.
+     * 
+     * @param obj the entity to add
+     */
     public void add(T obj) {
         objMap.put(obj.getId(), obj);
     }
 
+    /**
+     * Retrieves an entity by its ID.
+     * 
+     * @param id the ID of the entity
+     * @return the entity corresponding to the given ID
+     */
     public T get(String id) {
         return objMap.get(id);
     }
 
+    /**
+     * Updates an existing entity in the repository.
+     * 
+     * @param obj the entity with updated information
+     */
     public void update(T obj) {
         String id = obj.getId();
         if (objMap.containsKey(id)) {
@@ -80,12 +145,24 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         }
     }
 
+    /**
+     * Sets the list of entities in the repository.
+     * 
+     * @param entities the list of entities to set in the repository
+     */
     public void setObjects(List<T> entities) {
         for (T entity : entities) {
-            objMap.put(entity.getId(),entity);
+            objMap.put(entity.getId(), entity);
         }
     }
 
+    /**
+     * Finds entities in the repository by a specific field and its value.
+     * 
+     * @param fieldName the name of the field to search by
+     * @param value the value to search for
+     * @return a list of entities that match the given field and value
+     */
     public List<T> findByField(String fieldName, Object value) {
         List<T> matchingObjects = new ArrayList<>();
     
@@ -107,6 +184,14 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         return matchingObjects;
     }
 
+    /**
+     * Finds the field in the class hierarchy, throwing NoSuchFieldException if the field is not found.
+     * 
+     * @param clazz the class to search the field in
+     * @param fieldName the name of the field to find
+     * @return the field object representing the field in the class hierarchy
+     * @throws NoSuchFieldException if the field is not found in the class hierarchy
+     */
     private Field getFieldFromClassHierarchy(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         Class<?> currentClass = clazz;
         while (currentClass != null) {
@@ -119,6 +204,11 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         throw new NoSuchFieldException(fieldName); // Field not found in the hierarchy
     }
 
+    /**
+     * Returns a list of all IDs in the repository.
+     * 
+     * @return a list of all IDs
+     */
     public List<String> getAllIds() {
         List<String> idList = new ArrayList<>();
     
@@ -129,6 +219,12 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         return idList;
     }
 
+    /**
+     * Returns the next unique ID based on the given prefix.
+     * 
+     * @param prefix the prefix used for the ID
+     * @return the next available ID with the specified prefix
+     */
     public String getNextId(String prefix) {
         if (objMap.isEmpty()) {
             return prefix + "001";
@@ -148,15 +244,28 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         return prefix + String.format("%03d", nextCount);
     }
 
+    /**
+     * Returns the next unique ID based on the class's prefix.
+     * 
+     * @return the next available class-specific ID
+     */
     public String getNextClassId() {
         return getNextId(getPrefix());
     }
 
+    /**
+     * Iterates over the entities in the repository.
+     * 
+     * @return an iterator over the repository's entities
+     */
     @Override
     public Iterator<T> iterator() {
         return objMap.values().iterator();
     }
 
+    /**
+     * Prints all the entities in the repository.
+     */
     public void printObjs() {
         Iterator<T> iterator = iterator();
         while (iterator.hasNext()) {
@@ -165,5 +274,3 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
         }
     }
 }
-
-
