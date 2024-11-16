@@ -1,6 +1,7 @@
 package boundary.user.pharmacist;
 
 import control.medicine.MedicineController;
+import control.notification.NotificationController;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.request.MedicineRequestController;
@@ -8,20 +9,23 @@ import control.user.SessionManager;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
+import entity.notification.Notification;
 import entity.user.HospitalStaff;
+import entity.user.User;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
-import interfaces.boundary.IClearConsole;
-import interfaces.boundary.IKeystrokeWait;
 import interfaces.boundary.IUserInterface;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import utility.ClearConsole;
 import utility.InputHandler;
+import utility.KeystrokeWait;
 
 public class PH_HomeUI implements IUserInterface {
     private final SessionManager session;
-    private final Scanner scanner = InputHandler.getInstance();
+    private static final Scanner scanner = InputHandler.getInstance();
 
     public PH_HomeUI(SessionManager session) {
         this.session = session;
@@ -30,7 +34,7 @@ public class PH_HomeUI implements IUserInterface {
     @Override
     public void show_options() {
         boolean exit = false;
-
+    
         while (!exit) {
             System.out.println("\n=== Pharmacist Menu ===");
             System.out.println("1. View Active Prescriptions");
@@ -38,19 +42,35 @@ public class PH_HomeUI implements IUserInterface {
             System.out.println("3. Dispense Prescription Item");
             System.out.println("4. Create Replenishment Request");
             System.out.println("5. View All Medicines");
-            System.out.println("6. Logout");
+            System.out.println("6. View notifications");
+            System.out.println("7. Logout");
             System.out.println("====================");
-            System.out.print("Please select an option: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            if (choice == 6) exit = true;
-            IClearConsole.clearConsole();
-            handle_option(choice);
+    
+            int choice = 0;
+    
+            while (true) {
+                try {
+                    System.out.print("Please select an option: ");
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    if (choice >= 1 && choice <= 6) break;
+                    System.out.println("Enter only a number between 1 and 7.");
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a number between 1 and 7.");
+                    scanner.nextLine();
+                }
+            }
+    
+            if (choice == 7) exit = true;
+            else {
+                ClearConsole.clearConsole();
+                handle_option(choice);
+            }
         }
-
+    
         System.out.println("You have successfully logged out. Goodbye!");
     }
+    
 
     @Override
     public void handle_option(int choice) {
@@ -60,7 +80,8 @@ public class PH_HomeUI implements IUserInterface {
             case 3 -> dispensePrescriptionItem();
             case 4 -> createReplenishmentRequest();
             case 5 -> viewAllMedicines();
-            case 6 -> {
+            case 6 -> viewNotifications();
+            case 7 -> {
                 System.out.println("Logging out...");
                 System.exit(0);
             }
@@ -85,8 +106,8 @@ public class PH_HomeUI implements IUserInterface {
             }
             System.out.println("=============================");
         }
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 
     private void viewPrescriptionItems() {
@@ -118,8 +139,8 @@ public class PH_HomeUI implements IUserInterface {
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
 
@@ -128,11 +149,10 @@ public class PH_HomeUI implements IUserInterface {
             System.out.print("Enter prescription ID to view pending items: ");
             String prescriptionId = scanner.nextLine();
     
-            // Fetch and display pending items
             List<PrescriptionItem> pendingItems = PrescriptionItemController.getPendingPrescriptionItems(prescriptionId);
             if (pendingItems.isEmpty()) {
                 System.out.println("No pending items for this prescription.");
-                return; // Exit if no pending items
+                return;
             } else {
                 System.out.println("Pending Prescription Items:");
                 for (PrescriptionItem item : pendingItems) {
@@ -146,14 +166,12 @@ public class PH_HomeUI implements IUserInterface {
                 System.out.println("=============================");
             }
     
-            // Prompt to dispense items
             System.out.print("Enter prescription item IDs to dispense (comma-separated): ");
             String input = scanner.nextLine();
             String[] itemIds = input.split(",");
     
-            // Process each item ID
             for (String id : itemIds) {
-                String itemId = id.trim(); // Trim spaces from user input
+                String itemId = id.trim();
                 try {
                     PrescriptionItem itemToDispense = PrescriptionItemController.getPrescriptionItemById(itemId);
     
@@ -162,7 +180,6 @@ public class PH_HomeUI implements IUserInterface {
                         continue;
                     }
 
-                    // Check if the item is already dispensed
                     if (itemToDispense.getStatus() == PrescriptionItem.ItemStatus.DISPENSED) {
                         System.out.println("Prescription item " + itemId + " has already been dispensed.");
                         continue;
@@ -180,7 +197,6 @@ public class PH_HomeUI implements IUserInterface {
                 }
             }
     
-            // After dispensing all items, update prescription status
             try {
                 PrescriptionController.updatePrescriptionStatusIfCompleted(prescriptionId);
             } catch (EntityNotFoundException | InvalidInputException e) {
@@ -190,8 +206,8 @@ public class PH_HomeUI implements IUserInterface {
         } catch (InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
     
@@ -210,8 +226,8 @@ public class PH_HomeUI implements IUserInterface {
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
 
@@ -225,14 +241,21 @@ public class PH_HomeUI implements IUserInterface {
             for (Medicine medicine : medicines) {
                 System.out.println("=============================");
                 System.out.println(medicine.toString());
-            //     System.out.printf("Medicine ID: %s, Name: %s, Stock: %d%n",
-            //             medicine.getId(),
-            //             medicine.getMedicineName(),
-            //             medicine.getStockQuantity());
             }
             System.out.println("=============================");
         }
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
+    }
+
+    public void viewNotifications() {
+        try {
+            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
+            for (Notification noti : list) {
+                System.out.println(noti.getMessage());
+            }
+        } catch (NoUserLoggedInException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }

@@ -6,6 +6,9 @@ import exception.InvalidInputException;
 import java.util.List;
 import repository.medicine.MedicineRepository;
 
+/**
+ * Controller for handling operations related to medicines.
+ */
 public class MedicineController {
 
     private static final MedicineRepository medicineRepository = MedicineRepository.getInstance();

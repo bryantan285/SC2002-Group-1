@@ -10,10 +10,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import repository.user.UnavailableDateRepository;
 
+/**
+ * Controller for managing unavailable dates for hospital staff.
+ */
 public class UnavailableDateController {
 
     private static final UnavailableDateRepository repo = UnavailableDateRepository.getInstance();
 
+    /**
+     * Adds an unavailable date for the specified hospital staff.
+     *
+     * @param staff The hospital staff for whom the date is being added.
+     * @param date  The date to be marked as unavailable.
+     * @return A success message if the date is added successfully.
+     * @throws InvalidInputException If the staff or date is null, or if the date is already marked as unavailable.
+     */
     public static String addUnavailability(HospitalStaff staff, LocalDateTime date) throws InvalidInputException {
         if (staff == null) {
             throw new InvalidInputException("Hospital staff cannot be null.");
@@ -31,13 +42,17 @@ public class UnavailableDateController {
         return "Added successfully.";
     }
 
-    public static Boolean removeUnavailability(String unavabilityId) throws EntityNotFoundException, InvalidInputException {
-        if (unavabilityId == null || unavabilityId.isEmpty()) {
-            throw new InvalidInputException("Block ID cannot be null or empty.");
-        }
-        UnavailableDate unavailableDate = repo.get(unavabilityId);
+    /**
+     * Removes an unavailable date for the specified hospital staff.
+     *
+     * @param unavailableDate The unavailable date to be removed.
+     * @return True if the date is removed successfully.
+     * @throws EntityNotFoundException If the unavailable date is not found.
+     * @throws InvalidInputException   If the unavailable date is null.
+     */
+    public static Boolean removeUnavailability(UnavailableDate unavailableDate) throws EntityNotFoundException, InvalidInputException {
         if (unavailableDate == null) {
-            throw new EntityNotFoundException("UnavailableDate", unavabilityId);
+            throw new EntityNotFoundException("Unavailable date for user not found.");
         }
 
         repo.remove(unavailableDate);
@@ -45,6 +60,13 @@ public class UnavailableDateController {
         return true;
     }
 
+    /**
+     * Retrieves a list of unavailable dates for the specified hospital staff.
+     *
+     * @param staff The hospital staff for whom the unavailable dates are being retrieved.
+     * @return A list of unavailable dates for the staff.
+     * @throws InvalidInputException If the staff is null.
+     */
     public static List<UnavailableDate> getUnavailableDates(HospitalStaff staff) throws InvalidInputException {
         if (staff == null) {
             throw new InvalidInputException("Hospital staff cannot be null.");
@@ -52,6 +74,14 @@ public class UnavailableDateController {
         return repo.findByField("staffId", staff.getId());
     }
 
+    /**
+     * Retrieves a list of unavailable dates for the specified hospital staff on a given date.
+     *
+     * @param staff The hospital staff for whom the unavailable dates are being retrieved.
+     * @param date  The date to check for unavailability.
+     * @return A list of unavailable dates matching the given date.
+     * @throws InvalidInputException If the staff or date is null.
+     */
     public static List<UnavailableDate> getUnavailableDatesByDate(HospitalStaff staff, LocalDate date) throws InvalidInputException {
         if (staff == null) {
             throw new InvalidInputException("Hospital staff cannot be null.");
@@ -60,12 +90,19 @@ public class UnavailableDateController {
             throw new InvalidInputException("Date cannot be null.");
         }
 
-        // Fetch all unavailable dates for the given staff
         return repo.findByField("staffId", staff.getId()).stream()
                 .filter(unavailableDate -> unavailableDate.getDate().toLocalDate().isEqual(date))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Checks if a specific date is marked as unavailable for the given staff ID.
+     *
+     * @param staffId The ID of the hospital staff.
+     * @param date    The date to check for unavailability.
+     * @return True if the date is unavailable, false otherwise.
+     * @throws InvalidInputException If the staff ID is null or empty, or if the date is null.
+     */
     public static boolean isDateUnavailable(String staffId, LocalDateTime date) throws InvalidInputException {
         if (staffId == null || staffId.isEmpty()) {
             throw new InvalidInputException("Staff ID cannot be null or empty.");

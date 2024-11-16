@@ -2,7 +2,14 @@ package entity.user;
 
 public class StaffFactory {
 
-    // Method to create the appropriate HospitalStaff subclass based on the prefix
+    /**
+     * Creates an instance of the appropriate subclass of HospitalStaff based on the given ID prefix.
+     * The method checks the prefix of the ID to determine if the staff member is a Doctor, Pharmacist, or Administrator.
+     * 
+     * @param id The ID of the staff member.
+     * @return The appropriate HospitalStaff subclass (Doctor, Pharmacist, or Administrator).
+     * @throws IllegalArgumentException if the ID does not start with 'D', 'P', or 'A'.
+     */
     public static HospitalStaff createStaffByPrefix(String id) {
         if (id.startsWith("D")) {
             return new Doctor();
@@ -15,6 +22,13 @@ public class StaffFactory {
         }
     }
 
+    /**
+     * Creates an instance of the appropriate subclass of HospitalStaff based on the given role.
+     * 
+     * @param role The role of the staff member (DOCTOR, PHARMACIST, or ADMINISTRATOR).
+     * @return The appropriate HospitalStaff subclass (Doctor, Pharmacist, or Administrator).
+     * @throws IllegalArgumentException if the role is null or does not match one of the valid roles.
+     */
     public static HospitalStaff createStaffByRole(HospitalStaff.Role role) {
         if (null == role) {
             throw new IllegalArgumentException("Invalid role");

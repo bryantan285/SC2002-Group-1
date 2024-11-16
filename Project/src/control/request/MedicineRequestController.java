@@ -12,10 +12,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import repository.request.MedicineRequestRepository;
 
+/**
+ * Controller for managing medicine replenishment requests.
+ */
 public class MedicineRequestController {
 
     private static final MedicineRequestRepository repo = MedicineRequestRepository.getInstance();
 
+    /**
+     * Creates a new medicine replenishment request.
+     *
+     * @param staff      The hospital staff requesting replenishment.
+     * @param medicineId The ID of the medicine to be replenished.
+     * @param quantity   The quantity of the medicine requested.
+     * @return The ID of the created request.
+     * @throws InvalidInputException If any input is invalid.
+     */
     public static String createReplenishmentRequest(HospitalStaff staff, String medicineId, int quantity) throws InvalidInputException {
         if (staff.getId() == null || staff.getId().isEmpty()) {
             throw new InvalidInputException("Requestor ID cannot be null or empty.");
@@ -40,6 +52,14 @@ public class MedicineRequestController {
         return req.getId();
     }
 
+    /**
+     * Retrieves a MedicineRequest by its ID.
+     *
+     * @param requestId The ID of the request.
+     * @return The MedicineRequest object.
+     * @throws EntityNotFoundException If the request is not found.
+     * @throws InvalidInputException   If the request ID is invalid.
+     */
     public static MedicineRequest getRequestById(String requestId) throws EntityNotFoundException, InvalidInputException {
         if (requestId == null || requestId.isEmpty()) {
             throw new InvalidInputException("Request ID cannot be null or empty.");
@@ -52,10 +72,23 @@ public class MedicineRequestController {
         return req;
     }
 
+    /**
+     * Retrieves all pending medicine requests.
+     *
+     * @return A list of pending MedicineRequest objects.
+     */
     public static List<MedicineRequest> getPendingRequests() {
         return repo.findByField("status", Request.STATUS.PENDING);
     }
 
+    /**
+     * Approves a replenishment request and updates the medicine stock.
+     *
+     * @param user The hospital staff approving the request.
+     * @param req  The MedicineRequest to be approved.
+     * @throws InvalidInputException   If the approver or request is invalid.
+     * @throws EntityNotFoundException If the medicine is not found.
+     */
     public static void approveReplenishmentRequest(HospitalStaff user, MedicineRequest req) throws InvalidInputException, EntityNotFoundException {
         if (user == null) {
             throw new InvalidInputException("Approver cannot be null.");
@@ -77,6 +110,13 @@ public class MedicineRequestController {
         repo.save();
     }
 
+    /**
+     * Rejects a replenishment request.
+     *
+     * @param user The hospital staff rejecting the request.
+     * @param req  The MedicineRequest to be rejected.
+     * @throws InvalidInputException If the approver or request is invalid.
+     */
     public static void rejectReplenishmentRequest(HospitalStaff user, MedicineRequest req) throws InvalidInputException {
         if (user == null) {
             throw new InvalidInputException("Approver cannot be null.");
@@ -91,6 +131,14 @@ public class MedicineRequestController {
         repo.save();
     }
 
+    /**
+     * Updates the status of a replenishment request.
+     *
+     * @param requestId The ID of the request.
+     * @param newStatus The new status to set.
+     * @throws InvalidInputException   If the request ID is invalid.
+     * @throws EntityNotFoundException If the request is not found.
+     */
     public static void updateRequestStatus(String requestId, Request.STATUS newStatus) throws InvalidInputException, EntityNotFoundException {
         if (requestId == null || requestId.isEmpty()) {
             throw new InvalidInputException("Request ID cannot be null or empty.");
@@ -102,6 +150,13 @@ public class MedicineRequestController {
         repo.save();
     }
 
+    /**
+     * Removes a replenishment request by its ID.
+     *
+     * @param requestId The ID of the request to be removed.
+     * @throws InvalidInputException   If the request ID is invalid.
+     * @throws EntityNotFoundException If the request is not found.
+     */
     public static void removeReplenishmentRequest(String requestId) throws InvalidInputException, EntityNotFoundException {
         if (requestId == null || requestId.isEmpty()) {
             throw new InvalidInputException("Request ID cannot be null or empty.");

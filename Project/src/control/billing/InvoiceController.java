@@ -12,10 +12,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import repository.billing.InvoiceRepository;
 
+/**
+ * Controller for managing invoices.
+ */
 public class InvoiceController {
 
     private static final InvoiceRepository invoiceRepository = InvoiceRepository.getInstance();
 
+    /**
+     * Creates a new invoice based on the specified prescription.
+     *
+     * @param customerId     The ID of the customer.
+     * @param prescriptionId The ID of the prescription.
+     * @param taxRate        The tax rate to apply.
+     * @throws InvalidInputException   If any input is invalid.
+     * @throws EntityNotFoundException If the prescription or items are not found.
+     */
     public static void createInvoice(String customerId, String prescriptionId, double taxRate) throws InvalidInputException, EntityNotFoundException {
         if (customerId == null || customerId.isEmpty()) {
             throw new InvalidInputException("Customer ID cannot be null or empty.");
@@ -43,7 +55,6 @@ public class InvoiceController {
                 customerId,
                 prescriptionId,
                 totalAmount,
-                taxAmount,
                 totalPayable,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusDays(30)
@@ -67,6 +78,14 @@ public class InvoiceController {
         return totalAmount;
     }
 
+    /**
+     * Retrieves an Invoice by its ID.
+     *
+     * @param invoiceId The ID of the invoice.
+     * @return The Invoice object.
+     * @throws InvalidInputException   If the invoice ID is invalid.
+     * @throws EntityNotFoundException If the invoice is not found.
+     */
     public static Invoice getInvoiceById(String invoiceId) throws InvalidInputException, EntityNotFoundException {
         if (invoiceId == null || invoiceId.isEmpty()) {
             throw new InvalidInputException("Invoice ID cannot be null or empty.");
@@ -79,10 +98,22 @@ public class InvoiceController {
         return invoice;
     }
 
+    /**
+     * Retrieves a list of all invoices.
+     *
+     * @return A list of all invoices.
+     */
     public static List<Invoice> getAllInvoices() {
         return invoiceRepository.toList();
     }
 
+    /**
+     * Displays the details of an invoice.
+     *
+     * @param invoiceId The ID of the invoice to display.
+     * @throws InvalidInputException   If the invoice ID is invalid.
+     * @throws EntityNotFoundException If the invoice is not found.
+     */
     public static void displayInvoiceDetails(String invoiceId) throws InvalidInputException, EntityNotFoundException {
         Invoice invoice = getInvoiceById(invoiceId);
 
@@ -97,6 +128,9 @@ public class InvoiceController {
         System.out.println("Status: " + invoice.getStatus());
     }
 
+    /**
+     * Lists all overdue invoices.
+     */
     public static void listOverdueInvoices() {
         List<Invoice> invoices = invoiceRepository.toList();
 
@@ -110,6 +144,13 @@ public class InvoiceController {
         }
     }
 
+    /**
+     * Marks the specified invoice as paid.
+     *
+     * @param invoice The invoice to mark as paid.
+     * @return True if the operation is successful.
+     * @throws InvalidInputException If the invoice is null.
+     */
     public static Boolean markAsPaid(Invoice invoice) throws InvalidInputException {
         if (invoice == null) {
             throw new InvalidInputException("Invoice cannot be null.");
@@ -123,6 +164,14 @@ public class InvoiceController {
         return true;
     }
 
+    /**
+     * Cancels the specified invoice.
+     *
+     * @param invoiceId The ID of the invoice to cancel.
+     * @return True if the operation is successful.
+     * @throws InvalidInputException   If the invoice ID is invalid.
+     * @throws EntityNotFoundException If the invoice is not found.
+     */
     public static Boolean cancelInvoice(String invoiceId) throws InvalidInputException, EntityNotFoundException {
         Invoice invoice = getInvoiceById(invoiceId);
 
@@ -135,6 +184,14 @@ public class InvoiceController {
         return true;
     }
 
+    /**
+     * Updates the due date of the specified invoice.
+     *
+     * @param invoice    The invoice to update.
+     * @param newDueDate The new due date.
+     * @return True if the update is successful.
+     * @throws InvalidInputException If the input is invalid.
+     */
     public static Boolean updateDueDate(Invoice invoice, LocalDateTime newDueDate) throws InvalidInputException {
         if (invoice == null) {
             throw new InvalidInputException("Invoice cannot be null.");
@@ -148,12 +205,26 @@ public class InvoiceController {
         return true;
     }
 
+    /**
+     * Deletes the specified invoice.
+     *
+     * @param invoiceId The ID of the invoice to delete.
+     * @throws InvalidInputException   If the invoice ID is invalid.
+     * @throws EntityNotFoundException If the invoice is not found.
+     */
     public static void deleteInvoice(String invoiceId) throws InvalidInputException, EntityNotFoundException {
         Invoice invoice = getInvoiceById(invoiceId);
         invoiceRepository.remove(invoice);
         invoiceRepository.save();
     }
 
+    /**
+     * Checks if the specified invoice is overdue.
+     *
+     * @param invoice The invoice to check.
+     * @return True if the invoice is overdue, false otherwise.
+     * @throws InvalidInputException If the invoice is null.
+     */
     public static Boolean isInvoiceOverdue(Invoice invoice) throws InvalidInputException {
         if (invoice == null) {
             throw new InvalidInputException("Invoice cannot be null.");

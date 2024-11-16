@@ -64,8 +64,8 @@ public class PatientController {
      */
     public static void changeContactNumber(User user, String contactNumber) throws InvalidInputException, EntityNotFoundException {
         // Validate contact number format (can include an optional "+" and must be between 10-15 digits)
-        if (contactNumber == null || !contactNumber.matches("^\\+?[0-9]{10,15}$")) {
-            throw new InvalidInputException("Invalid contact number format.");
+        if (contactNumber == null || !contactNumber.matches("^[89][0-9]{7}$")) {
+            throw new InvalidInputException("Invalid Singaporean mobile number format. It must start with 8 or 9 and have exactly 8 digits.");
         }
         PatientRepository repo = PatientRepository.getInstance();
         // Find patient by user ID

@@ -8,10 +8,6 @@ import repository.Repository;
 /**
  * A singleton repository class for managing Appointment entities.
  * Handles loading, saving, and managing appointments stored in a CSV file.
- * 
- * @author Your Name
- * @version 1.0
- * @since 2024-11-16
  */
 public class AppointmentRepository extends Repository<Appointment> {
 

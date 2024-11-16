@@ -1,8 +1,6 @@
 package utility;
 
 import entity.EntityObject;
-import entity.appointment.Appointment.AppointmentOutcome;
-import entity.medicine.Prescription;
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
 import java.io.BufferedReader;
@@ -12,14 +10,23 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
+/**
+ * Utility class for handling CSV files
+ */
 public class CSV_handler {
 
+    /**
+     * Reads a list of HospitalStaff entities from a CSV file.
+     *
+     * @param filePath The path to the CSV file.
+     * @return A list of HospitalStaff entities.
+     * @throws IOException If an I/O error occurs or the CSV file is empty.
+     */
     public static List<HospitalStaff> readHospitalStaffFromCSV(String filePath) throws IOException {
         List<HospitalStaff> staffList = new ArrayList<>();
 
@@ -41,6 +48,13 @@ public class CSV_handler {
         return staffList;
     }
 
+    /**
+     * Creates a HospitalStaff entity from CSV data.
+     *
+     * @param values The CSV data values.
+     * @param headers The headers from the CSV file.
+     * @return A HospitalStaff entity.
+     */
     private static HospitalStaff createHospitalStaffFromCSV(String[] values, String[] headers) {
         try {
             String id = values[1].trim();
@@ -68,6 +82,14 @@ public class CSV_handler {
         }
     }
 
+    /**
+     * Retrieves a Field object from the class hierarchy of a given class.
+     *
+     * @param clazz The class to search.
+     * @param fieldName The name of the field to retrieve.
+     * @return The Field object.
+     * @throws NoSuchFieldException If the field is not found in the class hierarchy.
+     */
     private static Field getFieldFromClassHierarchy(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         Class<?> currentClass = clazz;
         while (currentClass != null) {
@@ -80,6 +102,14 @@ public class CSV_handler {
         throw new NoSuchFieldException(fieldName);
     }
 
+    /**
+     * Converts a string value to the appropriate data type based on the field type.
+     *
+     * @param fieldType The type of the field.
+     * @param value The string value to be converted.
+     * @return The converted value.
+     * @throws IllegalArgumentException If the value cannot be converted to the specified type.
+     */
     private static Object convertValue(Class<?> fieldType, String value) {
         if (value == null || value.isEmpty()) {
             return null;
@@ -96,13 +126,10 @@ public class CSV_handler {
                 return Float.parseFloat(value);
             } else if (fieldType == boolean.class || fieldType == Boolean.class) {
                 return Boolean.parseBoolean(value);
-            } else if (fieldType == LocalDateTime.class) {
+            }else if (fieldType == LocalDateTime.class) {
                 return LocalDateTime.parse(value);
             } else if (fieldType == Date.class) {
                 return new Date(value);
-            }  else if (List.class.isAssignableFrom(fieldType)) {
-                // Handle List deserialization (custom logic for AppointmentOutcome)
-                return deserializeList(value);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid format for value: " + value + " of type " + fieldType.getName(), e);
@@ -111,6 +138,15 @@ public class CSV_handler {
         throw new IllegalArgumentException("Unsupported field type: " + fieldType);
     }
 
+    /**
+     * Reads a list of entities of the specified class from a CSV file.
+     *
+     * @param filePath The path to the CSV file.
+     * @param clazz The class of the entities to be read.
+     * @param <T> The type of the entities.
+     * @return A list of entities of the specified class.
+     * @throws IOException If an I/O error occurs or the CSV file is empty.
+     */
     public static <T> List<T> readFromCSV(String filePath, Class<T> clazz) throws IOException {
         List<T> entities = new ArrayList<>();
 
@@ -132,6 +168,15 @@ public class CSV_handler {
         return entities;
     }
 
+    /**
+     * Creates an entity of the specified class from CSV data using reflection.
+     *
+     * @param values The CSV data values.
+     * @param headers The headers from the CSV file.
+     * @param clazz The class of the entity to be created.
+     * @param <T> The type of the entity.
+     * @return An entity of the specified class.
+     */
     private static <T> T createEntityFromCSV(String[] values, String[] headers, Class<T> clazz) {
         try {
             T entity = clazz.getDeclaredConstructor().newInstance();
@@ -165,6 +210,15 @@ public class CSV_handler {
         }
     }
 
+    /**
+     * Writes a map of entities to a CSV file.
+     *
+     * @param filePath The path to the CSV file.
+     * @param objMap A map of entities to be written to the CSV file.
+     * @param clazz The class of the entities.
+     * @param <T> The type of the entities.
+     * @throws IOException If an I/O error occurs during writing.
+     */
     public static <T extends EntityObject> void writeToCSV(String filePath, Map<String, T> objMap, Class<T> clazz) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
             Field[] superFields = clazz.getSuperclass().getDeclaredFields();
@@ -193,6 +247,14 @@ public class CSV_handler {
         }
     }
 
+    /**
+     * Retrieves the value of a field from an object.
+     *
+     * @param obj The object from which to retrieve the field value.
+     * @param field The field whose value is to be retrieved.
+     * @param <T> The type of the object.
+     * @return The value of the field as a string, or an empty string if the value is null.
+     */
     private static <T> String getFieldValue(T obj, Field field) {
         try {
             field.setAccessible(true);
@@ -200,80 +262,14 @@ public class CSV_handler {
             if (value == null) {
                 return "";
             }
-
-            if (value instanceof List) {
-                // Handle List serialization (custom logic for AppointmentOutcome)
-                return serializeList((List<?>) value);
+            if (value instanceof LocalDateTime) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                return ((LocalDateTime) value).format(formatter);
             }
-
             return value.toString();
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Error accessing field value", e);
         }
-    }
-
-    private static List<AppointmentOutcome> deserializeList(String value) {
-        List<AppointmentOutcome> list = new ArrayList<>();
-        if (value == null || value.isEmpty() || !value.startsWith("[") || !value.endsWith("]")) {
-            return list;
-        }
-    
-        // Remove surrounding square brackets
-        value = value.substring(1, value.length() - 1);
-    
-        String[] items = value.split("\\],\\["); // Split by "],[" to handle the format
-        for (String item : items) {
-            String[] parts = item.split(","); // Split by commas to separate parts
-            if (parts.length >= 3) {
-                // Extract Diagnosis, Consultation Notes, and Prescription data
-                String diagnosis = parts[0].replace("Diagnosis: ", "").trim();
-                String consultationNotes = parts[1].replace("Consultation Notes: ", "").trim();
-                List<Prescription> prescriptions = parsePrescriptions(parts[2].replace("Prescription ID: ", "").trim());
-    
-                // Create new AppointmentOutcome
-                list.add(new AppointmentOutcome(diagnosis, consultationNotes, prescriptions));
-            }
-        }
-        return list;
-    }
-    
-
-    private static String serializeList(List<?> list) {
-        if (list == null || list.isEmpty()) {
-            return "[]"; // Empty list is represented as "[]"
-        }
-    
-        List<String> serializedItems = new ArrayList<>();
-        for (Object item : list) {
-            if (item instanceof AppointmentOutcome) {
-                AppointmentOutcome outcome = (AppointmentOutcome) item;
-    
-                // Format each part as "[Diagnosis: <value>]" and so on
-                StringBuilder serializedOutcome = new StringBuilder();
-                serializedOutcome.append("[Diagnosis: ").append(outcome.getDiagnosis()).append("], ");
-                serializedOutcome.append("[Consultation Notes: ").append(outcome.getConsultationNotes()).append("], ");
-    
-                // Serialize Prescription
-                String prescriptionsString = outcome.getPrescriptions().stream()
-                    .map(p -> "[Prescription ID: " + p.getId() + "]")
-                    .collect(Collectors.joining(", "));
-    
-                serializedOutcome.append(prescriptionsString);
-    
-                // Add this serialized outcome to the list
-                serializedItems.add(serializedOutcome.toString());
-            }
-        }
-    
-        // Join the items as a single array-like string with square brackets around the whole list
-        return "[" + String.join(", ", serializedItems) + "]"; 
-    }
-    
-
-    // Helper method to parse prescriptions (adjust as per your Prescription class)
-    private static List<Prescription> parsePrescriptions(String prescriptionsString) {
-        // Implement logic to parse prescriptions
-        return new ArrayList<>(); // Stub implementation
     }
 
 }

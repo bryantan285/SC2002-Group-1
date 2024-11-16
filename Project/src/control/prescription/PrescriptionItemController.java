@@ -9,11 +9,24 @@ import exception.InvalidInputException;
 import java.util.List;
 import repository.medicine.PrescriptionItemRepository;
 
+/**
+ * Controller for handling operations related to prescription items.
+ */
 public class PrescriptionItemController {
 
     private static final PrescriptionItemRepository prescriptionItemRepository = PrescriptionItemRepository.getInstance();
 
-    public static void createPrescriptionItem(String prescriptionId, String medicineId, int quantity, String notes) throws InvalidInputException {
+    /**
+     * Creates a new PrescriptionItem.
+     *
+     * @param prescriptionId The ID of the prescription.
+     * @param medicineId     The ID of the medicine.
+     * @param quantity       The quantity of the medicine.
+     * @param notes          Notes for the prescription item.
+     * @return The created PrescriptionItem.
+     * @throws InvalidInputException If any input is invalid.
+     */
+    public static PrescriptionItem createPrescriptionItem(String prescriptionId, String medicineId, int quantity, String notes) throws InvalidInputException {
         if (prescriptionId == null || prescriptionId.isEmpty()) {
             throw new InvalidInputException("Prescription ID cannot be null or empty.");
         }
@@ -33,8 +46,17 @@ public class PrescriptionItemController {
         item.setNotes(notes);
         prescriptionItemRepository.add(item);
         prescriptionItemRepository.save();
+        return item;
     }
 
+    /**
+     * Retrieves a PrescriptionItem by its ID.
+     *
+     * @param itemId The ID of the prescription item.
+     * @return The PrescriptionItem.
+     * @throws EntityNotFoundException If the item is not found.
+     * @throws InvalidInputException   If the item ID is invalid.
+     */
     public static PrescriptionItem getPrescriptionItemById(String itemId) throws EntityNotFoundException, InvalidInputException {
         if (itemId == null || itemId.isEmpty()) {
             throw new InvalidInputException("Item ID cannot be null or empty.");
@@ -47,6 +69,13 @@ public class PrescriptionItemController {
         return item;
     }
 
+    /**
+     * Retrieves a list of PrescriptionItems for the given prescription.
+     *
+     * @param prescription The prescription to get items for.
+     * @return A list of PrescriptionItems.
+     * @throws InvalidInputException If the prescription is null.
+     */
     public static List<PrescriptionItem> getPrescriptionItems(Prescription prescription) throws InvalidInputException {
         if (prescription == null) {
             throw new InvalidInputException("Prescription cannot be null.");
@@ -54,6 +83,14 @@ public class PrescriptionItemController {
         return prescriptionItemRepository.findByField("prescriptionId", prescription.getId());
     }
 
+    /**
+     * Dispenses a PrescriptionItem and updates the medicine stock.
+     *
+     * @param item The PrescriptionItem to dispense.
+     * @return True if the item was successfully dispensed, false otherwise.
+     * @throws InvalidInputException   If the item is null.
+     * @throws EntityNotFoundException If the medicine is not found.
+     */
     public static Boolean dispensePrescriptionItem(PrescriptionItem item) throws InvalidInputException, EntityNotFoundException {
         if (item == null) {
             throw new InvalidInputException("Prescription item cannot be null.");
@@ -72,6 +109,13 @@ public class PrescriptionItemController {
         return false;
     }
 
+    /**
+     * Retrieves all pending PrescriptionItems for a given prescription ID.
+     *
+     * @param prescriptionId The ID of the prescription.
+     * @return A list of pending PrescriptionItems.
+     * @throws InvalidInputException If the prescription ID is invalid.
+     */
     public static List<PrescriptionItem> getPendingPrescriptionItems(String prescriptionId) throws InvalidInputException {
         if (prescriptionId == null || prescriptionId.isEmpty()) {
             throw new InvalidInputException("Prescription ID cannot be null or empty.");
@@ -83,6 +127,12 @@ public class PrescriptionItemController {
                 .toList();
     }
 
+    /**
+     * Deletes a PrescriptionItem.
+     *
+     * @param item The PrescriptionItem to delete.
+     * @throws EntityNotFoundException If the item is not found.
+     */
     public static void deletePrescriptionItem(PrescriptionItem item) throws EntityNotFoundException {
         if (item == null) {
             throw new EntityNotFoundException("PrescriptionItem", "null");

@@ -14,14 +14,14 @@ import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.InvalidUserTypeException;
 import exception.user.NoUserLoggedInException;
-import interfaces.boundary.IClearConsole;
-import interfaces.boundary.IKeystrokeWait;
+import utility.ClearConsole;
+import utility.KeystrokeWait;
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
 import utility.InputHandler;
 
 public class EntryUI {
-    private final Scanner scanner = InputHandler.getInstance();
+    private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
 
     public static void main(String[] args) throws InvalidUserTypeException {
@@ -67,8 +67,8 @@ public class EntryUI {
             } catch (EntityNotFoundException | InvalidInputException e) {
                 System.out.println("Error: " + e.getMessage());
             } finally {
-                IKeystrokeWait.waitForKeyPress();
-                IClearConsole.clearConsole();
+                KeystrokeWait.waitForKeyPress();
+                ClearConsole.clearConsole();
             }
         }
 
@@ -130,8 +130,8 @@ public class EntryUI {
                 } else {
                     UserController.passwordChange(user, newPassword);
                     System.out.println("Password changed successfully.");
-                    IKeystrokeWait.waitForKeyPress();
-                    IClearConsole.clearConsole();
+                    KeystrokeWait.waitForKeyPress();
+                    ClearConsole.clearConsole();
                     break;
                 }
             } catch (InvalidInputException e) {

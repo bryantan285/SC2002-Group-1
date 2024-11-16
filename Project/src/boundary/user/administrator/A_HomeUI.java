@@ -2,18 +2,19 @@ package boundary.user.administrator;
 
 import control.appointment.AppointmentController;
 import control.medicine.MedicineController;
+import control.notification.NotificationController;
 import control.request.MedicineRequestController;
 import control.user.HospitalStaffController;
 import control.user.SessionManager;
 import entity.appointment.Appointment;
 import entity.medicine.Medicine;
+import entity.notification.Notification;
 import entity.request.MedicineRequest;
 import entity.user.HospitalStaff;
+import entity.user.User;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
-import interfaces.boundary.IClearConsole;
-import interfaces.boundary.IKeystrokeWait;
 import interfaces.boundary.IUserInterface;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,10 +22,12 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import utility.ClearConsole;
 import utility.InputHandler;
+import utility.KeystrokeWait;
 
 public class A_HomeUI implements IUserInterface {
-    private final Scanner scanner = InputHandler.getInstance();
+    private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
 
     public A_HomeUI(SessionManager session) {
@@ -34,26 +37,42 @@ public class A_HomeUI implements IUserInterface {
     @Override
     public void show_options() {
         boolean exit = false;
-
+    
         while (!exit) {
             System.out.println("\n=== Administrator Menu ===");
             System.out.println("1. View and Manage Hospital Staff");
             System.out.println("2. View Appointments Details");
             System.out.println("3. View and Manage Medication Inventory");
             System.out.println("4. Approve Replenishment Requests");
-            System.out.println("5. Logout");
+            System.out.println("5. View notifications");
+            System.out.println("6. Logout");
             System.out.println("====================");
-            System.out.print("Please select an option: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            if (choice == 5) exit = true;
-            IClearConsole.clearConsole();
-            handle_option(choice);
+    
+            int choice = 0;
+    
+            while (true) {
+                try {
+                    System.out.print("Please select an option: ");
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    if (choice >= 1 && choice <= 5) break;
+                    System.out.println("Enter only a number between 1 and 6.");
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a number between 1 and 6.");
+                    scanner.nextLine();
+                }
+            }
+    
+            if (choice == 6) exit = true;
+            else {
+                ClearConsole.clearConsole();
+                handle_option(choice);
+            }
         }
-
+    
         System.out.println("You have successfully logged out. Goodbye!");
     }
+    
 
     @Override
     public void handle_option(int choice) {
@@ -62,7 +81,8 @@ public class A_HomeUI implements IUserInterface {
             case 2 -> viewAppointmentsDetails();
             case 3 -> viewAndManageMedicationInventory();
             case 4 -> manageReplenishmentRequests();
-            case 5 -> {
+            case 5 -> viewNotifications();
+            case 6 -> {
                 System.out.println("Logging out...");
                 System.exit(0);
             }
@@ -83,7 +103,7 @@ public class A_HomeUI implements IUserInterface {
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
-            IClearConsole.clearConsole();
+            ClearConsole.clearConsole();
             switch (choice) {
                 case 1 -> viewHospitalStaff();
                 case 2 ->  addHospitalStaff();
@@ -108,8 +128,8 @@ public class A_HomeUI implements IUserInterface {
     
         if (list.isEmpty()) {
             System.out.println("No hospital staff found.");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
             return;
         }
     
@@ -126,7 +146,7 @@ public class A_HomeUI implements IUserInterface {
                 String staffId = scanner.nextLine().trim();
         
                 if (staffId.isEmpty()) {
-                    IClearConsole.clearConsole();
+                    ClearConsole.clearConsole();
                     return;
                 }
         
@@ -150,22 +170,22 @@ public class A_HomeUI implements IUserInterface {
                 String choice = scanner.nextLine().trim();
                 switch (choice) {
                     case "1" -> {
-                        IClearConsole.clearConsole();
+                        ClearConsole.clearConsole();
                         updateHospitalStaff(targetStaff);
-                        IKeystrokeWait.waitForKeyPress();
-                        IClearConsole.clearConsole();
+                        KeystrokeWait.waitForKeyPress();
+                        ClearConsole.clearConsole();
                         return;
                     }
                     case "2" -> {
-                        IClearConsole.clearConsole();
+                        ClearConsole.clearConsole();
                         HospitalStaffController.removeStaff(targetStaff);
                         System.out.println("Hospital staff deleted successfully.");
-                        IKeystrokeWait.waitForKeyPress();
-                        IClearConsole.clearConsole();
+                        KeystrokeWait.waitForKeyPress();
+                        ClearConsole.clearConsole();
                         return;
                     }
                     case "3" -> {
-                        IClearConsole.clearConsole();
+                        ClearConsole.clearConsole();
                         return;
                     }
                     default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
@@ -175,8 +195,8 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("Error: " + e.getMessage());
         }
     
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 
     private void updateHospitalStaff(HospitalStaff staff) {
@@ -193,7 +213,7 @@ public class A_HomeUI implements IUserInterface {
             System.out.print("Enter staff name: ");
             name = scanner.nextLine().trim();
             if (name.isEmpty()) {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 return;
             }
             if (name.length() > 2) {
@@ -208,7 +228,7 @@ public class A_HomeUI implements IUserInterface {
             System.out.print("Select gender (1 for Male, 2 for Female): ");
             String input = scanner.nextLine().trim();
             if (input.isEmpty()) {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 return;
             }
             if (input.equals("1")) {
@@ -233,7 +253,7 @@ public class A_HomeUI implements IUserInterface {
             String roleInput = scanner.nextLine().trim();
         
             if (roleInput.isEmpty()) {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 return;
             }
         
@@ -255,7 +275,7 @@ public class A_HomeUI implements IUserInterface {
             System.out.print("Enter age (between 18 and 100): ");
             String input = scanner.nextLine().trim();
             if (input.isEmpty()) {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 return;
             }
             try {
@@ -277,8 +297,8 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("Error: " + e.getMessage());
         }
     
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
     
 
@@ -292,16 +312,16 @@ public class A_HomeUI implements IUserInterface {
             System.out.println(appt.toString());
         }
         System.out.println("==================");
-        IKeystrokeWait.waitForKeyPress();
-        IClearConsole.clearConsole();
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 
     private void viewAndManageMedicationInventory() {
         List<Medicine> medList = MedicineController.getAllMedicines();
         if (medList.isEmpty()) {
             System.out.println("No medicines.");
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
             return;
         }
 
@@ -316,11 +336,11 @@ public class A_HomeUI implements IUserInterface {
             String medId = scanner.nextLine();
 
             if (medId.isEmpty()) {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 return;
             }
             Medicine med = MedicineController.getMedicineById(medId);
-            IClearConsole.clearConsole();
+            ClearConsole.clearConsole();
             manageMedicationInventory(med);
 
         } catch (InvalidInputException | EntityNotFoundException e) {
@@ -339,24 +359,70 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("1. Increase Medicine Stock");
             System.out.println("2. Decrease Medicine Stock");
             System.out.println("3. Update Medicine Stock");
-            System.out.println("4. Return to Previous Menu");
+            System.out.println("4. Update low stock threshold");
+            System.out.println("5. Return to Previous Menu");
     
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            IClearConsole.clearConsole();
-
+            int choice = 0;
+    
+            while (true) {
+                try {
+                    System.out.print("Enter your choice: ");
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    if (choice >= 1 && choice <= 4) break;
+                    System.out.println("Enter only a number between 1 and 5.");
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a number between 1 and 5.");
+                    scanner.nextLine();
+                }
+            }
+    
+            ClearConsole.clearConsole();
+    
             switch (choice) {
                 case 1 -> increaseMedicineStock(med);
                 case 2 -> decreaseMedicineStock(med);
                 case 3 -> updateMedicineStock(med);
-                case 4 -> {
-                    exit = true;
-                }
+                case 4 -> updateMedicineThreshold(med);
+                case 5 -> exit = true;
                 default -> System.out.println("Invalid choice. Please select an option from 1 to 4.");
             }
         }
     }
+
+    private void updateMedicineThreshold(Medicine medicine) {
+        try {
+            int newThreshold;
+            while (true) {
+                System.out.print("Enter the new threshold value (0 to go back to previous menu): ");
+                try {
+                    newThreshold = scanner.nextInt();
+                    scanner.nextLine();
+                    if (newThreshold == 0) {
+                        System.out.print("Going back to previous menu... ");
+                        return;
+                    } else if (newThreshold > 0) {
+                        break;
+                    } else {
+                        System.out.println("Error: Invalid input. Please enter a positive number.");
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Error: Invalid input. Please enter a valid number.");
+                    scanner.nextLine();
+                }
+            }
+    
+            if (MedicineController.setLowStockThreshold(medicine, newThreshold)) {
+                System.out.printf("Updated threshold for medicine ID %s to %d units.%n", medicine.getId(), newThreshold);
+            }
+        } catch (InvalidInputException | EntityNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        }
+    }
+    
 
     private void increaseMedicineStock(Medicine medicine) {
         try {
@@ -386,8 +452,8 @@ public class A_HomeUI implements IUserInterface {
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
 
@@ -419,8 +485,8 @@ public class A_HomeUI implements IUserInterface {
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
 
@@ -451,8 +517,8 @@ public class A_HomeUI implements IUserInterface {
         } catch (InvalidInputException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            IKeystrokeWait.waitForKeyPress();
-            IClearConsole.clearConsole();
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
     }
 
@@ -464,8 +530,8 @@ public class A_HomeUI implements IUserInterface {
         
                 if (reqList.isEmpty()) {
                     System.out.println("No pending replenishment requests.");
-                    IKeystrokeWait.waitForKeyPress();
-                    IClearConsole.clearConsole();
+                    KeystrokeWait.waitForKeyPress();
+                    ClearConsole.clearConsole();
                     return;
                 }
         
@@ -487,7 +553,7 @@ public class A_HomeUI implements IUserInterface {
                     System.out.print("Enter a valid request ID to process (Enter nothing to go back to previous menu): ");
                     String choice = scanner.nextLine();
                     if (choice.isEmpty()) {
-                        IClearConsole.clearConsole();
+                        ClearConsole.clearConsole();
                         return;
                     }
         
@@ -501,12 +567,12 @@ public class A_HomeUI implements IUserInterface {
                     }
                 }
         
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
                 processReplenishmentRequest(selectedRequest);
             } catch (InvalidInputException | EntityNotFoundException  e) {
                 System.out.println("Error: " + e.getMessage());
             } finally {
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
             }
         }
     }
@@ -533,29 +599,39 @@ public class A_HomeUI implements IUserInterface {
     
                 int actionChoice = scanner.nextInt();
                 scanner.nextLine();
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
     
                 switch (actionChoice) {
                     case 1 -> {
                         MedicineRequestController.approveReplenishmentRequest((HospitalStaff) session.getCurrentUser(), selectedRequest);
                         System.out.println("Request approved. Stock has been updated.");
-                        IKeystrokeWait.waitForKeyPress();
+                        KeystrokeWait.waitForKeyPress();
                         actionExit = true;
                     }
                     case 2 -> {
                         MedicineRequestController.rejectReplenishmentRequest((HospitalStaff) session.getCurrentUser(), selectedRequest);
                         System.out.println("Request rejected.");
-                        IKeystrokeWait.waitForKeyPress();
+                        KeystrokeWait.waitForKeyPress();
                         actionExit = true;
                     }
                     case 3 -> actionExit = true;
                     default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
                 }
-                IClearConsole.clearConsole();
+                ClearConsole.clearConsole();
             }
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
     
+    public void viewNotifications() {
+        try {
+            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
+            for (Notification noti : list) {
+                System.out.println(noti.getMessage());
+            }
+        } catch (NoUserLoggedInException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
 }

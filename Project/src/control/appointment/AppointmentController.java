@@ -1,14 +1,12 @@
 package control.appointment;
 
-import control.medicine.MedicineController;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.user.HospitalStaffController;
 import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
-import entity.appointment.Appointment.AppointmentOutcome;
-import entity.medicine.Medicine;
 import entity.medicine.Prescription;
+import entity.medicine.PrescriptionItem;
 import entity.user.Doctor;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
@@ -18,15 +16,28 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import repository.appointment.AppointmentRepository;
 
+/**
+ * Controller for managing appointments
+ */
 public class AppointmentController {
 
     private static final AppointmentRepository appointmentRepository = AppointmentRepository.getInstance();
 
+   /**
+     * Schedules a new appointment.
+     *
+     * @param doc The doctor for the appointment.
+     * @param patient The patient for the appointment.
+     * @param service The service type of the appointment.
+     * @param selectedSlot The date and time for the appointment.
+     * @throws InvalidInputException If any of the parameters are null.
+     */
     public static void scheduleAppointment(Doctor doc, Patient patient, Appointment.Service service, LocalDateTime selectedSlot) throws InvalidInputException {
         if (doc == null || patient == null || service == null || selectedSlot == null) {
             throw new InvalidInputException("Invalid input: Doctor, patient, service, and selected slot must not be null.");
@@ -37,6 +48,14 @@ public class AppointmentController {
         appointmentRepository.save();
     }
 
+    /**
+     * Retrieves an appointment by its ID.
+     *
+     * @param apptId The ID of the appointment.
+     * @return The appointment object.
+     * @throws InvalidInputException If the ID is null or empty.
+     * @throws EntityNotFoundException If the appointment is not found.
+     */
     public static Appointment getAppt(String apptId) throws InvalidInputException, EntityNotFoundException {
         if (apptId == null || apptId.isEmpty()) {
             throw new InvalidInputException("Appointment ID cannot be null or empty.");
@@ -48,11 +67,23 @@ public class AppointmentController {
         }
         return appt;
     }
-
+    
+    /**
+     * Retrieves all appointments.
+     *
+     * @return A list of all appointments.
+     */
     public static List<Appointment> getAllAppts() {
         return appointmentRepository.toList();
     }
 
+    /**
+     * Retrieves all appointments for a specific doctor.
+     *
+     * @param doc The doctor whose appointments are to be retrieved.
+     * @return A list of appointments for the specified doctor.
+     * @throws InvalidInputException If the doctor is null.
+     */
     public static List<Appointment> getDoctorAppts(Doctor doc) throws InvalidInputException {
         if (doc == null) {
             throw new InvalidInputException("Doctor cannot be null.");
@@ -60,6 +91,13 @@ public class AppointmentController {
         return appointmentRepository.findByField("doctorId", doc.getId());
     }
 
+    /**
+     * Retrieves all pending appointments for a specific doctor.
+     *
+     * @param doc The doctor whose pending appointments are to be retrieved.
+     * @return A list of pending appointments for the specified doctor.
+     * @throws InvalidInputException If the doctor is null.
+     */
     public static List<Appointment> getPendingAppts(Doctor doc) throws InvalidInputException {
         if (doc == null) {
             throw new InvalidInputException("Doctor cannot be null.");
@@ -69,66 +107,143 @@ public class AppointmentController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves all scheduled future appointments for a specific patient.
+     *
+     * @param patient The patient whose scheduled appointments are to be retrieved.
+     * @return A list of scheduled appointments for the specified patient.
+     * @throws InvalidInputException If the patient is null.
+     */
     public static List<Appointment> getScheduledAppointments(Patient patient) throws InvalidInputException {
         if (patient == null) {
             throw new InvalidInputException("Patient cannot be null.");
         }
 
         return appointmentRepository.findByField("patientId", patient.getId()).stream()
-                .filter(appt -> appt.getApptDateTime().isAfter(LocalDateTime.now()) && appt.getStatus() == Appointment.Status.PENDING)
+                .filter(appt -> appt.getApptDateTime().isAfter(LocalDateTime.now().minusDays(1)) && (appt.getStatus() == Appointment.Status.PENDING || appt.getStatus() == Appointment.Status.CONFIRMED))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves all past appointments for a specific patient.
+     *
+     * @param patient The patient whose past appointments are to be retrieved.
+     * @return A list of past appointments for the specified patient.
+     * @throws InvalidInputException If the patient is null.
+     */
     public static List<Appointment> getPastAppointments(Patient patient) throws InvalidInputException {
         if (patient == null) {
             throw new InvalidInputException("Patient cannot be null.");
         }
 
         return appointmentRepository.findByField("patientId", patient.getId()).stream()
-                .filter(appt -> appt.getApptDateTime().isBefore(LocalDateTime.now()) &&
+                .filter(appt -> appt.getApptDateTime().isBefore(LocalDateTime.now().plusDays(1)) &&
                                 (appt.getStatus() == Appointment.Status.COMPLETED || appt.getStatus() == Appointment.Status.CANCELED))
                 .collect(Collectors.toList());
     }
 
-    public static List<String> getAppointmentOutcomes(Patient patient) throws InvalidInputException {
+    /**
+     * Retrieves the outcomes of completed appointments for a specific patient.
+     *
+     * @param patient The patient whose appointment outcomes are to be retrieved.
+     * @return A list containing past appointments, prescriptions, and prescription items.
+     * @throws InvalidInputException If the patient is null.
+     */
+    public static List<Object> getAppointmentOutcomes(Patient patient) throws InvalidInputException {
         if (patient == null) {
             throw new InvalidInputException("Patient cannot be null.");
         }
-
-        List<Appointment> pastAppointments = getPastAppointments(patient);
-        return pastAppointments.stream()
-                .map(appt -> "Appointment ID: " + appt.getId() + " - Outcome: " + appt.getApptOutcome())
-                .collect(Collectors.toList());
+    
+        List<Appointment> pastAppts = getPastAppointments(patient)
+                                      .stream()
+                                      .filter(appt -> appt.getStatus() == Appointment.Status.COMPLETED)
+                                      .toList();
+    
+        HashMap<String, Prescription> pastPrescriptions = new HashMap<>();
+        HashMap<String, List<PrescriptionItem>> prescriptionItems = new HashMap<>();
+    
+        for (Appointment appt : pastAppts) {
+            try {
+                Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
+                pastPrescriptions.put(appt.getId(), prescription);
+    
+                prescriptionItems.put(prescription.getId(), PrescriptionItemController.getPrescriptionItems(prescription));
+            } catch (EntityNotFoundException | InvalidInputException e) {
+                System.out.println("Error: " + e.getMessage());
+                pastPrescriptions.put(appt.getId(), null);
+            }
+        }
+    
+        List<Object> result = new ArrayList<>();
+        result.add(pastAppts);
+        result.add(pastPrescriptions);
+        result.add(prescriptionItems);
+    
+        return result;
     }
 
-    public static List<LocalDateTime> getAvailableSlots(Doctor doc) throws InvalidInputException {
+    /**
+     * Retrieves available time slots for a doctor on a specific date.
+     *
+     * @param doc The doctor whose availability is being checked.
+     * @param selectedDate The date for which to check availability.
+     * @return A list of available time slots.
+     * @throws InvalidInputException If the doctor is null or the date is invalid.
+     */
+    public static List<LocalDateTime> getAvailableSlots(Doctor doc, LocalDate selectedDate) throws InvalidInputException {
         if (doc == null) {
             throw new InvalidInputException("Doctor cannot be null.");
         }
-
+        if (selectedDate == null || selectedDate.isBefore(LocalDate.now())) {
+            throw new InvalidInputException("The selected date must be today or a future date.");
+        }
+    
         List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates(doc);
         List<Appointment> doctorAppointments = getDoctorAppts(doc);
-        List<LocalDateTime> allSlots = generateAllSlotsForDay();
-
+        List<LocalDateTime> allSlots = generateAllSlotsForDay(selectedDate);
+    
         return allSlots.stream()
-                .filter(slot -> unavailableDates.stream().noneMatch(unavailable -> unavailable.getDate().isEqual(slot)) &&
-                                doctorAppointments.stream().noneMatch(appt -> appt.getApptDateTime().equals(slot)))
+                .filter(slot -> {
+                    // If the selected date is today, filter out past slots
+                    if (selectedDate.isEqual(LocalDate.now())) {
+                        return slot.isAfter(LocalDateTime.now());
+                    }
+                    return true;
+                })
+                .filter(slot -> unavailableDates.stream().noneMatch(unavailable -> unavailable.getDate().isEqual(slot)))
+                .filter(slot -> doctorAppointments.stream().noneMatch(appt -> appt.getApptDateTime().equals(slot)))
                 .collect(Collectors.toList());
     }
-
-    private static List<LocalDateTime> generateAllSlotsForDay() {
+    
+    /**
+     * Generates all time slots for a given day.
+     *
+     * @param selectedDate The date for which to generate time slots.
+     * @return A list of time slots for the specified date.
+     */
+    public static List<LocalDateTime> generateAllSlotsForDay(LocalDate selectedDate) {
         List<LocalDateTime> slots = new ArrayList<>();
-        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
-        LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 0));
-
+        LocalDateTime startOfDay = LocalDateTime.of(selectedDate, LocalTime.of(9, 0));
+        LocalDateTime endOfDay = LocalDateTime.of(selectedDate, LocalTime.of(17, 0));
+    
         while (startOfDay.isBefore(endOfDay)) {
-            slots.add(startOfDay);
+            if (!selectedDate.isEqual(LocalDate.now()) || startOfDay.isAfter(LocalDateTime.now())) {
+                slots.add(startOfDay);
+            }
             startOfDay = startOfDay.plusHours(1);
         }
-
+    
         return slots;
     }
-
+    
+    /**
+     * Reschedules an existing appointment.
+     *
+     * @param appt The appointment to be rescheduled.
+     * @param newDateTime The new date and time for the appointment.
+     * @throws InvalidInputException If the appointment or new date/time is null.
+     * @throws EntityNotFoundException If the doctor is not found or the time slot is unavailable.
+     */
     public static void rescheduleAppointment(Appointment appt, LocalDateTime newDateTime) throws InvalidInputException, EntityNotFoundException {
         if (appt == null || newDateTime == null) {
             throw new InvalidInputException("Appointment and new date/time cannot be null.");
@@ -144,6 +259,13 @@ public class AppointmentController {
         appointmentRepository.save();
     }
 
+    /**
+     * Makes a decision on an appointment request.
+     *
+     * @param appt The appointment request to be decided.
+     * @param isAccepted True if the appointment is accepted, false if it is rejected.
+     * @throws InvalidInputException If the appointment is null or already confirmed/canceled.
+     */
     public static void apptRequestDecision(Appointment appt, boolean isAccepted) throws InvalidInputException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
@@ -161,53 +283,47 @@ public class AppointmentController {
         appointmentRepository.save();
     }
     
-
-    public static void completeAppointment(Appointment appt, String diagnosis, String consultationNotes, List<Prescription> prescriptions, String outcome) throws InvalidInputException, EntityNotFoundException {
+    /**
+     * Completes an appointment by setting its diagnosis, consultation notes, and prescribed medication.
+     *
+     * @param appt The appointment to be completed.
+     * @param diagnosis The diagnosis for the appointment.
+     * @param consultationNotes The consultation notes.
+     * @param prescribedMedication The prescribed medication details.
+     * @throws InvalidInputException If any required input is null or empty.
+     * @throws EntityNotFoundException If prescription creation fails.
+     */
+    public static void completeAppointment(Appointment appt, String diagnosis, String consultationNotes, HashMap<String,List<Object>> prescribedMedication) throws InvalidInputException, EntityNotFoundException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
         }
-        if (outcome == null || outcome.isEmpty()) {
-            throw new InvalidInputException("Outcome cannot be null or empty.");
+        if (diagnosis == null || diagnosis.isEmpty()) {
+            throw new InvalidInputException("Diagnosis cannot be empty");
+        }
+        if (consultationNotes == null || consultationNotes.isEmpty()) {
+            throw new InvalidInputException("Consultation notes cannot be empty");
         }
 
-        // Create an AppointmentOutcome object using the provided details
-        Appointment.AppointmentOutcome apptOutcome = new AppointmentOutcome(diagnosis, consultationNotes, prescriptions);
-
-        // Set the appointment outcome as a list
-        appt.setApptOutcome(Collections.singletonList(apptOutcome));
-
-        // Set the appointment status to COMPLETED
+        appt.setDiagnosis(diagnosis);
+        appt.setNotes(consultationNotes);
         appt.setStatus(Appointment.Status.COMPLETED);
-
-        // Save the appointment (assuming appointmentRepository.save() is defined elsewhere)
         appointmentRepository.save();
-
-        // Check if prescription needs to be created based on appointment outcome
-        if (outcome.equalsIgnoreCase("Medication Prescribed")) {
-            createPrescriptionForAppointment(appt);
+        // prescribed medicine, get(0) is quantity, get(1) is notes
+        if (!prescribedMedication.isEmpty()) {
+            PrescriptionController.createPrescription(appt.getId());
+            Prescription prescription = PrescriptionController.getPrescriptionById(appt.getId());
+            for (Map.Entry<String,List<Object>> med : prescribedMedication.entrySet()) {
+                PrescriptionItemController.createPrescriptionItem(prescription.getId(), med.getKey(),(int) med.getValue().get(0),(String) med.getValue().get(1));
+            }
         }
     }
 
-    // Helper method to create a prescription from the appointment
-    private static void createPrescriptionForAppointment(Appointment appt) throws InvalidInputException, EntityNotFoundException {
-        // Assuming prescription is created when medication is prescribed
-        String apptId = appt.getId();
-        PrescriptionController.createPrescription(apptId, true);  // Active prescription
-
-        Prescription prescription = PrescriptionController.getPrescriptionById(apptId);
-        
-        // Add medications to prescription (example logic, you may modify based on your prescription items)
-        List<Medicine> medicines = getMedicinesForPrescription(appt); // Assuming a method to fetch medicines for the prescription
-        for (Medicine med : medicines) {
-            // Add each medicine to the prescription as a prescription item
-            PrescriptionItemController.createPrescriptionItem(prescription.getId(), med.getId(), 1, "Medication prescribed for treatment.");
-        }
-    }
-
-    private static List<Medicine> getMedicinesForPrescription(Appointment appt) {
-        return MedicineController.getAllMedicines(); // Example, you might have logic to filter by specific needs
-    }
-
+    /**
+     * Cancels an appointment.
+     *
+     * @param appt The appointment to be canceled.
+     * @throws InvalidInputException If the appointment is null.
+     */
     public static void cancelAppointment(Appointment appt) throws InvalidInputException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
@@ -217,6 +333,14 @@ public class AppointmentController {
         appointmentRepository.save();
     }
 
+    /**
+     * Checks if there are any overlapping appointments for a doctor at a given date and time.
+     *
+     * @param doc The doctor to check for overlapping appointments.
+     * @param dateTime The date and time to check.
+     * @return True if there is an overlapping appointment, false otherwise.
+     * @throws InvalidInputException If the doctor or date/time is null.
+     */
     public static boolean checkOverlappingAppointments(Doctor doc, LocalDateTime dateTime) throws InvalidInputException {
         if (doc == null || dateTime == null) {
             throw new InvalidInputException("Doctor and date/time cannot be null.");
@@ -226,6 +350,14 @@ public class AppointmentController {
         return doctorAppointments.stream().anyMatch(appt -> appt.getApptDateTime().isEqual(dateTime));
     }
 
+    /**
+     * Retrieves appointments for a specific doctor on a given date.
+     *
+     * @param doc The doctor whose appointments are to be retrieved.
+     * @param date The date for which to retrieve appointments.
+     * @return A list of appointments for the specified doctor on the given date.
+     * @throws InvalidInputException If the doctor or date is null.
+     */
     public static List<Appointment> getApptByDate(Doctor doc, LocalDate date) throws InvalidInputException {
         if (doc == null) {
             throw new InvalidInputException("Doctor cannot be null.");
@@ -234,10 +366,8 @@ public class AppointmentController {
             throw new InvalidInputException("Date cannot be null.");
         }
     
-        // Fetch all appointments for the doctor
         List<Appointment> doctorAppointments = getDoctorAppts(doc);
     
-        // Filter appointments matching the specified date
         return doctorAppointments.stream()
                 .filter(appt -> appt.getApptDateTime().toLocalDate().isEqual(date))
                 .collect(Collectors.toList());
