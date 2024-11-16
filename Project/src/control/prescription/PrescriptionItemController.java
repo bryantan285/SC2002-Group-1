@@ -72,6 +72,17 @@ public class PrescriptionItemController {
         return false;
     }
 
+    public static List<PrescriptionItem> getPendingPrescriptionItems(String prescriptionId) throws InvalidInputException {
+        if (prescriptionId == null || prescriptionId.isEmpty()) {
+            throw new InvalidInputException("Prescription ID cannot be null or empty.");
+        }
+
+        List<PrescriptionItem> items = prescriptionItemRepository.findByField("prescriptionId", prescriptionId);
+        return items.stream()
+                .filter(item -> item.getStatus() == PrescriptionItem.ItemStatus.PENDING)
+                .toList();
+    }
+
     public static void deletePrescriptionItem(PrescriptionItem item) throws EntityNotFoundException {
         if (item == null) {
             throw new EntityNotFoundException("PrescriptionItem", "null");

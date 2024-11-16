@@ -60,7 +60,10 @@ public class PH_HomeUI implements IUserInterface {
             case 3 -> dispensePrescriptionItem();
             case 4 -> createReplenishmentRequest();
             case 5 -> viewAllMedicines();
-            case 6 -> System.out.println("Logging out...");
+            case 6 -> {
+                System.out.println("Logging out...");
+                System.exit(0);
+            }
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
     }
@@ -122,31 +125,77 @@ public class PH_HomeUI implements IUserInterface {
 
     private void dispensePrescriptionItem() {
         try {
-            System.out.print("Enter prescription item ID to dispense: ");
-            String prescriptionItemId = scanner.nextLine();
-            
-            PrescriptionItem item = PrescriptionItemController.getPrescriptionItemById(prescriptionItemId);
-            
-            
-            if (item == null) {
-                System.out.println("Invalid prescription item ID.");
-                return;
-            }
-            
-            boolean isDispensed = PrescriptionItemController.dispensePrescriptionItem(item);
-            
-            if (isDispensed) {
-                System.out.println("Item dispensed successfully.");
+            System.out.print("Enter prescription ID to view pending items: ");
+            String prescriptionId = scanner.nextLine();
+    
+            // Fetch and display pending items
+            List<PrescriptionItem> pendingItems = PrescriptionItemController.getPendingPrescriptionItems(prescriptionId);
+            if (pendingItems.isEmpty()) {
+                System.out.println("No pending items for this prescription.");
+                return; // Exit if no pending items
             } else {
-                System.out.println("Failed to dispense item.");
+                System.out.println("Pending Prescription Items:");
+                for (PrescriptionItem item : pendingItems) {
+                    System.out.println("=============================");
+                    System.out.println("Item ID: " + item.getId());
+                    System.out.println("Medicine ID: " + item.getMedicineId());
+                    System.out.println("Quantity: " + item.getQuantity());
+                    System.out.println("Notes: " + item.getNotes());
+                    System.out.println("Status: " + item.getStatus());
+                }
+                System.out.println("=============================");
             }
-        } catch (EntityNotFoundException | InvalidInputException e) {
+    
+            // Prompt to dispense items
+            System.out.print("Enter prescription item IDs to dispense (comma-separated): ");
+            String input = scanner.nextLine();
+            String[] itemIds = input.split(",");
+    
+            // Process each item ID
+            for (String id : itemIds) {
+                String itemId = id.trim(); // Trim spaces from user input
+                try {
+                    PrescriptionItem itemToDispense = PrescriptionItemController.getPrescriptionItemById(itemId);
+    
+                    if (itemToDispense == null || !itemToDispense.getPrescriptionId().equals(prescriptionId)) {
+                        System.out.println("Invalid prescription item ID: " + itemId);
+                        continue;
+                    }
+
+                    // Check if the item is already dispensed
+                    if (itemToDispense.getStatus() == PrescriptionItem.ItemStatus.DISPENSED) {
+                        System.out.println("Prescription item " + itemId + " has already been dispensed.");
+                        continue;
+                    }
+    
+                    boolean isDispensed = PrescriptionItemController.dispensePrescriptionItem(itemToDispense);
+    
+                    if (isDispensed) {
+                        System.out.println("Item dispensed successfully: " + itemId);
+                    } else {
+                        System.out.println("Failed to dispense item: " + itemId);
+                    }
+                } catch (EntityNotFoundException | InvalidInputException e) {
+                    System.out.println("Error dispensing item with ID " + itemId + ": " + e.getMessage());
+                }
+            }
+    
+            // After dispensing all items, update prescription status
+            try {
+                PrescriptionController.updatePrescriptionStatusIfCompleted(prescriptionId);
+            } catch (EntityNotFoundException | InvalidInputException e) {
+                System.out.println("Error updating prescription status: " + e.getMessage());
+            }
+    
+        } catch (InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
             IKeystrokeWait.waitForKeyPress();
             IClearConsole.clearConsole();
         }
     }
+    
+    
 
     private void createReplenishmentRequest() {
         try {

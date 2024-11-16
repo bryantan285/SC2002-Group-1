@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import repository.appointment.AppointmentRepository;
-import repository.user.PatientRepository;
 
 public class AppointmentController {
 

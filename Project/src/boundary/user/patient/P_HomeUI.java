@@ -65,7 +65,10 @@ public class P_HomeUI implements IUserInterface {
             case 6 -> cancelAppointment();
             case 7 -> viewScheduledAppointments();
             case 8 -> viewPastAppointmentOutcomeRecords();
-            case 9 -> System.out.println("Logging out...");
+            case 9 -> {
+                System.out.println("Logging out...");
+                System.exit(0);
+            }
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
     }

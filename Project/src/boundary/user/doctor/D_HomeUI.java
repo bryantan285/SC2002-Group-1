@@ -69,36 +69,100 @@ public class D_HomeUI implements IUserInterface {
     public void handle_option(int choice) {
         switch (choice) {
             case 1 -> viewPatientMedicalRecords();
-            case 2 -> viewUnavailableDates();
+            case 2 -> updatePatientMedicalRecord();
             case 3 -> viewSchedule();
             case 4 -> setAvailability();
             case 5 -> acceptDeclineApptRequest();
             case 6 -> viewUpcomingAppointments();
             case 7 -> recordApptOutcome();
-            case 8 -> System.out.println("Logging out...");
+            case 8 -> {
+                System.out.println("Logging out...");
+                System.exit(0);
+            }
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
+    }
+
+    // private void viewSchedule() {
+    //     try {
+    //         User user = session.getCurrentUser();
+    //         Doctor doctor = (Doctor) user;
+    
+    //         LocalDate today = LocalDate.now();
+    //         LocalDate endDate = today.plusWeeks(1); // Adjust range as needed
+            
+    //         System.out.println("\n===============================================");
+    //         System.out.println("Schedule for Dr. " + doctor.getName() + " (Next 7 days):");
+    //         System.out.println("=================================================");
+    
+    //         // Iterate over each day in the range
+    //         for (LocalDate date = today; date.isBefore(endDate); date = date.plusDays(1)) {
+    //             System.out.println(date + ":");
+    
+    //             // Fetch appointments for the day
+    //             List<Appointment> dailyAppointments = AppointmentController.getApptByDate(doctor, date);
+    
+    //             if (dailyAppointments.isEmpty()) {
+    //                 System.out.println("  No appointments.");
+    //             } else {
+    //                 for (Appointment appt : dailyAppointments) {
+    //                     System.out.printf("  %s - Patient: %s, Service: %s%n",
+    //                             DateFormat.formatWithTime(appt.getApptDateTime()),
+    //                             appt.getPatientId(),
+    //                             appt.getService().name());
+    //                 }
+    //             }
+    
+    //             // Fetch unavailable slots for the day
+    //             List<UnavailableDate> unavailableSlots = UnavailableDateController.getUnavailableDatesByDate(doctor, date);
+    //             if (!unavailableSlots.isEmpty()) {
+    //                 System.out.println("  Unavailable Slots:");
+    //                 for (UnavailableDate slot : unavailableSlots) {
+    //                     System.out.printf("    %s%n", DateFormat.formatWithTime(slot.getDate()));
+    //                 }
+    //             }
+    //             System.out.println("-------------------------------------------------");
+    //         }
+    //     } catch (NoUserLoggedInException | InvalidInputException e) {
+    //         System.out.println("Error: " + e.getMessage());
+    //     } finally {
+    //         IKeystrokeWait.waitForKeyPress();
+    //         IClearConsole.clearConsole();
+    //     }
+    // }
+
+    private void updatePatientMedicalRecord() {
+        
     }
 
     private void viewSchedule() {
         try {
             User user = session.getCurrentUser();
             Doctor doctor = (Doctor) user;
-    
-            LocalDate today = LocalDate.now();
-            LocalDate endDate = today.plusWeeks(1); // Adjust range as needed
             
+            Scanner scanner = new Scanner(System.in);
+
+            // Get the start date from the user
+            System.out.println("Enter the start date (YYYY-MM-DD): ");
+            String startDateInput = scanner.nextLine();
+            LocalDate startDate = LocalDate.parse(startDateInput);
+            
+            // Get the end date from the user
+            System.out.println("Enter the end date (YYYY-MM-DD): ");
+            String endDateInput = scanner.nextLine();
+            LocalDate endDate = LocalDate.parse(endDateInput);
+
             System.out.println("\n===============================================");
-            System.out.println("Schedule for Dr. " + doctor.getName() + " (Next 7 days):");
+            System.out.println("Schedule for Dr. " + doctor.getName() + " (" + startDate + " to " + endDate + "):");
             System.out.println("=================================================");
-    
+
             // Iterate over each day in the range
-            for (LocalDate date = today; date.isBefore(endDate); date = date.plusDays(1)) {
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
                 System.out.println(date + ":");
-    
+
                 // Fetch appointments for the day
                 List<Appointment> dailyAppointments = AppointmentController.getApptByDate(doctor, date);
-    
+
                 if (dailyAppointments.isEmpty()) {
                     System.out.println("  No appointments.");
                 } else {
@@ -109,7 +173,7 @@ public class D_HomeUI implements IUserInterface {
                                 appt.getService().name());
                     }
                 }
-    
+
                 // Fetch unavailable slots for the day
                 List<UnavailableDate> unavailableSlots = UnavailableDateController.getUnavailableDatesByDate(doctor, date);
                 if (!unavailableSlots.isEmpty()) {
@@ -122,6 +186,8 @@ public class D_HomeUI implements IUserInterface {
             }
         } catch (NoUserLoggedInException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Invalid date format. Please try again with the correct format (YYYY-MM-DD).");
         } finally {
             IKeystrokeWait.waitForKeyPress();
             IClearConsole.clearConsole();
@@ -150,7 +216,7 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("You are unavailable on:");
             for (UnavailableDate date : unavailableDates) {
                 if (date.getDate().isAfter(threshold)) {
-                    System.out.printf("%s%n", DateFormat.formatNoTime(date.getDate()));
+                    System.out.printf("%s%n", DateFormat.formatWithTime(date.getDate()));
                 }
             }
             System.out.println("=============================");
@@ -252,14 +318,14 @@ public class D_HomeUI implements IUserInterface {
         try {
             User user = session.getCurrentUser();
             List<Appointment> pendingAppointments = AppointmentController.getPendingAppts((Doctor) user);
-            
+    
             System.out.println("Pending Appointments for Dr. " + user.getName() + ":");
-            
+    
             if (pendingAppointments.isEmpty()) {
                 System.out.println("No pending appointments.");
                 return;
             }
-            
+    
             for (Appointment appt : pendingAppointments) {
                 System.out.printf("ID: %s, Patient: %s, Date: %s, Service: %s%n",
                         appt.getId(),
@@ -267,29 +333,39 @@ public class D_HomeUI implements IUserInterface {
                         DateFormat.formatWithTime(appt.getApptDateTime()),
                         appt.getService().name());
             }
-            
+    
             System.out.print("Enter appointment ID to accept/decline (or '0' to cancel): ");
             String appointmentId = scanner.nextLine();
             if (appointmentId.equals("0")) {
                 System.out.println("Returning to main menu.");
                 return;
             }
-            
+    
             Appointment selectedAppt = AppointmentController.getAppt(appointmentId);
-            
+    
             if (selectedAppt == null) {
                 System.out.println("Invalid appointment ID.");
                 return;
             }
-            
+    
             System.out.print("Enter 1 to accept or 0 to decline: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();
-            boolean isAccepted = (choice == 1);
-            AppointmentController.apptRequestDecision(selectedAppt, isAccepted);
-            System.out.println(isAccepted ? "Appointment accepted." : "Appointment declined.");
-        } catch (InvalidInputException | NoUserLoggedInException | EntityNotFoundException e) {
+            scanner.nextLine();  // Consume the newline
+            switch (choice) {
+                case 1 -> {
+                    AppointmentController.apptRequestDecision(selectedAppt, true);
+                    System.out.println("Appointment accepted.");
+                }
+                case 0 -> {
+                    AppointmentController.apptRequestDecision(selectedAppt, false);
+                    System.out.println("Appointment declined.");
+                }
+                default -> System.out.println("Invalid choice. Returning to main menu.");
+            }
+        } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
         } finally {
             IKeystrokeWait.waitForKeyPress();
             IClearConsole.clearConsole();

@@ -53,6 +53,28 @@ public class PrescriptionController {
         return isActive;
     }
 
+    public static void updatePrescriptionStatusIfCompleted(String prescriptionId) throws InvalidInputException, EntityNotFoundException {
+        if (prescriptionId == null || prescriptionId.isEmpty()) {
+            throw new InvalidInputException("Prescription ID cannot be null or empty.");
+        }
+    
+        // Retrieve the prescription
+        Prescription prescription = getPrescriptionById(prescriptionId);
+    
+        // Get all prescription items associated with the prescription
+        List<PrescriptionItem> itemList = getPrescriptionItems(prescription);
+    
+        // Check if all items have been dispensed
+        boolean allDispensed = itemList.stream().allMatch(item -> item.getStatus() == PrescriptionItem.ItemStatus.DISPENSED);
+    
+        // If all items are dispensed, set isActive to false
+        if (allDispensed) {
+            prescription.setIsActive(false);
+            prescriptionRepository.save(); // Save the updated prescription to the repository
+        }
+    }
+    
+
     public static void cancelPrescription(Prescription prescription) throws InvalidInputException {
         if (prescription == null) {
             throw new InvalidInputException("Prescription cannot be null.");

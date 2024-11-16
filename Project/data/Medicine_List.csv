@@ -1,4 +1,4 @@
 id,medicineName,stockQuantity,unitCost,dosage,lowStockThreshold
-MED001,Paracetamol,407,1.0,10.0,20
+MED001,Paracetamol,387,1.0,10.0,20
 MED003,Amoxicillin,75,1.0,10.0,15
 MED002,Ibuprofen,50,1.0,10.0,10

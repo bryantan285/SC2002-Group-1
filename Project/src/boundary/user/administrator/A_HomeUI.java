@@ -62,7 +62,10 @@ public class A_HomeUI implements IUserInterface {
             case 2 -> viewAppointmentsDetails();
             case 3 -> viewAndManageMedicationInventory();
             case 4 -> manageReplenishmentRequests();
-            case 5 -> System.out.println("Logging out...");
+            case 5 -> {
+                System.out.println("Logging out...");
+                System.exit(0);
+            }
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
     }

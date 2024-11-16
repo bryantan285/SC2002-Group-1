@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CSV_handler {
 
@@ -213,22 +214,61 @@ public class CSV_handler {
 
     private static List<AppointmentOutcome> deserializeList(String value) {
         List<AppointmentOutcome> list = new ArrayList<>();
-        if (value == null || value.isEmpty()) {
+        if (value == null || value.isEmpty() || !value.startsWith("[") || !value.endsWith("]")) {
             return list;
         }
-
-        String[] items = value.split("\\|"); // Split by '|'
+    
+        // Remove surrounding square brackets
+        value = value.substring(1, value.length() - 1);
+    
+        String[] items = value.split("\\],\\["); // Split by "],[" to handle the format
         for (String item : items) {
-            String[] parts = item.split("~"); // Split by '~'
+            String[] parts = item.split(","); // Split by commas to separate parts
             if (parts.length >= 3) {
-                String diagnosis = parts[0];
-                String consultationNotes = parts[1];
-                List<Prescription> prescriptions = parsePrescriptions(parts[2]);
+                // Extract Diagnosis, Consultation Notes, and Prescription data
+                String diagnosis = parts[0].replace("Diagnosis: ", "").trim();
+                String consultationNotes = parts[1].replace("Consultation Notes: ", "").trim();
+                List<Prescription> prescriptions = parsePrescriptions(parts[2].replace("Prescription ID: ", "").trim());
+    
+                // Create new AppointmentOutcome
                 list.add(new AppointmentOutcome(diagnosis, consultationNotes, prescriptions));
             }
         }
         return list;
     }
+    
+
+    private static String serializeList(List<?> list) {
+        if (list == null || list.isEmpty()) {
+            return "[]"; // Empty list is represented as "[]"
+        }
+    
+        List<String> serializedItems = new ArrayList<>();
+        for (Object item : list) {
+            if (item instanceof AppointmentOutcome) {
+                AppointmentOutcome outcome = (AppointmentOutcome) item;
+    
+                // Format each part as "[Diagnosis: <value>]" and so on
+                StringBuilder serializedOutcome = new StringBuilder();
+                serializedOutcome.append("[Diagnosis: ").append(outcome.getDiagnosis()).append("], ");
+                serializedOutcome.append("[Consultation Notes: ").append(outcome.getConsultationNotes()).append("], ");
+    
+                // Serialize Prescription
+                String prescriptionsString = outcome.getPrescriptions().stream()
+                    .map(p -> "[Prescription ID: " + p.getId() + "]")
+                    .collect(Collectors.joining(", "));
+    
+                serializedOutcome.append(prescriptionsString);
+    
+                // Add this serialized outcome to the list
+                serializedItems.add(serializedOutcome.toString());
+            }
+        }
+    
+        // Join the items as a single array-like string with square brackets around the whole list
+        return "[" + String.join(", ", serializedItems) + "]"; 
+    }
+    
 
     // Helper method to parse prescriptions (adjust as per your Prescription class)
     private static List<Prescription> parsePrescriptions(String prescriptionsString) {
@@ -236,21 +276,4 @@ public class CSV_handler {
         return new ArrayList<>(); // Stub implementation
     }
 
-    private static String serializeList(List<?> list) {
-        if (list == null || list.isEmpty()) {
-            return "";
-        }
-        List<String> serializedItems = new ArrayList<>();
-        for (Object item : list) {
-            if (item instanceof AppointmentOutcome) {
-                AppointmentOutcome outcome = (AppointmentOutcome) item;
-                serializedItems.add(String.join("~",
-                    outcome.getDiagnosis(),
-                    outcome.getConsultationNotes(),
-                    outcome.getPrescriptions().toString() // Customize as needed
-                ));
-            }
-        }
-        return String.join("|", serializedItems); // Use '|' as separator
-    }
 }
