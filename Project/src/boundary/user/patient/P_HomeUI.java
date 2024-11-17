@@ -68,7 +68,7 @@ public class P_HomeUI implements IUserInterface {
                     choice = scanner.nextInt();
                     scanner.nextLine();
     
-                    if (choice >= 1 && choice <= 9) {
+                    if (choice >= 1 && choice <= 10) {
                         break;
                     } else {
                         System.out.println("Enter only a number between 1 and 10.");
@@ -297,7 +297,7 @@ public class P_HomeUI implements IUserInterface {
                     }
                 }
     
-                List<LocalDateTime> availableSlots = AppointmentController.getAvailableSlots(doc, selectedDate);
+                List<LocalDateTime> availableSlots = AppointmentController.getAvailableTimeSlots(doc, selectedDate);
     
                 if (availableSlots.isEmpty()) {
                     System.out.println("No available slots for this doctor on " + selectedDate + ".");
@@ -324,7 +324,6 @@ public class P_HomeUI implements IUserInterface {
             }
         }
     }
-    
 
     private void scheduleAppointment() {
         try {
@@ -362,7 +361,7 @@ public class P_HomeUI implements IUserInterface {
                 return;
             }
     
-            System.out.println("Choose a service type:");
+            System.out.println("\nChoose a service type:");
             Appointment.Service[] services = Appointment.Service.values();
             for (int i = 0; i < services.length; i++) {
                 System.out.println((i + 1) + ". " + services[i].name());
@@ -394,9 +393,6 @@ public class P_HomeUI implements IUserInterface {
         }
     }
     
-    
-
-
     private void rescheduleAppointment() {
         try {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
@@ -451,9 +447,6 @@ public class P_HomeUI implements IUserInterface {
         }
     }
     
-    
-    
-
     private void cancelAppointment() {
         try {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
@@ -506,9 +499,14 @@ public class P_HomeUI implements IUserInterface {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
             list.sort(Comparator.comparing(Appointment::getId));
             System.out.println("Scheduled Appointments:");
-            for (Appointment appt : list) {
-                System.out.println("=============================");
-                System.out.println(appt.toString());
+            System.out.println("-----------------------------");
+            if (list.isEmpty()) {
+                System.out.println("No scheduled appointments.");
+            } else {
+                for (Appointment appt : list) {
+                    System.out.println(appt.toString());
+                    System.out.println("-----------------------------");
+                }
             }
             System.out.println("=============================");
         } catch (InvalidInputException | NoUserLoggedInException e) {

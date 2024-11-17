@@ -75,6 +75,28 @@ public class UnavailableDateController {
     }
 
     /**
+     * Retrieves all unavailable slots (dates and times) for the specified doctor.
+     *
+     * @param staff The hospital staff for whom the unavailable slots are being retrieved.
+     * @return A list of unavailable slots (dates and times) for the staff.
+     * @throws InvalidInputException If the staff is null.
+     */
+    public static List<LocalDateTime> getUnavailableSlotsByDate(HospitalStaff staff, LocalDate date) throws InvalidInputException {
+        if (staff == null) {
+            throw new InvalidInputException("Hospital staff cannot be null.");
+        }
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
+        }
+    
+        // Retrieve all unavailable dates for the staff, then filter by the specified date.
+        return repo.findByField("staffId", staff.getId()).stream()
+                .map(UnavailableDate::getDate)
+                .filter(dateTime -> dateTime.toLocalDate().isEqual(date))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Retrieves a list of unavailable dates for the specified hospital staff on a given date.
      *
      * @param staff The hospital staff for whom the unavailable dates are being retrieved.

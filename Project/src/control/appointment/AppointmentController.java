@@ -9,13 +9,12 @@ import entity.appointment.Appointment;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import entity.user.Doctor;
+import entity.user.HospitalStaff;
 import entity.user.Patient;
-import entity.user.UnavailableDate;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +46,9 @@ public class AppointmentController {
         Appointment newAppointment = new Appointment(appointmentRepository.getNextClassId(), patient.getId(), doc.getId(), service, selectedSlot);
         appointmentRepository.add(newAppointment);
         appointmentRepository.save();
+
+        // Mark the selected slot as unavailable for the doctor
+        UnavailableDateController.addUnavailability(doc, selectedSlot);
     }
 
     /**
@@ -182,59 +184,31 @@ public class AppointmentController {
     
         return result;
     }
-
-    /**
-     * Retrieves available time slots for a doctor on a specific date.
-     *
-     * @param doc The doctor whose availability is being checked.
-     * @param selectedDate The date for which to check availability.
-     * @return A list of available time slots.
-     * @throws InvalidInputException If the doctor is null or the date is invalid.
-     */
-    public static List<LocalDateTime> getAvailableSlots(Doctor doc, LocalDate selectedDate) throws InvalidInputException {
+    
+    public static List<LocalDateTime> getAvailableTimeSlots(HospitalStaff doc, LocalDate date) throws InvalidInputException {
+        
         if (doc == null) {
-            throw new InvalidInputException("Doctor cannot be null.");
+            throw new InvalidInputException("Hospital staff cannot be null.");
         }
-        if (selectedDate == null || selectedDate.isBefore(LocalDate.now())) {
-            throw new InvalidInputException("The selected date must be today or a future date.");
+        if (date == null) {
+            throw new InvalidInputException("Date cannot be null.");
         }
-    
-        List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates(doc);
-        List<Appointment> doctorAppointments = getDoctorAppts(doc);
-        List<LocalDateTime> allSlots = generateAllSlotsForDay(selectedDate);
-    
-        return allSlots.stream()
-                .filter(slot -> {
-                    // If the selected date is today, filter out past slots
-                    if (selectedDate.isEqual(LocalDate.now())) {
-                        return slot.isAfter(LocalDateTime.now());
-                    }
-                    return true;
-                })
-                .filter(slot -> unavailableDates.stream().noneMatch(unavailable -> unavailable.getDate().isEqual(slot)))
-                .filter(slot -> doctorAppointments.stream().noneMatch(appt -> appt.getApptDateTime().equals(slot)))
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * Generates all time slots for a given day.
-     *
-     * @param selectedDate The date for which to generate time slots.
-     * @return A list of time slots for the specified date.
-     */
-    public static List<LocalDateTime> generateAllSlotsForDay(LocalDate selectedDate) {
-        List<LocalDateTime> slots = new ArrayList<>();
-        LocalDateTime startOfDay = LocalDateTime.of(selectedDate, LocalTime.of(9, 0));
-        LocalDateTime endOfDay = LocalDateTime.of(selectedDate, LocalTime.of(17, 0));
-    
-        while (startOfDay.isBefore(endOfDay)) {
-            if (!selectedDate.isEqual(LocalDate.now()) || startOfDay.isAfter(LocalDateTime.now())) {
-                slots.add(startOfDay);
-            }
-            startOfDay = startOfDay.plusHours(1);
-        }
-    
-        return slots;
+
+        List<LocalDateTime> defaultSlots = List.of(
+                date.atTime(9, 0),
+                date.atTime(10, 0),
+                date.atTime(11, 0),
+                date.atTime(14, 0),
+                date.atTime(15, 0),
+                date.atTime(16, 0)
+        );
+            // Fetch the unavailable slots for the specified staff and date
+        List<LocalDateTime> unavailableSlots = UnavailableDateController.getUnavailableSlotsByDate(doc, date);
+
+        // Filter out unavailable slots from the default time slots
+        return defaultSlots.stream()
+            .filter(slot -> !unavailableSlots.contains(slot))
+            .collect(Collectors.toList());
     }
     
     /**

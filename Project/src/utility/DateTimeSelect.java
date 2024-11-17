@@ -1,17 +1,13 @@
 package utility;
 
 import control.appointment.AppointmentController;
-import control.user.UnavailableDateController;
-import entity.appointment.Appointment;
 import entity.user.Doctor;
-import entity.user.UnavailableDate;
 import exception.InvalidInputException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for selecting a new date and time for appointments.
@@ -29,10 +25,10 @@ public class DateTimeSelect {
      */
     public static LocalDateTime selectNewDateAndTime(Doctor doctor) {
         List<LocalDateTime> availableSlots;
+        LocalDate selectedDate;
 
         while (true) {
             try {
-                LocalDate selectedDate;
 
                 // Loop until a valid date is entered
                 while (true) {
@@ -59,32 +55,7 @@ public class DateTimeSelect {
                 final LocalDate selectDate = selectedDate;
 
                 // Retrieve the doctor's appointments and unavailable dates
-                List<Appointment> doctorAppointments = AppointmentController.getDoctorAppts(doctor);
-                List<UnavailableDate> unavailableDates = UnavailableDateController.getUnavailableDates(doctor);
-
-                // Extract booked and blocked slots for the selected date
-                List<LocalDateTime> bookedSlots = doctorAppointments.stream()
-                        .filter(appt -> appt.getApptDateTime().toLocalDate().isEqual(selectDate))
-                        .map(Appointment::getApptDateTime)
-                        .toList();
-
-                List<LocalDateTime> blockedSlots = unavailableDates.stream()
-                        .filter(unavailable -> unavailable.getDate().toLocalDate().isEqual(selectDate))
-                        .map(UnavailableDate::getDate)
-                        .toList();
-
-                // Generate all potential slots for the selected date
-                availableSlots = AppointmentController.generateAllSlotsForDay(selectedDate);
-
-                // Filter available slots by removing booked and blocked slots
-                List<LocalDate> blockedDates = blockedSlots.stream()
-                        .map(LocalDateTime::toLocalDate)
-                        .toList();
-
-                availableSlots = availableSlots.stream()
-                        .filter(slot -> !bookedSlots.contains(slot) &&
-                                        !blockedDates.contains(slot.toLocalDate()))
-                        .collect(Collectors.toList());
+                availableSlots = AppointmentController.getAvailableTimeSlots(doctor, selectDate);
 
                 if (!availableSlots.isEmpty()) {
                     break; // Exit the loop if there are available slots
@@ -97,9 +68,9 @@ public class DateTimeSelect {
         }
 
         // Display available slots to the user
-        System.out.println("Available time slots on the selected date:");
+        System.out.println("Available slots for Doctor " + doctor.getId() + " on " + selectedDate + ":");
         for (int i = 0; i < availableSlots.size(); i++) {
-            System.out.println((i + 1) + ". " + DateFormat.formatWithTime(availableSlots.get(i)));
+            System.out.println((i + 1) + ". " + availableSlots.get(i));
         }
 
         int slotChoice;

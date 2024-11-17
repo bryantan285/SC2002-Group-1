@@ -55,7 +55,7 @@ public class A_HomeUI implements IUserInterface {
                     System.out.print("Please select an option: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
-                    if (choice >= 1 && choice <= 5) break;
+                    if (choice >= 1 && choice <= 6) break;
                     System.out.println("Enter only a number between 1 and 6.");
                 } catch (InputMismatchException e) {
                     System.out.println("Invalid input. Please enter a number between 1 and 6.");

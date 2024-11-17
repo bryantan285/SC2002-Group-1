@@ -459,7 +459,7 @@ public class D_HomeUI implements IUserInterface {
             for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
                 System.out.println("\nSetting availability for: " + date);
     
-                List<LocalDateTime> defaultSlots = getDefaultTimeSlots(date);
+                List<LocalDateTime> defaultSlots = AppointmentController.getAvailableTimeSlots(doctor, date);
                 for (int i = 0; i < defaultSlots.size(); i++) {
                     LocalDateTime slot = defaultSlots.get(i);
                     System.out.printf("%d. %s%n", (i + 1), DateFormat.formatWithTime(slot));
@@ -501,7 +501,6 @@ public class D_HomeUI implements IUserInterface {
                 }
             }
         }
-    
             System.out.println("Availability updated.");
         } catch (NoUserLoggedInException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
@@ -509,18 +508,6 @@ public class D_HomeUI implements IUserInterface {
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
-    }
-
-    private List<LocalDateTime> getDefaultTimeSlots(LocalDate date) {
-        List<LocalDateTime> slots = List.of(
-                date.atTime(9, 0),
-                date.atTime(10, 0),
-                date.atTime(11, 0),
-                date.atTime(14, 0),
-                date.atTime(15, 0),
-                date.atTime(16, 0)
-        );
-        return slots;
     }
 
     private void acceptDeclineApptRequest() {
