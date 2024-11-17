@@ -12,7 +12,6 @@ import entity.appointment.Appointment.Status;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
-import entity.notification.Notification;
 import entity.user.Doctor;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
@@ -21,6 +20,7 @@ import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
 import interfaces.boundary.IUserInterface;
+import interfaces.observer.IObserver;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.DateFormat;
 import utility.InputHandler;
@@ -38,9 +39,19 @@ import utility.KeystrokeWait;
 public class D_HomeUI implements IUserInterface {
     private final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
+    private final NotificationController notificationController;
+    private IObserver observer;
 
     public D_HomeUI(SessionManager session) {
         this.session = session;
+        this.notificationController = NotificationController.getInstance();
+        try {
+            this.observer = new NotificationObserver(session.getCurrentUser());
+            notificationController.registerObserver(session.getCurrentUser().getId(), observer);
+            this.observer.setNotificationHistory();
+        } catch (NoUserLoggedInException e) {
+            System.out.println("No user logged in");
+        }
     }
 
     @Override
@@ -152,7 +163,7 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("----------------------------------");
             
             for (Appointment appt : pastAppts) {
-                System.out.println("\tAppointment Date: " + appt.getApptDateTime());
+                System.out.println("\tAppointment Date: " + DateFormat.formatWithTime(appt.getApptDateTime()));
                 System.out.println("\tID: " + appt.getId());
                 System.out.println("\tService: " + appt.getService());
                 System.out.println("\tDiagnosis: " + appt.getDiagnosis());
@@ -679,13 +690,13 @@ public class D_HomeUI implements IUserInterface {
     }
     
     public void viewNotifications() {
-        try {
-            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
-            for (Notification noti : list) {
-                System.out.println(noti.getMessage());
-            }
-        } catch (NoUserLoggedInException e) {
-            System.out.println("Error: " + e.getMessage());
+        List<List<String>> notiList = observer.getNotificationHistory();
+        System.out.println("Notifications");
+        System.out.println("=============");
+        for (List<String> noti : notiList) {
+            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
         }
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 }

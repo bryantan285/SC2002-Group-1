@@ -11,15 +11,14 @@ import entity.appointment.Appointment;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
-import entity.notification.Notification;
 import entity.user.Doctor;
 import entity.user.HospitalStaff;
 import entity.user.Patient;
-import entity.user.User;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
 import interfaces.boundary.IUserInterface;
+import interfaces.observer.IObserver;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +29,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.DateTimeSelect;
 import utility.InputHandler;
@@ -38,9 +38,19 @@ import utility.KeystrokeWait;
 public class P_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
+    private final NotificationController notificationController;
+    private IObserver observer;
 
     public P_HomeUI(SessionManager session) {
         this.session = session;
+        this.notificationController = NotificationController.getInstance();
+        try {
+            this.observer = new NotificationObserver(session.getCurrentUser());
+            notificationController.registerObserver(session.getCurrentUser().getId(), observer);
+            this.observer.setNotificationHistory();
+        } catch (NoUserLoggedInException e) {
+            System.out.println("No user logged in");
+        }
     }
 
     @Override
@@ -384,8 +394,9 @@ public class P_HomeUI implements IUserInterface {
     
             Appointment.Service service = services[serviceChoice - 1];
             AppointmentController.scheduleAppointment(doc, (Patient) session.getCurrentUser(), service, selectedSlot);
+            notificationController.notifyObserver(doctorId, "Patient " + session.getCurrentUser().getId() + " has scheduled an appointment with you on " + utility.DateFormat.formatWithTime(selectedSlot));
             System.out.println("Appointment scheduled successfully.");
-    
+            KeystrokeWait.waitForKeyPress();
         } catch (EntityNotFoundException | InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
@@ -439,7 +450,7 @@ public class P_HomeUI implements IUserInterface {
     
             AppointmentController.rescheduleAppointment(selectedAppointment, newDateTime);
             System.out.println("Appointment rescheduled successfully.");
-    
+            KeystrokeWait.waitForKeyPress();
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
@@ -486,6 +497,7 @@ public class P_HomeUI implements IUserInterface {
     
             AppointmentController.cancelAppointment(selectedAppointment);
             System.out.println("Appointment canceled successfully.");
+            KeystrokeWait.waitForKeyPress();
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
@@ -558,13 +570,11 @@ public class P_HomeUI implements IUserInterface {
     }
     
     public void viewNotifications() {
-        try {
-            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
-            for (Notification noti : list) {
-                System.out.println(noti.getMessage());
-            }
-        } catch (NoUserLoggedInException e) {
-            System.out.println("Error: " + e.getMessage());
+        List<List<String>> notiList = observer.getNotificationHistory();
+        for (List<String> noti : notiList) {
+            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
         }
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 }

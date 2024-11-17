@@ -8,20 +8,20 @@ import control.user.HospitalStaffController;
 import control.user.SessionManager;
 import entity.appointment.Appointment;
 import entity.medicine.Medicine;
-import entity.notification.Notification;
 import entity.request.MedicineRequest;
 import entity.user.HospitalStaff;
-import entity.user.User;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
 import interfaces.boundary.IUserInterface;
+import interfaces.observer.IObserver;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
@@ -29,9 +29,19 @@ import utility.KeystrokeWait;
 public class A_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
+    private final NotificationController notificationController;
+    private IObserver observer;
 
     public A_HomeUI(SessionManager session) {
         this.session = session;
+        this.notificationController = NotificationController.getInstance();
+        try {
+            this.observer = new NotificationObserver(session.getCurrentUser());
+            notificationController.registerObserver(session.getCurrentUser().getId(), observer);
+            this.observer.setNotificationHistory();
+        } catch (NoUserLoggedInException e) {
+            System.out.println("No user logged in");
+        }
     }
 
     @Override
@@ -625,13 +635,13 @@ public class A_HomeUI implements IUserInterface {
     }
     
     public void viewNotifications() {
-        try {
-            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
-            for (Notification noti : list) {
-                System.out.println(noti.getMessage());
-            }
-        } catch (NoUserLoggedInException e) {
-            System.out.println("Error: " + e.getMessage());
+        List<List<String>> notiList = observer.getNotificationHistory();
+        System.out.println("Notifications");
+        System.out.println("=============");
+        for (List<String> noti : notiList) {
+            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
         }
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 }

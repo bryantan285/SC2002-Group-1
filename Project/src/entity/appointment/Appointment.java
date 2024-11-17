@@ -138,7 +138,7 @@ public class Appointment extends EntityObject {
      *
      * @param id The appointment ID to set.
      */
-    public void setid(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 

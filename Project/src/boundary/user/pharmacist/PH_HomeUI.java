@@ -9,16 +9,16 @@ import control.user.SessionManager;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
-import entity.notification.Notification;
 import entity.user.HospitalStaff;
-import entity.user.User;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.NoUserLoggedInException;
 import interfaces.boundary.IUserInterface;
+import interfaces.observer.IObserver;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
@@ -26,9 +26,19 @@ import utility.KeystrokeWait;
 public class PH_HomeUI implements IUserInterface {
     private final SessionManager session;
     private static final Scanner scanner = InputHandler.getInstance();
+    private final NotificationController notificationController;
+    private IObserver observer;
 
     public PH_HomeUI(SessionManager session) {
         this.session = session;
+        this.notificationController = NotificationController.getInstance();
+        try {
+            this.observer = new NotificationObserver(session.getCurrentUser());
+            notificationController.registerObserver(session.getCurrentUser().getId(), observer);
+            this.observer.setNotificationHistory();
+        } catch (NoUserLoggedInException e) {
+            System.out.println("No user logged in");
+        }
     }
 
     @Override
@@ -247,15 +257,15 @@ public class PH_HomeUI implements IUserInterface {
         KeystrokeWait.waitForKeyPress();
         ClearConsole.clearConsole();
     }
-
+    
     public void viewNotifications() {
-        try {
-            List<Notification> list = NotificationController.getNotificationByUser((User) session.getCurrentUser());
-            for (Notification noti : list) {
-                System.out.println(noti.getMessage());
-            }
-        } catch (NoUserLoggedInException e) {
-            System.out.println("Error: " + e.getMessage());
+        List<List<String>> notiList = observer.getNotificationHistory();
+        System.out.println("Notifications");
+        System.out.println("=============");
+        for (List<String> noti : notiList) {
+            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
         }
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
 }

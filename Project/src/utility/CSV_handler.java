@@ -1,8 +1,8 @@
 package utility;
 
-import entity.EntityObject;
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
+import interfaces.utility.IStorageHandler;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Utility class for handling CSV files
  */
-public class CSV_handler {
+public class CSV_handler implements IStorageHandler {
 
     /**
      * Reads a list of HospitalStaff entities from a CSV file.
@@ -27,7 +27,7 @@ public class CSV_handler {
      * @return A list of HospitalStaff entities.
      * @throws IOException If an I/O error occurs or the CSV file is empty.
      */
-    public static List<HospitalStaff> readHospitalStaffFromCSV(String filePath) throws IOException {
+    public List<HospitalStaff> readHospitalStaffFromCSV(String filePath) throws IOException {
         List<HospitalStaff> staffList = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -55,7 +55,7 @@ public class CSV_handler {
      * @param headers The headers from the CSV file.
      * @return A HospitalStaff entity.
      */
-    private static HospitalStaff createHospitalStaffFromCSV(String[] values, String[] headers) {
+    private HospitalStaff createHospitalStaffFromCSV(String[] values, String[] headers) {
         try {
             String id = values[1].trim();
             HospitalStaff staff = StaffFactory.createStaffByPrefix(id);
@@ -90,7 +90,7 @@ public class CSV_handler {
      * @return The Field object.
      * @throws NoSuchFieldException If the field is not found in the class hierarchy.
      */
-    private static Field getFieldFromClassHierarchy(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+    private Field getFieldFromClassHierarchy(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         Class<?> currentClass = clazz;
         while (currentClass != null) {
             try {
@@ -110,7 +110,7 @@ public class CSV_handler {
      * @return The converted value.
      * @throws IllegalArgumentException If the value cannot be converted to the specified type.
      */
-    private static Object convertValue(Class<?> fieldType, String value) {
+    private Object convertValue(Class<?> fieldType, String value) {
         if (value == null || value.isEmpty()) {
             return null;
         }
@@ -147,7 +147,8 @@ public class CSV_handler {
      * @return A list of entities of the specified class.
      * @throws IOException If an I/O error occurs or the CSV file is empty.
      */
-    public static <T> List<T> readFromCSV(String filePath, Class<T> clazz) throws IOException {
+    @Override
+    public <T> List<T> readFromFile(String filePath, Class<T> clazz) throws IOException {
         List<T> entities = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -177,7 +178,7 @@ public class CSV_handler {
      * @param <T> The type of the entity.
      * @return An entity of the specified class.
      */
-    private static <T> T createEntityFromCSV(String[] values, String[] headers, Class<T> clazz) {
+    private <T> T createEntityFromCSV(String[] values, String[] headers, Class<T> clazz) {
         try {
             T entity = clazz.getDeclaredConstructor().newInstance();
 
@@ -219,7 +220,8 @@ public class CSV_handler {
      * @param <T> The type of the entities.
      * @throws IOException If an I/O error occurs during writing.
      */
-    public static <T extends EntityObject> void writeToCSV(String filePath, Map<String, T> objMap, Class<T> clazz) throws IOException {
+    @Override
+    public <T> void writeToFile(String filePath, Map<String, T> objMap, Class<T> clazz) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
             Field[] superFields = clazz.getSuperclass().getDeclaredFields();
             Field[] fields = clazz.getDeclaredFields();
@@ -255,7 +257,7 @@ public class CSV_handler {
      * @param <T> The type of the object.
      * @return The value of the field as a string, or an empty string if the value is null.
      */
-    private static <T> String getFieldValue(T obj, Field field) {
+    private <T> String getFieldValue(T obj, Field field) {
         try {
             field.setAccessible(true);
             Object value = field.get(obj);

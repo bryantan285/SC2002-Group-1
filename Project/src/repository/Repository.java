@@ -1,6 +1,7 @@
 package repository;
 
 import entity.EntityObject;
+import interfaces.repository.IRepository;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -19,15 +20,17 @@ import utility.CSV_handler;
  *
  * @param <T> the type of entity the repository manages, extending EntityObject
  */
-public abstract class Repository<T extends EntityObject> implements Iterable<T> {
+public abstract class Repository<T extends EntityObject> implements Iterable<T>, IRepository<T> {
 
     private final Map<String, T> objMap;
+    private final CSV_handler csv_handler;
 
     /**
      * Constructor initializes the repository and creates an empty map to store entities.
      */
     public Repository() {
         objMap = new HashMap<>();
+        csv_handler = new CSV_handler();
     }
 
     /**
@@ -56,17 +59,19 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @throws IOException if there is an error reading the file
      */
+    @Override
     public void load() throws IOException {
-        List<T> objs = CSV_handler.readFromCSV(getFilePath(), getEntityClass());
+        List<T> objs = csv_handler.readFromFile(getFilePath(), getEntityClass());
         setObjects(objs);
     }
 
     /**
      * Saves the current state of the repository back to the CSV file.
      */
+    @Override
     public void save() {
         try {
-            CSV_handler.writeToCSV(getFilePath(), objMap, getEntityClass());
+            csv_handler.writeToFile(getFilePath(), objMap, getEntityClass());
         } catch (IOException e) {
             System.err.println("Error saving data to CSV file: " + getFilePath());
             e.printStackTrace();
@@ -78,6 +83,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @return a map of entity ID to entity object
      */
+    @Override
     public Map<String, T> getObjects() {
         return objMap;
     }
@@ -87,6 +93,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @return a list of all entities in the repository
      */
+    @Override
     public List<T> toList() {
         List<T> objs = new ArrayList<>();
         objMap.forEach((k, v) -> {
@@ -110,6 +117,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @param obj the entity to remove
      */
+    @Override
     public void remove(T obj) {
         objMap.remove(obj.getId());
     }
@@ -119,6 +127,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @param obj the entity to add
      */
+    @Override
     public void add(T obj) {
         objMap.put(obj.getId(), obj);
     }
@@ -129,6 +138,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * @param id the ID of the entity
      * @return the entity corresponding to the given ID
      */
+    @Override
     public T get(String id) {
         return objMap.get(id);
     }
@@ -225,6 +235,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * @param prefix the prefix used for the ID
      * @return the next available ID with the specified prefix
      */
+    @Override
     public String getNextId(String prefix) {
         if (objMap.isEmpty()) {
             return prefix + "001";
@@ -249,6 +260,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
      * 
      * @return the next available class-specific ID
      */
+    @Override
     public String getNextClassId() {
         return getNextId(getPrefix());
     }
@@ -272,5 +284,12 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T> 
             T iter = iterator.next();
             System.out.println(iter);
         }
+    }
+
+    /**
+     * Retrieves CSV_handler instance.
+     */
+    protected CSV_handler getCSV_handler() {
+        return this.csv_handler;
     }
 }

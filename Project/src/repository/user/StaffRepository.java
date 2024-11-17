@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import repository.Repository;
-import utility.CSV_handler;
 
 /**
  * StaffRepository is a singleton class that manages the collection of HospitalStaff entities.
@@ -144,7 +143,7 @@ public class StaffRepository extends Repository<HospitalStaff> {
      */
     @Override
     public void load() throws IOException {
-        List<HospitalStaff> objs = CSV_handler.readHospitalStaffFromCSV(getFilePath());
+        List<HospitalStaff> objs = super.getCSV_handler().readHospitalStaffFromCSV(getFilePath());
         setObjects(objs);
     }
 
