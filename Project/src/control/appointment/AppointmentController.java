@@ -3,6 +3,7 @@ package control.appointment;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.user.HospitalStaffController;
+import control.user.PatientController;
 import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
 import entity.medicine.Prescription;
@@ -372,5 +373,86 @@ public class AppointmentController {
                 .filter(appt -> appt.getApptDateTime().toLocalDate().isEqual(date))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Retrieves a list of unique patients assigned to a specific doctor.
+     *
+     * @param doc The doctor whose patients are to be retrieved.
+     * @return A list of unique patients assigned to the specified doctor.
+     * @throws InvalidInputException If the doctor is null.
+     */
+    public static List<Patient> getDoctorsPatients(Doctor doc) throws InvalidInputException {
+        if (doc == null) {
+            throw new InvalidInputException("Doctor cannot be null.");
+        }
+
+        List<Appointment> doctorAppointments = appointmentRepository.findByField("doctorId", doc.getId());
+
+        return doctorAppointments.stream()
+                .map(appt -> {
+                    try {
+                        return (Patient) PatientController.getById(appt.getPatientId());
+                    } catch (EntityNotFoundException e) {
+                        System.out.println("Error retrieving patient: " + e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(patient -> patient != null) // Filter out null patients
+                .distinct() // Ensure unique patients
+                .collect(Collectors.toList());
+    }  
     
+    /**
+     * Updates the outcomes of a completed appointment, including diagnosis, prescriptions, and consultation notes.
+     *
+     * @param appt The appointment to be updated.
+     * @param updatedDiagnosis The updated diagnosis, or null if no update is required.
+     * @param updatedConsultationNotes The updated consultation notes, or null if no update is required.
+     * @param updatedPrescribedMedication The updated prescribed medications (key: medicine ID, value: list [quantity, notes]), or null if no update is required.
+     * @throws InvalidInputException If the appointment is null or not completed, or if input values are invalid.
+     * @throws EntityNotFoundException If the prescription or prescription items cannot be updated.
+     */
+    public static void updateAppointmentOutcomes(Appointment appt, String updatedDiagnosis, String updatedConsultationNotes, HashMap<String, List<Object>> updatedPrescribedMedication) throws InvalidInputException, EntityNotFoundException {
+        if (appt == null) {
+            throw new InvalidInputException("Appointment cannot be null.");
+        }
+
+        if (appt.getStatus() != Appointment.Status.COMPLETED) {
+            throw new InvalidInputException("Only completed appointments can be updated.");
+        }
+
+        // Update diagnosis
+        if (updatedDiagnosis != null && !updatedDiagnosis.isEmpty()) {
+            appt.setDiagnosis(updatedDiagnosis);
+        }
+
+        // Update consultation notes
+        if (updatedConsultationNotes != null && !updatedConsultationNotes.isEmpty()) {
+            appt.setNotes(updatedConsultationNotes);
+        }
+
+        // Update prescribed medication
+        if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
+            Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
+
+            // Update existing prescription items or add new ones
+            for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
+                String medicineId = med.getKey();
+                int quantity = (int) med.getValue().get(0);
+                String notes = (String) med.getValue().get(1);
+
+                try {
+                    // If the item exists, update it
+                    PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
+                } catch (EntityNotFoundException e) {
+                    // If the item doesn't exist, create a new one
+                    PrescriptionItemController.createPrescriptionItem(prescription.getId(), medicineId, quantity, notes);
+                }
+            }
+        }
+
+        // Save updates to the repository
+        appointmentRepository.save();
+    }
+
 }

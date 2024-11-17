@@ -47,7 +47,7 @@ public class P_HomeUI implements IUserInterface {
     public void show_options() {
         boolean exit = false;
         while (!exit) {
-            System.out.println("\n=== Patient Menu ===");
+            System.out.println("\n============== Patient Menu ==============");
             System.out.println("1. View Medical Record");
             System.out.println("2. Update Personal Information");
             System.out.println("3. View Available Appointment Slots");
@@ -58,7 +58,7 @@ public class P_HomeUI implements IUserInterface {
             System.out.println("8. View Past Appointment Outcome Records");
             System.out.println("9. View Notifications");
             System.out.println("10. Logout");
-            System.out.println("====================");
+            System.out.println("============================================");
     
             int choice = 0;
     
@@ -78,6 +78,7 @@ public class P_HomeUI implements IUserInterface {
                     scanner.nextLine();
                 }
             }
+
             if (choice == 10) {
                 exit = true;
             } else {
@@ -112,13 +113,32 @@ public class P_HomeUI implements IUserInterface {
     private void viewMedicalRecord() {
         try {
             Patient patient = (Patient) session.getCurrentUser();
+
+            List<Object> list = AppointmentController.getAppointmentOutcomes(patient);
+            List<Appointment> pastAppts = (List<Appointment>) list.get(0);
+
+            System.out.println("==========================================");
             System.out.println("View Medical Record");
-            System.out.println("==================");
+            System.out.println("==========================================");
             System.out.println(patient.toString());
-            System.out.println("==================");
+            System.out.println("----------------------------------");
+            System.out.println("Past Appointment Outcome Records:");
+            System.out.println("----------------------------------");
+            
+            for (Appointment appt : pastAppts) {
+                System.out.println("\tAppointment Date: " + appt.getApptDateTime());
+                System.out.println("\tID: " + appt.getId());
+                System.out.println("\tService: " + appt.getService());
+                System.out.println("\tDiagnosis: " + appt.getDiagnosis());
+                System.out.println("\tConsultation Notes: " + appt.getNotes());
+                System.out.println("----------------------------------");
+            }
+            System.out.println("==========================================");
         } catch (NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
-        } finally {
+        } catch (InvalidInputException e) {
+                    e.printStackTrace();
+                } finally {
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
@@ -501,15 +521,19 @@ public class P_HomeUI implements IUserInterface {
 
     private void viewPastAppointmentOutcomeRecords() {
         try {
+            System.out.println("==========================================");
             System.out.println("Past Appointment Outcome Records:");
             List<Object> list = AppointmentController.getAppointmentOutcomes((Patient) session.getCurrentUser());
             List<Appointment> pastAppts = (List<Appointment>) list.get(0);
             HashMap<String, Prescription> pastPrescriptions = (HashMap<String, Prescription>) list.get(1);
             HashMap<String, List<PrescriptionItem>> prescriptionItems = (HashMap<String, List<PrescriptionItem>>) list.get(2);
             for (Appointment appt : pastAppts) {
-                System.out.println("=============================");
+                System.out.println("==========================================");
                 System.out.println("ID: " + appt.getId());
                 System.out.println("Service: " + appt.getService());
+                System.out.println("Diagnosis: " + appt.getDiagnosis());
+                System.out.println("Consultation Notes: " + appt.getNotes());
+                System.out.println("----------------------------------");
                 System.out.println("Prescription items:");
                 Prescription prescription = pastPrescriptions.get(appt.getId());
                 if (prescription == null) {
@@ -517,16 +541,15 @@ public class P_HomeUI implements IUserInterface {
                 } else {
                     for (PrescriptionItem item : prescriptionItems.get(prescription.getId())) {
                         Medicine med = MedicineController.getMedicineById(item.getMedicineId());
-                        System.out.println("=============");
-                        System.out.println("Name: " + med.getMedicineName());
-                        System.out.println("Dosage: " + med.getDosage());
-                        System.out.println("Quantity: " + item.getQuantity());
-                        System.out.println("Status: " + item.getStatus());
+                        System.out.println("\tName: " + med.getMedicineName());
+                        System.out.println("\tDosage: " + med.getDosage());
+                        System.out.println("\tQuantity: " + item.getQuantity());
+                        System.out.println("\tStatus: " + item.getStatus());
+                        System.out.println("----------------------------------");
                     }
-                    System.out.println("=============");
                 }
             }
-            System.out.println("=============================");
+            System.out.println("==========================================");
 
         } catch (InvalidInputException | NoUserLoggedInException | EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());

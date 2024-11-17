@@ -14,11 +14,11 @@ import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import exception.user.InvalidUserTypeException;
 import exception.user.NoUserLoggedInException;
-import utility.ClearConsole;
-import utility.KeystrokeWait;
 import interfaces.boundary.IUserInterface;
 import java.util.Scanner;
+import utility.ClearConsole;
 import utility.InputHandler;
+import utility.KeystrokeWait;
 
 public class EntryUI {
     private static final Scanner scanner = InputHandler.getInstance();
@@ -34,12 +34,14 @@ public class EntryUI {
     }
 
     public void login() throws InvalidUserTypeException {
+        System.out.println("\n===========================");
         System.out.println("██╗  ██╗███╗   ███╗███████╗");
         System.out.println("██║  ██║████╗ ████║██╔════╝");
         System.out.println("███████║██╔████╔██║███████╗");
         System.out.println("██╔══██║██║╚██╔╝██║╚════██║");
         System.out.println("██║  ██║██║ ╚═╝ ██║███████║");
         System.out.println("╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝");
+        System.out.println("\nHOSPITAL MANAGEMENT SYSTEM");
         System.out.println("===========================");
         
         String inputId;
@@ -79,6 +81,7 @@ public class EntryUI {
         String userId;
         while (true) {
             try {
+                System.out.println("\nPlease login to enter");
                 System.out.print("Enter your User ID: ");
                 userId = scanner.nextLine().trim();
 

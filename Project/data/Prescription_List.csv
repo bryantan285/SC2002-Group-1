@@ -1,2 +1,4 @@
 id,apptId,isActive
+PRSC002,APPT003,true
+PRSC003,APPT003,true
 PRSC001,APPT002,true

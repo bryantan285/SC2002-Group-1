@@ -140,4 +140,44 @@ public class PrescriptionItemController {
         prescriptionItemRepository.remove(item);
         prescriptionItemRepository.save();
     }
+
+    /**
+     * Updates an existing PrescriptionItem with new quantity and notes.
+     *
+     * @param prescriptionId The ID of the prescription.
+     * @param medicineId     The ID of the medicine in the prescription item.
+     * @param quantity       The new quantity of the medicine.
+     * @param notes          The updated notes for the prescription item.
+     * @throws EntityNotFoundException If the PrescriptionItem is not found.
+     * @throws InvalidInputException   If the inputs are invalid.
+     */
+    public static void updatePrescriptionItem(String prescriptionId, String medicineId, int quantity, String notes) throws EntityNotFoundException, InvalidInputException {
+        if (prescriptionId == null || prescriptionId.isEmpty()) {
+            throw new InvalidInputException("Prescription ID cannot be null or empty.");
+        }
+        if (medicineId == null || medicineId.isEmpty()) {
+            throw new InvalidInputException("Medicine ID cannot be null or empty.");
+        }
+        if (quantity <= 0) {
+            throw new InvalidInputException("Quantity must be greater than zero.");
+        }
+
+        // Retrieve the PrescriptionItem
+        List<PrescriptionItem> items = prescriptionItemRepository.findByField("prescriptionId", prescriptionId);
+        PrescriptionItem item = items.stream()
+                .filter(i -> i.getMedicineId().equals(medicineId))
+                .findFirst()
+                .orElse(null);
+
+        if (item == null) {
+            throw new EntityNotFoundException("PrescriptionItem", "PrescriptionId: " + prescriptionId + ", MedicineId: " + medicineId);
+        }
+
+        // Update the item's details
+        item.setQuantity(quantity);
+        item.setNotes(notes);
+
+        // Save updates to the repository
+        prescriptionItemRepository.save();
+    }
 }
