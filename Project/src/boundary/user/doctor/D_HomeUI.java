@@ -24,6 +24,7 @@ import interfaces.boundary.IUserInterface;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
@@ -104,13 +105,10 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
-    //Allows the doctor to view the list of patients under their care and select one to view their medical record.
     private void viewPatientMedicalRecords() {
         try {
-            // Get the currently logged-in doctor
             User user = session.getCurrentUser();
 
-            // Fetch the list of patients under the doctor's care
             List<Patient> patients = AppointmentController.getDoctorsPatients((Doctor) user);
 
             if (patients.isEmpty()) {
@@ -129,7 +127,6 @@ public class D_HomeUI implements IUserInterface {
             System.out.print("Enter the number of the patient to view their medical records: ");
             String input = scanner.nextLine();
 
-            // Validate input
             int patientIndex;
             try {
                 patientIndex = Integer.parseInt(input) - 1;
@@ -143,12 +140,10 @@ public class D_HomeUI implements IUserInterface {
                 return;
             }
 
-            // Get the selected patient
             Patient selectedPatient = patients.get(patientIndex);
             List<Object> list = AppointmentController.getAppointmentOutcomes(selectedPatient);
             List<Appointment> pastAppts = (List<Appointment>) list.get(0);
 
-            // Display medical record for the selected patient
             System.out.println("\n==========================================");
             System.out.println("Medical Record for " + selectedPatient.getName() + ":");
             System.out.println(selectedPatient.toString());
@@ -180,16 +175,15 @@ public class D_HomeUI implements IUserInterface {
         try {
             System.out.println("=== Update Patient Medical Records ===");
     
-            // Fetch the doctor's current patients
             Doctor doctor = (Doctor) session.getCurrentUser();
             List<Patient> patientsUnderCare = AppointmentController.getDoctorsPatients(doctor);
     
             if (patientsUnderCare.isEmpty()) {
                 System.out.println("You have no patients under your care.");
+                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
-            // Display list of patients under the doctor's care
             System.out.println("Select a patient to update their medical record:");
             for (int i = 0; i < patientsUnderCare.size(); i++) {
                 Patient patient = patientsUnderCare.get(i);
@@ -198,10 +192,11 @@ public class D_HomeUI implements IUserInterface {
     
             System.out.print("Enter the number of the patient to select (or 0 to cancel): ");
             int patientChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
     
             if (patientChoice == 0) {
                 System.out.println("Update canceled.");
+                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
@@ -210,18 +205,15 @@ public class D_HomeUI implements IUserInterface {
                 return;
             }
     
-            // Fetch the selected patient
             Patient selectedPatient = patientsUnderCare.get(patientChoice - 1);
-    
-            // Fetch the patient's completed appointments
             List<Appointment> completedAppointments = AppointmentController.getPastAppointments(selectedPatient);
     
             if (completedAppointments.isEmpty()) {
                 System.out.println("This patient has no completed appointments to update.");
+                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
-            // Display past medical records (completed appointments)
             System.out.println("\nSelect an appointment to update its medical record:");
             for (int i = 0; i < completedAppointments.size(); i++) {
                 Appointment appointment = completedAppointments.get(i);
@@ -234,26 +226,25 @@ public class D_HomeUI implements IUserInterface {
     
             System.out.print("Enter the number of the appointment to update (or 0 to cancel): ");
             int appointmentChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
     
             if (appointmentChoice == 0) {
                 System.out.println("Update canceled.");
+                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
             if (appointmentChoice < 1 || appointmentChoice > completedAppointments.size()) {
                 System.out.println("Invalid choice. Please try again.");
+                KeystrokeWait.waitForKeyPress();
                 return;
             }
-
-            // Fetch the selected appointment
+    
             Appointment selectedAppointment = completedAppointments.get(appointmentChoice - 1);
-
             List<Object> list = AppointmentController.getAppointmentOutcomes(selectedPatient);
             HashMap<String, Prescription> pastPrescriptions = (HashMap<String, Prescription>) list.get(1);
             HashMap<String, List<PrescriptionItem>> prescriptionItems = (HashMap<String, List<PrescriptionItem>>) list.get(2);
-
-            // View the selected appointment details before updating
+            
             System.out.println("\n=== Current Appointment Details ===");
             System.out.println("Appointment ID: " + selectedAppointment.getId());
             System.out.println("Date: " + DateFormat.formatWithTime(selectedAppointment.getApptDateTime()));
@@ -276,17 +267,32 @@ public class D_HomeUI implements IUserInterface {
                 }
             }
             System.out.println("===================================");
+
+            System.out.print("\nEnter updated diagnosis (enter nothing to go back to previous menu): ");
+            String updatedDiagnosis = scanner.nextLine().trim();
+            if (updatedDiagnosis.isEmpty()) {
+                return;
+            }
     
-            // Collect updated details for the appointment
-            System.out.print("\nEnter updated diagnosis: ");
-            String updatedDiagnosis = scanner.nextLine();
+            System.out.print("Enter updated consultation notes (enter nothing to go back to previous menu): ");
+            String updatedNotes = scanner.nextLine().trim();
+            if (updatedNotes.isEmpty()) {
+                return;
+            }
     
-            System.out.print("Enter updated consultation notes: ");
-            String updatedNotes = scanner.nextLine();
-    
-            // Collect updated prescription if needed
-            System.out.print("Do you want to update the prescription? (yes/no): ");
-            String prescriptionChoice = scanner.nextLine().trim().toLowerCase();
+            String prescriptionChoice;
+            while (true) {
+                System.out.print("Do you want to update the prescription? (yes/no) (enter nothing to go back to previous menu): ");
+                prescriptionChoice = scanner.nextLine().trim().toLowerCase();
+                if (prescriptionChoice.isEmpty()) {
+                    return;
+                }
+                if (prescriptionChoice.equals("yes") || prescriptionChoice.equals("no")) {
+                    break;
+                }
+                System.out.println("Invalid input. Please enter 'yes' or 'no'.");
+            }
+            
     
             HashMap<String, List<Object>> updatedPrescribedMedication = new HashMap<>();
             if (prescriptionChoice.equals("yes")) {
@@ -312,30 +318,42 @@ public class D_HomeUI implements IUserInterface {
     
                                 System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ": ");
                                 int quantity = scanner.nextInt();
-                                System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ": ");
-                                String prescriptionNotes = scanner.nextLine();
-
-                                scanner.nextLine(); // Consume newline
+                                scanner.nextLine();
+                                if (quantity <= 0) {
+                                    System.out.println("Invalid quantity. Skipping this medicine.");
+                                    continue;
+                                }
     
-                                // Store the prescribed medicine in the HashMap
+                                if (quantity > selectedMedicine.getStockQuantity()) {
+                                    System.out.println("Quantity exceeds available stock. Skipping this medicine.");
+                                    continue;
+                                }
+    
+                                System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ": ");
+                                String prescriptionNotes = scanner.nextLine().trim();
+                                if (prescriptionNotes.isEmpty()) {
+                                    System.out.println("Medication notes cannot be empty. Skipping this medicine.");
+                                    continue;
+                                }
+    
                                 List<Object> medicineDetails = new ArrayList<>();
-                                medicineDetails.add(quantity); // Quantity
-                                medicineDetails.add(prescriptionNotes + " (Prescribed for updated diagnosis)"); // Notes
+                                medicineDetails.add(quantity);
+                                medicineDetails.add(prescriptionNotes + " (Prescribed for updated diagnosis)");
                                 updatedPrescribedMedication.put(selectedMedicine.getId(), medicineDetails);
     
                             } else {
-                                System.out.println("Invalid medicine selection.");
+                                System.out.println("Invalid medicine selection. Skipping.");
                             }
                         } catch (NumberFormatException e) {
                             System.out.println("Invalid input. Skipping medicine.");
+                        } finally {
+                            ClearConsole.clearConsole();
                         }
                     }
                 }
             }
     
-            // Update the medical record for the selected appointment
             AppointmentController.updateAppointmentOutcomes(selectedAppointment, updatedDiagnosis, updatedNotes, updatedPrescribedMedication);
-    
             System.out.println("Medical record updated successfully.");
     
         } catch (NoUserLoggedInException | InvalidInputException e) {
@@ -343,24 +361,43 @@ public class D_HomeUI implements IUserInterface {
         } catch (Exception e) {
             System.out.println("An unexpected error occurred: " + e.getMessage());
         } finally {
-            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
     
+    
     private void viewSchedule() {
         try {
             Doctor doctor = (Doctor) session.getCurrentUser();
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-            System.out.println("Enter the start date (dd-MM-yyyy): ");
-            String startDateInput = scanner.nextLine();
-            LocalDate startDate = LocalDate.parse(startDateInput, formatter);
+            LocalDate startDate;
+            while (true) {
+                System.out.print("Enter the start date (dd-MM-yyyy): ");
+                String startDateInput = scanner.nextLine();
+                try {
+                    startDate = LocalDate.parse(startDateInput, formatter);
+                    break;
+                } catch (DateTimeParseException e) {
+                    System.out.println("Invalid date format. Please use dd-MM-yyyy.");
+                }
+            }
 
-            System.out.println("Enter the end date (dd-MM-yyyy): ");
-            String endDateInput = scanner.nextLine();
-            LocalDate endDate = LocalDate.parse(endDateInput, formatter);
+            LocalDate endDate;
+            while (true) {
+                System.out.print("Enter the end date (dd-MM-yyyy): ");
+                String endDateInput = scanner.nextLine();
+                try {
+                    endDate = LocalDate.parse(endDateInput, formatter);
+                    if (!endDate.isBefore(startDate)) {
+                        break;
+                    } else {
+                        System.out.println("End date cannot be before the start date. Please try again.");
+                    }
+                } catch (DateTimeParseException e) {
+                    System.out.println("Invalid date format. Please use dd-MM-yyyy.");
+                }
+            }
 
             System.out.println("\n===============================================");
             System.out.println("Schedule for Dr. " + doctor.getName() + " (" + startDate + " to " + endDate + "):");
@@ -393,13 +430,12 @@ public class D_HomeUI implements IUserInterface {
             }
         } catch (NoUserLoggedInException | InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Invalid date format. Please try again with the correct format (YYYY-MM-DD).");
         } finally {
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
+
 
     private void setAvailability() {
         try {
@@ -586,12 +622,11 @@ public class D_HomeUI implements IUserInterface {
                 System.out.println(appt.toString());
             }
             System.out.println("=============================");
-            System.out.print("Enter appointment ID: ");
+            System.out.print("Enter appointment ID (enter nothing to go back to previous menu): ");
             String appointmentId = scanner.nextLine();
             Appointment appt = AppointmentController.getAppt(appointmentId);
     
             if (appt == null) {
-                System.out.println("Invalid appointment ID.");
                 return;
             }
     
@@ -648,11 +683,10 @@ public class D_HomeUI implements IUserInterface {
     
             System.out.println("Outcome recorded successfully.");
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
-            // System.out.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid number.");
         } finally {
-            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }

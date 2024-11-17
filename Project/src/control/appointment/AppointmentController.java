@@ -397,8 +397,8 @@ public class AppointmentController {
                         return null;
                     }
                 })
-                .filter(patient -> patient != null) // Filter out null patients
-                .distinct() // Ensure unique patients
+                .filter(patient -> patient != null)
+                .distinct()
                 .collect(Collectors.toList());
     }  
     
@@ -421,37 +421,29 @@ public class AppointmentController {
             throw new InvalidInputException("Only completed appointments can be updated.");
         }
 
-        // Update diagnosis
         if (updatedDiagnosis != null && !updatedDiagnosis.isEmpty()) {
             appt.setDiagnosis(updatedDiagnosis);
         }
 
-        // Update consultation notes
         if (updatedConsultationNotes != null && !updatedConsultationNotes.isEmpty()) {
             appt.setNotes(updatedConsultationNotes);
         }
 
-        // Update prescribed medication
         if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
             Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
 
-            // Update existing prescription items or add new ones
             for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
                 String medicineId = med.getKey();
                 int quantity = (int) med.getValue().get(0);
                 String notes = (String) med.getValue().get(1);
 
                 try {
-                    // If the item exists, update it
                     PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
                 } catch (EntityNotFoundException e) {
-                    // If the item doesn't exist, create a new one
                     PrescriptionItemController.createPrescriptionItem(prescription.getId(), medicineId, quantity, notes);
                 }
             }
         }
-
-        // Save updates to the repository
         appointmentRepository.save();
     }
 
