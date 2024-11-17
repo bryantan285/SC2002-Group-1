@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+/**
+ * Utility class for formatting dates and times in various formats.
+ */
 public class DateFormat {
 
     // Define the common date formatter for dd-MM-yyyy format
@@ -15,7 +18,10 @@ public class DateFormat {
     private static final SimpleDateFormat LEGACY_DATE_TIME_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
     /**
-     * Format a LocalDate to dd-MM-yyyy format.
+     * Formats a {@link LocalDate} to the "dd-MM-yyyy" format.
+     *
+     * @param date The {@link LocalDate} to format.
+     * @return A formatted date string, or an empty string if the input is null.
      */
     public static String format(LocalDate date) {
         if (date == null) {
@@ -25,7 +31,10 @@ public class DateFormat {
     }
 
     /**
-     * Format a LocalDateTime to dd-MM-yyyy HH:mm format.
+     * Formats a {@link LocalDateTime} to the "dd-MM-yyyy HH:mm" format.
+     *
+     * @param dateTime The {@link LocalDateTime} to format.
+     * @return A formatted date-time string, or an empty string if the input is null.
      */
     public static String formatWithTime(LocalDateTime dateTime) {
         if (dateTime == null) {
@@ -35,7 +44,10 @@ public class DateFormat {
     }
 
     /**
-     * Format a legacy Date (java.util.Date) to dd-MM-yyyy format.
+     * Formats a {@link Date} (legacy java.util.Date) to the "dd-MM-yyyy" format.
+     *
+     * @param date The {@link Date} to format.
+     * @return A formatted date string, or an empty string if the input is null.
      */
     public static String format(Date date) {
         if (date == null) {
@@ -45,7 +57,10 @@ public class DateFormat {
     }
 
     /**
-     * Format a legacy Date (java.util.Date) to dd-MM-yyyy HH:mm format.
+     * Formats a {@link Date} (legacy java.util.Date) to the "dd-MM-yyyy HH:mm" format.
+     *
+     * @param date The {@link Date} to format.
+     * @return A formatted date-time string, or an empty string if the input is null.
      */
     public static String formatWithTime(Date date) {
         if (date == null) {
@@ -55,8 +70,12 @@ public class DateFormat {
     }
 
     /**
-     * Format a LocalDateTime or LocalDate to dd-MM-yyyy without time.
-     * Automatically extracts the date part if input is LocalDateTime.
+     * Formats a {@link LocalDateTime} or {@link LocalDate} to the "dd-MM-yyyy" format.
+     * If a {@link LocalDateTime} is passed, it extracts and formats the date part.
+     *
+     * @param date The date or date-time object to format.
+     * @return A formatted date string, or an empty string if the input is null.
+     * @throws IllegalArgumentException If the input type is unsupported.
      */
     public static String formatNoTime(Object date) {
         if (date == null) {
@@ -72,7 +91,11 @@ public class DateFormat {
     }
 
     /**
-     * Parse a String date input and format it to dd-MM-yyyy format.
+     * Parses a date string and formats it to the "dd-MM-yyyy" format.
+     * Accepts inputs in "d-M-yyyy" or "dd-MM-yyyy" formats.
+     *
+     * @param dateStr The input date string to parse and format.
+     * @return A formatted date string, or the original input if parsing fails.
      */
     public static String format(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -89,7 +112,11 @@ public class DateFormat {
     }
 
     /**
-     * Parse a String date input and format it to dd-MM-yyyy HH:mm format.
+     * Parses a date-time string and formats it to the "dd-MM-yyyy HH:mm" format.
+     * Accepts inputs in "d-M-yyyy HH:mm" or "dd-MM-yyyy HH:mm" formats.
+     *
+     * @param dateStr The input date-time string to parse and format.
+     * @return A formatted date-time string, or the original input if parsing fails.
      */
     public static String formatWithTime(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -106,7 +133,12 @@ public class DateFormat {
     }
 
     /**
-     * General format method that handles LocalDate, LocalDateTime, and Date.
+     * Formats an object representing a date or date-time to an appropriate format.
+     * Supports {@link LocalDate}, {@link LocalDateTime}, and {@link Date}.
+     *
+     * @param date The date object to format.
+     * @return A formatted date or date-time string, or an empty string if the input is null.
+     * @throws IllegalArgumentException If the input type is unsupported.
      */
     public static String format(Object date) {
         if (date == null) {
