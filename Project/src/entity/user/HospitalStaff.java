@@ -1,4 +1,7 @@
 package entity.user;
+
+import java.time.LocalDate;
+
 /**
 * The HospitalStaff class represents a staff member of the hospital, who is a user of the system with a specific role (e.g., Doctor, Pharmacist, Administrator).
 * This class extends the User class and adds additional properties like role and age.
@@ -12,7 +15,6 @@ public class HospitalStaff extends User{
     public enum Role {DOCTOR, PHARMACIST, ADMINISTRATOR}
 
     private Role role;
-    private int age;
 
     /**
      * Default constructor for the HospitalStaff class.
@@ -29,12 +31,10 @@ public class HospitalStaff extends User{
      * @param name The name of the staff member.
      * @param gender The gender of the staff member.
      * @param role The role of the staff member (Doctor, Pharmacist, Administrator).
-     * @param age The age of the staff member.
      */
-    public HospitalStaff(boolean isPatient, String userId, String name, String gender, Role role, int age) {
-        super(isPatient, userId, name, gender);
+    public HospitalStaff(boolean isPatient, String userId, String name, String gender, LocalDate dob, Role role) {
+        super(isPatient, userId, name, gender, dob);
         this.role = role;
-        this.age = age;
     }
     
     //Getters
@@ -47,15 +47,6 @@ public class HospitalStaff extends User{
     public Role getRole() {
         return role;
     }
-    /**
-     * Gets the age of the staff member.
-     *
-     * @return The age of the staff member.
-     */
-    public int getAge() {
-        return this.age;
-    }
-
     //Setters
 
     /**
@@ -65,14 +56,6 @@ public class HospitalStaff extends User{
      */
     public void setRole(Role Role) {
         this.role = Role;
-    }
-    /**
-     * Sets the age of the staff member.
-     *
-     * @param age The age to set for the staff member.
-     */
-    public void setAge(int age) {
-        this.age = age;
     }
 
     /**
@@ -85,8 +68,8 @@ public class HospitalStaff extends User{
         return "User ID: " + super.getId() + "\n" +
                "Name: " + super.getName() + "\n" +
                "Gender: " + super.getGender() + "\n" +
-               "Role: " + role + "\n" +
-               "Age: " + age;
+               "Date of birth: " + utility.DateFormat.format(super.getDob()) + "\n" +
+               "Role: " + role;
     }
     
     

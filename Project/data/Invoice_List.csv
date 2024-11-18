@@ -1,1 +1,2 @@
-id,customerId,prescriptionId,totalAmount,taxAmount,totalPayable,issueDate,dueDate,status
+id,customerId,apptId,serviceFee,totalAmount,taxRate,balance,currentPaid,totalPayable,issueDate,status
+INV001,P1001,APPT002,30.00,40.00,.09,.00,43.60,43.60,2024-11-18T18:46,PAID

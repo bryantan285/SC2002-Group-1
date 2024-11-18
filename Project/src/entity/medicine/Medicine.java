@@ -14,7 +14,6 @@ public class Medicine extends EntityObject {
         
     }
 
-    // Constructor
     public Medicine(String medicineName, int stockQuantity, float unitCost, double dosage, int lowStockThreshold) {
         this.medicineName = medicineName;
         this.stockQuantity = stockQuantity;
@@ -23,13 +22,10 @@ public class Medicine extends EntityObject {
         this.lowStockThreshold = lowStockThreshold;
     }
 
-    // Method to restock medicine
     public void restock(int quantity) {
         stockQuantity += quantity;
-        System.out.println("Medicine restocked. New stock: " + stockQuantity);
     }
 
-    // Method to check if medicine is available
     public boolean checkAvailability() {
         return stockQuantity > 0;
     }
@@ -76,7 +72,6 @@ public class Medicine extends EntityObject {
         this.lowStockThreshold = newLevel;
     }
 
-    // Getter for medicine name for selection purposes
     public String getMedicineName() {
         return medicineName;
     }

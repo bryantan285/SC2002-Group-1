@@ -9,10 +9,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 /**
@@ -128,8 +129,8 @@ public class CSV_handler implements IStorageHandler {
                 return Boolean.parseBoolean(value);
             }else if (fieldType == LocalDateTime.class) {
                 return LocalDateTime.parse(value);
-            } else if (fieldType == Date.class) {
-                return new Date(value);
+            } else if (fieldType == LocalDate.class) {
+                return LocalDate.parse(value);
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid format for value: " + value + " of type " + fieldType.getName(), e);
@@ -267,6 +268,10 @@ public class CSV_handler implements IStorageHandler {
             if (value instanceof LocalDateTime) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
                 return ((LocalDateTime) value).format(formatter);
+            }
+            if (value instanceof Double || value instanceof Float) {
+                DecimalFormat df = new DecimalFormat("#.00");
+                return df.format(value);
             }
             return value.toString();
         } catch (IllegalAccessException e) {

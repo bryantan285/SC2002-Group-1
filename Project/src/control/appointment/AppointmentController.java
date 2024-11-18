@@ -1,5 +1,6 @@
 package control.appointment;
 
+import control.billing.InvoiceController;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.user.HospitalStaffController;
@@ -141,7 +142,7 @@ public class AppointmentController {
 
         return appointmentRepository.findByField("patientId", patient.getId()).stream()
                 .filter(appt -> appt.getApptDateTime().isBefore(LocalDateTime.now().plusDays(1)) &&
-                                (appt.getStatus() == Appointment.Status.COMPLETED || appt.getStatus() == Appointment.Status.CANCELED))
+                                (appt.getStatus() == Appointment.Status.COMPLETED))
                 .collect(Collectors.toList());
     }
 
@@ -285,12 +286,12 @@ public class AppointmentController {
         appointmentRepository.save();
         // prescribed medicine, get(0) is quantity, get(1) is notes
         if (!prescribedMedication.isEmpty()) {
-            PrescriptionController.createPrescription(appt.getId());
-            Prescription prescription = PrescriptionController.getPrescriptionById(appt.getId());
+            Prescription prescription = PrescriptionController.createPrescription(appt.getId());
             for (Map.Entry<String,List<Object>> med : prescribedMedication.entrySet()) {
                 PrescriptionItemController.createPrescriptionItem(prescription.getId(), med.getKey(),(int) med.getValue().get(0),(String) med.getValue().get(1));
             }
         }
+        InvoiceController.createInvoice(appt.getPatientId(), appt.getId(), 0.09f);
     }
 
     /**
@@ -404,7 +405,12 @@ public class AppointmentController {
         }
 
         if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
-            Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
+            Prescription prescription = null;
+            try {
+                prescription = PrescriptionController.getPrescriptionByAppt(appt);
+            } catch (EntityNotFoundException e) {
+                prescription = PrescriptionController.createPrescription(appt.getId());
+            }
 
             for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
                 String medicineId = med.getKey();
@@ -414,9 +420,10 @@ public class AppointmentController {
                 try {
                     PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
                 } catch (EntityNotFoundException e) {
-                    PrescriptionItemController.createPrescriptionItem(prescription.getId(), medicineId, quantity, notes);
+                    System.out.println("Error: " + e.getMessage());
                 }
             }
+            InvoiceController.recalculateInvoiceCost(appt.getId());
         }
         appointmentRepository.save();
     }

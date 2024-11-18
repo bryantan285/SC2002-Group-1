@@ -66,11 +66,11 @@ public class PrescriptionController {
             throw new InvalidInputException("Prescription ID cannot be null or empty.");
         }
 
-        Prescription prescription = prescriptionRepository.findByField("apptId", appt.getId()).getFirst();
-        if (prescription == null) {
+        List<Prescription> prescription = prescriptionRepository.findByField("apptId", appt.getId());
+        if (prescription.isEmpty()) {
             throw new EntityNotFoundException("Cannot find prescription for appointment " + appt.getId());
         }
-        return prescription;
+        return prescription.getFirst();
     }
 
     /**

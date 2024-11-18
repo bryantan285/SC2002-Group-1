@@ -1,7 +1,10 @@
 package control.billing;
 
+import control.appointment.AppointmentController;
 import control.medicine.MedicineController;
 import control.prescription.PrescriptionController;
+import control.prescription.PrescriptionItemController;
+import entity.appointment.Appointment;
 import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
@@ -9,7 +12,9 @@ import entity.medicine.PrescriptionItem;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import repository.billing.InvoiceRepository;
 
 /**
@@ -28,41 +33,81 @@ public class InvoiceController {
      * @throws InvalidInputException   If any input is invalid.
      * @throws EntityNotFoundException If the prescription or items are not found.
      */
-    public static void createInvoice(String customerId, String prescriptionId, double taxRate) throws InvalidInputException, EntityNotFoundException {
+    public static void createInvoice(String customerId, String apptId, double taxRate) throws InvalidInputException, EntityNotFoundException {
         if (customerId == null || customerId.isEmpty()) {
             throw new InvalidInputException("Customer ID cannot be null or empty.");
-        }
-        if (prescriptionId == null || prescriptionId.isEmpty()) {
-            throw new InvalidInputException("Prescription ID cannot be null or empty.");
         }
         if (taxRate < 0) {
             throw new InvalidInputException("Tax rate cannot be negative.");
         }
-
-        Prescription prescription = PrescriptionController.getPrescriptionById(prescriptionId);
-        List<PrescriptionItem> prescriptionItems = PrescriptionController.getPrescriptionItems(prescription);
-
-        if (prescriptionItems.isEmpty()) {
-            throw new InvalidInputException("No items found for prescription ID: " + prescriptionId);
+        Appointment appt = AppointmentController.getAppt(apptId);
+        Prescription prescription = null;
+        try {
+            prescription = PrescriptionController.getPrescriptionByAppt(appt);
+        } catch (NoSuchElementException e) {
+            prescription = null;
         }
-
-        double totalAmount = calculateTotalAmount(prescriptionItems);
-        double taxAmount = totalAmount * taxRate;
-        double totalPayable = totalAmount + taxAmount;
+        double totalAmount;
+        if (prescription == null) {
+            totalAmount = 0.0;
+        } else {
+            List<PrescriptionItem> prescriptionItems = PrescriptionController.getPrescriptionItems(prescription);
+            totalAmount = calculateTotalAmount(prescriptionItems);
+        }
 
         Invoice newInvoice = new Invoice(
                 invoiceRepository.getNextClassId(),
                 customerId,
-                prescriptionId,
+                apptId,
+                30.0,
                 totalAmount,
-                totalPayable,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(30)
+                taxRate,
+                LocalDateTime.now()
         );
 
         invoiceRepository.add(newInvoice);
         invoiceRepository.save();
     }
+    
+    public static void recalculateInvoiceCost(String apptId) throws InvalidInputException, EntityNotFoundException {
+    if (apptId == null || apptId.isEmpty()) {
+        throw new InvalidInputException("Prescription ID cannot be null or empty.");
+    }
+
+    Invoice invoice = InvoiceController.getInvoiceByAppt(apptId);
+    if (invoice == null) {
+        throw new EntityNotFoundException("Invoice of", apptId);
+    }
+    Appointment appt = AppointmentController.getAppt(apptId);
+    try {
+        Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
+        try {
+            List<PrescriptionItem> items = PrescriptionItemController.getPrescriptionItems(prescription);
+            
+            double totalCost = 0.0;
+            for (PrescriptionItem item : items) {
+                Medicine med = MedicineController.getMedicineById(item.getMedicineId());
+                if (med != null) {
+                    totalCost += item.getQuantity() * med.getUnitCost();
+                }
+            }
+            invoice.setTotalAmount(totalCost + invoice.getServiceFee());
+            invoice.setTotalPayable(invoice.getTotalAmount()*(1+invoice.getTaxRate()));
+            if (invoice.getTotalPayable() - invoice.getCurrentPaid() < 0) {
+                invoice.setCurrentPaid(invoice.getCurrentPaid() - invoice.getTotalPayable());
+                invoice.setBalance(0);
+            } else {
+                invoice.setBalance(invoice.getTotalPayable() - invoice.getCurrentPaid());
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    } catch (EntityNotFoundException e) {
+        PrescriptionController.createPrescription(appt.getId());
+    }
+    invoiceRepository.save();
+}
+
 
     private static double calculateTotalAmount(List<PrescriptionItem> items) throws EntityNotFoundException, InvalidInputException {
         double totalAmount = 0.0;
@@ -77,6 +122,31 @@ public class InvoiceController {
 
         return totalAmount;
     }
+    
+    public static void incBalance(Invoice inv, double cost) throws InvalidInputException {
+        if (cost < 0) {
+            throw new InvalidInputException("Cost cannot be negative.");
+        }
+        double newBalance = inv.getBalance() + cost;
+        inv.setBalance(newBalance);
+        invoiceRepository.save();
+    }
+    
+    public static void payBalance(Invoice inv, double payment) throws InvalidInputException {
+        if (payment <= 0) {
+            throw new InvalidInputException("Payment must be greater than zero.");
+        }
+        double currentBalance = inv.getBalance();
+        if (payment > currentBalance) {
+            throw new InvalidInputException("Payment exceeds the current balance.");
+        }
+        inv.setBalance(currentBalance - payment);
+        inv.setCurrentPaid(inv.getCurrentPaid() + payment);
+        if (inv.getCurrentPaid() == inv.getTotalPayable()) inv.setStatus(Invoice.InvoiceStatus.PAID);
+        else inv.setStatus(Invoice.InvoiceStatus.PARTIAL);
+        invoiceRepository.save();
+    }
+    
 
     /**
      * Retrieves an Invoice by its ID.
@@ -98,70 +168,21 @@ public class InvoiceController {
         return invoice;
     }
 
+    public static List<Invoice> getInvoiceByCustomer(String customerId) {
+        List<Invoice> list = invoiceRepository.findByField("customerId", customerId);
+        list.sort(Comparator.comparing(Invoice::getId));
+        return list;
+    }
+
     /**
      * Retrieves a list of all invoices.
      *
      * @return A list of all invoices.
      */
     public static List<Invoice> getAllInvoices() {
-        return invoiceRepository.toList();
-    }
-
-    /**
-     * Displays the details of an invoice.
-     *
-     * @param invoiceId The ID of the invoice to display.
-     * @throws InvalidInputException   If the invoice ID is invalid.
-     * @throws EntityNotFoundException If the invoice is not found.
-     */
-    public static void displayInvoiceDetails(String invoiceId) throws InvalidInputException, EntityNotFoundException {
-        Invoice invoice = getInvoiceById(invoiceId);
-
-        System.out.println("Invoice ID: " + invoice.getId());
-        System.out.println("Customer ID: " + invoice.getCustomerId());
-        System.out.println("Prescription ID: " + invoice.getPrescriptionId());
-        System.out.println("Total Amount: " + invoice.getTotalAmount());
-        System.out.println("Tax Amount: " + invoice.getTaxAmount());
-        System.out.println("Total Payable: " + invoice.getTotalPayable());
-        System.out.println("Issue Date: " + invoice.getIssueDate());
-        System.out.println("Due Date: " + invoice.getDueDate());
-        System.out.println("Status: " + invoice.getStatus());
-    }
-
-    /**
-     * Lists all overdue invoices.
-     */
-    public static void listOverdueInvoices() {
         List<Invoice> invoices = invoiceRepository.toList();
-
-        boolean foundOverdue = invoices.stream()
-                .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.PAID && invoice.getDueDate().isBefore(LocalDateTime.now()))
-                .peek(System.out::println)
-                .count() > 0;
-
-        if (!foundOverdue) {
-            System.out.println("No overdue invoices found.");
-        }
-    }
-
-    /**
-     * Marks the specified invoice as paid.
-     *
-     * @param invoice The invoice to mark as paid.
-     * @return True if the operation is successful.
-     * @throws InvalidInputException If the invoice is null.
-     */
-    public static Boolean markAsPaid(Invoice invoice) throws InvalidInputException {
-        if (invoice == null) {
-            throw new InvalidInputException("Invoice cannot be null.");
-        }
-        if (invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
-            return true;
-        }
-
-        invoice.setStatus(Invoice.InvoiceStatus.PAID);
-        invoiceRepository.save();
-        return true;
+        invoices.sort(Comparator.comparing(Invoice::getId));
+        return invoices;
     }
 
     /**
@@ -185,27 +206,6 @@ public class InvoiceController {
     }
 
     /**
-     * Updates the due date of the specified invoice.
-     *
-     * @param invoice    The invoice to update.
-     * @param newDueDate The new due date.
-     * @return True if the update is successful.
-     * @throws InvalidInputException If the input is invalid.
-     */
-    public static Boolean updateDueDate(Invoice invoice, LocalDateTime newDueDate) throws InvalidInputException {
-        if (invoice == null) {
-            throw new InvalidInputException("Invoice cannot be null.");
-        }
-        if (newDueDate == null || newDueDate.isBefore(LocalDateTime.now())) {
-            throw new InvalidInputException("Due date must be in the future.");
-        }
-
-        invoice.setDueDate(newDueDate);
-        invoiceRepository.save();
-        return true;
-    }
-
-    /**
      * Deletes the specified invoice.
      *
      * @param invoiceId The ID of the invoice to delete.
@@ -218,18 +218,8 @@ public class InvoiceController {
         invoiceRepository.save();
     }
 
-    /**
-     * Checks if the specified invoice is overdue.
-     *
-     * @param invoice The invoice to check.
-     * @return True if the invoice is overdue, false otherwise.
-     * @throws InvalidInputException If the invoice is null.
-     */
-    public static Boolean isInvoiceOverdue(Invoice invoice) throws InvalidInputException {
-        if (invoice == null) {
-            throw new InvalidInputException("Invoice cannot be null.");
-        }
-
-        return invoice.getDueDate().isBefore(LocalDateTime.now()) && invoice.getStatus() != Invoice.InvoiceStatus.PAID;
+    public static Invoice getInvoiceByAppt(String apptId) {
+        Invoice inv = invoiceRepository.findByField("apptId", apptId).getFirst();
+        return inv;
     }
 }

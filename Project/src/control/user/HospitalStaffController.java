@@ -4,6 +4,8 @@ import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import repository.user.StaffRepository;
 
@@ -30,46 +32,98 @@ public class HospitalStaffController {
      * @param name the name of the staff member
      * @param gender the gender of the staff member (male or female)
      * @param role the role of the staff member (Doctor, Pharmacist, etc.)
-     * @param age the age of the staff member (must be between 18 and 100)
+     * @param dob the date of birth of the staff member (must be between 18 and 100)
      * @return true if the staff member was successfully added, false otherwise
      * @throws InvalidInputException if any of the input parameters are invalid
      */
-    public static Boolean addStaff(String name, String gender, HospitalStaff.Role role, int age) throws InvalidInputException {
+    public static HospitalStaff addStaff(String name, String gender, HospitalStaff.Role role, LocalDate dob) throws InvalidInputException {
         // Validate inputs
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             throw new InvalidInputException("Name cannot be null or empty.");
         }
+        if (name.length() < 3) {
+            throw new InvalidInputException("Name must be at least 3 characters long.");
+        }
+    
         if (gender == null || (!gender.equalsIgnoreCase("male") && !gender.equalsIgnoreCase("female"))) {
             throw new InvalidInputException("Invalid gender. Must be 'male' or 'female'.");
         }
+    
         if (role == null) {
             throw new InvalidInputException("Role cannot be null.");
         }
-        if (age < 18 || age > 100) {
-            throw new InvalidInputException("Age must be between 18 and 100.");
+    
+        if (dob == null) {
+            throw new InvalidInputException("Date of birth cannot be null.");
         }
-
+    
+        LocalDate today = LocalDate.now();
+        if (!dob.isBefore(today)) {
+            throw new InvalidInputException("Date of birth must be before today.");
+        }
+    
+        int age = Period.between(dob, today).getYears();
+        if (age < 18 || age > 100) {
+            throw new InvalidInputException("Age derived from date of birth must be between 18 and 100 years.");
+        }
+    
         try {
-            // Create new staff member
             StaffRepository repo = StaffRepository.getInstance();
             HospitalStaff newStaff = StaffFactory.createStaffByRole(role);
-            newStaff.setIsPatient(false); // Ensure the new staff is not marked as a patient
-            newStaff.changePassword("password"); // Set a default password
+            newStaff.setIsPatient(false);
+            newStaff.changePassword("password");
             newStaff.setName(name);
             newStaff.setId(repo.getNextId(role));
             newStaff.setGender(gender);
             newStaff.setRole(role);
-            newStaff.setAge(age);
-
-            // Add staff to repository and save
+            newStaff.setDob(dob);
+    
             repo.add(newStaff);
             repo.save();
-            return true;
+            return newStaff;
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-        return false;
+        return null;
     }
+    
+
+    public static void updateStaff(HospitalStaff staff, String name, String gender, HospitalStaff.Role role, LocalDate dob) throws InvalidInputException {
+        if (name == null || name.trim().length() < 3) {
+            throw new InvalidInputException("Name must be at least 3 characters long.");
+        }
+
+        if (!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")) {
+            throw new InvalidInputException("Gender must be 'Male' or 'Female'.");
+        }
+
+        if (role == null) {
+            throw new InvalidInputException("Role cannot be null. Please select a valid role.");
+        }
+
+        if (dob == null) {
+            throw new InvalidInputException("Date of birth cannot be null.");
+        }
+
+        LocalDate today = LocalDate.now();
+        if (!dob.isBefore(today)) {
+            throw new InvalidInputException("Date of birth must be before today.");
+        }
+
+        int age = Period.between(dob, today).getYears();
+        if (age < 18 || age > 100) {
+            throw new InvalidInputException("Age derived from date of birth must be between 18 and 100 years.");
+        }
+
+        staff.setName(name);
+        staff.setGender(gender);
+        staff.setRole(role);
+        staff.setDob(dob);
+
+        StaffRepository repo = StaffRepository.getInstance();
+        repo.save();
+    }
+
 
     /**
      * Removes a staff member from the repository.
@@ -79,7 +133,7 @@ public class HospitalStaffController {
      * @return true if the staff member was successfully removed, false otherwise
      * @throws EntityNotFoundException if the staff member cannot be found
      */
-    public static Boolean removeStaff(HospitalStaff staff) throws EntityNotFoundException {
+    public static void removeStaff(HospitalStaff staff) throws EntityNotFoundException {
         if (staff == null) {
             throw new EntityNotFoundException("Staff", "null");
         }
@@ -89,7 +143,6 @@ public class HospitalStaffController {
         }
         repo.remove(staff);
         repo.save();
-        return true;
     }
 
     /**

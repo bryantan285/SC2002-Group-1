@@ -1,6 +1,8 @@
 package control.prescription;
 
+import control.billing.InvoiceController;
 import control.medicine.MedicineController;
+import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
@@ -104,6 +106,11 @@ public class PrescriptionItemController {
         if (MedicineController.decMedStock(med, item.getQuantity())) {
             item.setStatus(PrescriptionItem.ItemStatus.DISPENSED);
             prescriptionItemRepository.save();
+            
+            String prescriptionId = item.getPrescriptionId();
+            Invoice invoice = InvoiceController.getInvoiceById(prescriptionId);
+            double itemCost = item.getQuantity() * med.getUnitCost();
+            InvoiceController.incBalance(invoice, itemCost);
             return true;
         }
         return false;
@@ -162,7 +169,6 @@ public class PrescriptionItemController {
             throw new InvalidInputException("Quantity must be greater than zero.");
         }
 
-        // Retrieve the PrescriptionItem
         List<PrescriptionItem> items = prescriptionItemRepository.findByField("prescriptionId", prescriptionId);
         PrescriptionItem item = items.stream()
                 .filter(i -> i.getMedicineId().equals(medicineId))
@@ -170,14 +176,12 @@ public class PrescriptionItemController {
                 .orElse(null);
 
         if (item == null) {
-            throw new EntityNotFoundException("PrescriptionItem", "PrescriptionId: " + prescriptionId + ", MedicineId: " + medicineId);
+            item = PrescriptionItemController.createPrescriptionItem(prescriptionId, medicineId, quantity, notes);
         }
 
-        // Update the item's details
         item.setQuantity(quantity);
         item.setNotes(notes);
 
-        // Save updates to the repository
         prescriptionItemRepository.save();
     }
 }

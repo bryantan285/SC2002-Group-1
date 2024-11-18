@@ -1,6 +1,7 @@
 package entity.user;
 
 import entity.EntityObject;
+import java.time.LocalDate;
 import utility.Password_hash;
 
 public abstract class User extends EntityObject {
@@ -10,6 +11,7 @@ public abstract class User extends EntityObject {
     private String password;
     private String name;
     private String gender;
+    private LocalDate dob;
 
     /**
      * Default constructor for the User class. Initializes an empty User object.
@@ -26,12 +28,13 @@ public abstract class User extends EntityObject {
      * @param name The name of the user.
      * @param gender The gender of the user.
      */
-    public User(boolean isPatient, String id, String name, String gender){
+    public User(boolean isPatient, String id, String name, String gender, LocalDate dob){
         this.isPatient = isPatient;
         this.id = id;
         this.password = Password_hash.hashPassword("password");  // Default password is hashed
         this.name = name;
         this.gender = gender;
+        this.dob = dob;
     }
 
     // Getters
@@ -80,6 +83,10 @@ public abstract class User extends EntityObject {
      */
     public String getGender() {
         return this.gender;
+    }
+
+    public LocalDate getDob() {
+        return this.dob;
     }
 
     
@@ -139,5 +146,9 @@ public abstract class User extends EntityObject {
      */
     public void changePassword(String input){
         setPassword(Password_hash.hashPassword(input));
+    }
+
+    public void setDob(LocalDate date) {
+        this.dob = date;
     }
 }

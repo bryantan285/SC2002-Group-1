@@ -1,6 +1,7 @@
 package boundary.user.patient;
 
 import control.appointment.AppointmentController;
+import control.billing.InvoiceController;
 import control.medicine.MedicineController;
 import control.notification.NotificationController;
 import control.user.HospitalStaffController;
@@ -8,6 +9,7 @@ import control.user.PatientController;
 import control.user.SessionManager;
 import control.user.UserController;
 import entity.appointment.Appointment;
+import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
@@ -66,8 +68,9 @@ public class P_HomeUI implements IUserInterface {
             System.out.println("6. Cancel an Appointment");
             System.out.println("7. View Scheduled Appointments");
             System.out.println("8. View Past Appointment Outcome Records");
-            System.out.println("9. View Notifications");
-            System.out.println("10. Logout");
+            System.out.println("9. View and Pay invoice");
+            System.out.println("10. View Notifications");
+            System.out.println("11. Logout");
             System.out.println("============================================");
     
             int choice = 0;
@@ -78,18 +81,18 @@ public class P_HomeUI implements IUserInterface {
                     choice = scanner.nextInt();
                     scanner.nextLine();
     
-                    if (choice >= 1 && choice <= 10) {
+                    if (choice >= 1 && choice <= 11) {
                         break;
                     } else {
-                        System.out.println("Enter only a number between 1 and 10.");
+                        System.out.println("Enter only a number between 1 and 11.");
                     }
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid input. Please enter a number between 1 and 10.");
+                    System.out.println("Invalid input. Please enter a number between 1 and 11.");
                     scanner.nextLine();
                 }
             }
 
-            if (choice == 10) {
+            if (choice == 11) {
                 exit = true;
             } else {
                 ClearConsole.clearConsole();
@@ -111,8 +114,9 @@ public class P_HomeUI implements IUserInterface {
             case 6 -> cancelAppointment();
             case 7 -> viewScheduledAppointments();
             case 8 -> viewPastAppointmentOutcomeRecords();
-            case 9 -> viewNotifications();
-            case 10 -> {
+            case 9 -> viewAndPayInvoice();
+            case 10 -> viewNotifications();
+            case 11 -> {
                 System.out.println("Logging out...");
                 System.exit(0);
             }
@@ -568,9 +572,88 @@ public class P_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
+
+    private void viewAndPayInvoice() {
+        try {
+            List<Invoice> invList = InvoiceController.getInvoiceByCustomer(session.getCurrentUser().getId());
+    
+            if (invList.isEmpty()) {
+                System.out.println("You have no invoices.");
+                return;
+            }
+    
+            System.out.println("Your invoices:");
+            System.out.println("==============");
+            for (Invoice inv : invList) {
+                System.out.println(inv);
+                System.out.println("==============");
+            }
+    
+            System.out.print("Enter the Invoice ID to select: ");
+            String invoiceId = scanner.nextLine();
+    
+            Invoice selectedInvoice = invList.stream()
+                                             .filter(inv -> inv.getId().equals(invoiceId))
+                                             .findFirst()
+                                             .orElse(null);
+    
+            if (selectedInvoice == null) {
+                System.out.println("Invalid Invoice ID. Please select a valid invoice from the list.");
+                return;
+            }
+    
+            System.out.println("Selected Invoice Details:");
+            System.out.println(selectedInvoice);
+    
+            if (selectedInvoice.getBalance() <= 0) {
+                System.out.println("This invoice is already paid in full.");
+                return;
+            }
+    
+            System.out.println("Outstanding Balance: " + selectedInvoice.getBalance());
+    
+            double payment;
+            while (true) {
+                try {
+                    System.out.print("Enter payment amount: ");
+                    payment = Double.parseDouble(scanner.nextLine());
+    
+                    if (payment <= 0) {
+                        System.out.println("Payment must be greater than zero. Please try again.");
+                        continue;
+                    }
+    
+                    if (payment > selectedInvoice.getBalance()) {
+                        System.out.println("Payment exceeds the outstanding balance. Please enter a valid amount.");
+                        continue;
+                    }
+    
+                    // If the input is valid, break the loop
+                    break;
+    
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid payment amount. Please enter a valid number.");
+                }
+            }
+    
+            InvoiceController.payBalance(selectedInvoice, payment);
+            System.out.println("Payment successful. Remaining balance: " + selectedInvoice.getBalance());
+    
+        } catch (NoUserLoggedInException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        }
+    }
+    
     
     public void viewNotifications() {
         List<List<String>> notiList = observer.getNotificationHistory();
+        System.out.println("Notifications");
+        System.out.println("=============");
         for (List<String> noti : notiList) {
             System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
         }

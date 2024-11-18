@@ -1,6 +1,6 @@
 package entity.user;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import utility.DateFormat;
 /**
  * The Patient class represents a patient in the healthcare system. It extends the User class
@@ -8,7 +8,6 @@ import utility.DateFormat;
  * contact information, and medical records (outcomes from appointments).
  */
 public class Patient extends User {
-    private LocalDateTime dob;
     private String bloodType;
     private String contactNumber;
     private String email;
@@ -27,30 +26,19 @@ public class Patient extends User {
      * @param id The unique identifier for the patient.
      * @param name The name of the patient.
      * @param gender The gender of the patient.
-     * @param dob The date of birth of the patient.
      * @param bloodType The blood type of the patient.
      * @param contactNumber The contact number of the patient.
      * @param email The email address of the patient.
      * @param medicalRecords A list of appointment outcomes (medical records) for the patient.
      */
-    public Patient(String id, String name, String gender, LocalDateTime dob, String bloodType, String contactNumber, String email) {
-        super(true, id, name, gender);
-        this.dob = dob;
+    public Patient(String id, String name, String gender, LocalDate dob, String bloodType, String contactNumber, String email) {
+        super(true, id, name, gender, dob);
         this.bloodType = bloodType;
         this.contactNumber = contactNumber;
         this.email = email;
     }
 
     // Getters
-
-    /**
-     * Gets the date of birth of the patient.
-     *
-     * @return The patient's date of birth.
-     */
-    public LocalDateTime getDob() {
-        return dob;
-    }
 
     /**
      * Gets the blood type of the patient.
@@ -80,15 +68,6 @@ public class Patient extends User {
     }
 
     // Setters
-
-    /**
-     * Sets the date of birth of the patient.
-     *
-     * @param dob The date of birth to set for the patient.
-     */
-    public void setDob(LocalDateTime dob) {
-        this.dob = dob;
-    }
 
     /**
      * Sets the blood type of the patient.
@@ -127,7 +106,7 @@ public class Patient extends User {
     public String toString() {
         return "Patient ID: " + getId() + "\n" +
                "Name: " + getName() + "\n" +
-               "Date of Birth: " + DateFormat.formatNoTime(dob) + "\n" +
+               "Date of Birth: " + DateFormat.formatNoTime(super.getDob()) + "\n" +
                "Gender: " + getGender() + "\n" +
                "Blood Type: " + bloodType + "\n" +
                "Email: " + email + "\n" +

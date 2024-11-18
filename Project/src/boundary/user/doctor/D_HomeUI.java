@@ -3,15 +3,11 @@ package boundary.user.doctor;
 import control.appointment.AppointmentController;
 import control.medicine.MedicineController;
 import control.notification.NotificationController;
-import control.prescription.PrescriptionController;
-import control.prescription.PrescriptionItemController;
 import control.user.SessionManager;
 import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
 import entity.appointment.Appointment.Status;
 import entity.medicine.Medicine;
-import entity.medicine.Prescription;
-import entity.medicine.PrescriptionItem;
 import entity.user.Doctor;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
@@ -201,19 +197,23 @@ public class D_HomeUI implements IUserInterface {
                 System.out.printf("%d. %s (ID: %s)%n", i + 1, patient.getName(), patient.getId());
             }
     
-            System.out.print("Enter the number of the patient to select (or 0 to cancel): ");
-            int patientChoice = scanner.nextInt();
-            scanner.nextLine();
-    
-            if (patientChoice == 0) {
-                System.out.println("Update canceled.");
-                KeystrokeWait.waitForKeyPress();
-                return;
-            }
-    
-            if (patientChoice < 1 || patientChoice > patientsUnderCare.size()) {
-                System.out.println("Invalid choice. Please try again.");
-                return;
+            int patientChoice;
+            while (true) {
+                System.out.print("Enter the number of the patient to select (or 0 to cancel): ");
+                try {
+                    patientChoice = Integer.parseInt(scanner.nextLine().trim());
+                    if (patientChoice == 0) {
+                        System.out.println("Update canceled.");
+                        return;
+                    }
+                    if (patientChoice < 1 || patientChoice > patientsUnderCare.size()) {
+                        System.out.println("Invalid choice. Please try again.");
+                    } else {
+                        break;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter a valid number.");
+                }
             }
     
             Patient selectedPatient = patientsUnderCare.get(patientChoice - 1);
@@ -225,71 +225,54 @@ public class D_HomeUI implements IUserInterface {
                 return;
             }
     
-            System.out.println("\nSelect an appointment to update its medical record:");
-            for (int i = 0; i < completedAppointments.size(); i++) {
-                Appointment appointment = completedAppointments.get(i);
-                System.out.printf("%d. Appointment ID: %s, Date: %s, Status: %s%n",
-                        i + 1,
-                        appointment.getId(),
-                        DateFormat.formatWithTime(appointment.getApptDateTime()),
-                        appointment.getStatus().name());
-            }
+            int appointmentChoice;
+            while (true) {
+                System.out.println("\nSelect an appointment to update its medical record:");
+                for (int i = 0; i < completedAppointments.size(); i++) {
+                    Appointment appointment = completedAppointments.get(i);
+                    System.out.printf("%d. Appointment ID: %s, Date: %s, Status: %s%n",
+                            i + 1,
+                            appointment.getId(),
+                            DateFormat.formatWithTime(appointment.getApptDateTime()),
+                            appointment.getStatus().name());
+                }
     
-            System.out.print("Enter the number of the appointment to update (or 0 to cancel): ");
-            int appointmentChoice = scanner.nextInt();
-            scanner.nextLine();
-    
-            if (appointmentChoice == 0) {
-                System.out.println("Update canceled.");
-                KeystrokeWait.waitForKeyPress();
-                return;
-            }
-    
-            if (appointmentChoice < 1 || appointmentChoice > completedAppointments.size()) {
-                System.out.println("Invalid choice. Please try again.");
-                KeystrokeWait.waitForKeyPress();
-                return;
+                System.out.print("Enter the number of the appointment to update (or 0 to cancel): ");
+                try {
+                    appointmentChoice = Integer.parseInt(scanner.nextLine().trim());
+                    if (appointmentChoice == 0) {
+                        System.out.println("Update canceled.");
+                        return;
+                    }
+                    if (appointmentChoice < 1 || appointmentChoice > completedAppointments.size()) {
+                        System.out.println("Invalid choice. Please try again.");
+                    } else {
+                        break;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please enter a valid number.");
+                }
             }
     
             Appointment selectedAppointment = completedAppointments.get(appointmentChoice - 1);
-            List<Object> list = AppointmentController.getAppointmentOutcomes(selectedPatient);
-            HashMap<String, Prescription> pastPrescriptions = (HashMap<String, Prescription>) list.get(1);
-            HashMap<String, List<PrescriptionItem>> prescriptionItems = (HashMap<String, List<PrescriptionItem>>) list.get(2);
-            
-            System.out.println("\n=== Current Appointment Details ===");
-            System.out.println("Appointment ID: " + selectedAppointment.getId());
-            System.out.println("Date: " + DateFormat.formatWithTime(selectedAppointment.getApptDateTime()));
-            System.out.println("Status: " + selectedAppointment.getStatus().name());
-            System.out.println("Diagnosis: " + selectedAppointment.getDiagnosis());
-            System.out.println("Consultation Notes: " + selectedAppointment.getNotes());
-            System.out.println("----------------------------------");
-            System.out.println("Prescription items:");
-            Prescription prescription = pastPrescriptions.get(selectedAppointment.getId());
-            if (prescription == null) {
-                System.out.println("No prescribed items.");
-            } else {
-                for (PrescriptionItem item : prescriptionItems.get(prescription.getId())) {
-                    Medicine med = MedicineController.getMedicineById(item.getMedicineId());
-                    System.out.println("\tName: " + med.getMedicineName());
-                    System.out.println("\tDosage: " + med.getDosage());
-                    System.out.println("\tQuantity: " + item.getQuantity());
-                    System.out.println("\tStatus: " + item.getStatus());
-                    System.out.println("----------------------------------");
-                }
-            }
-            System.out.println("===================================");
-
-            System.out.print("\nEnter updated diagnosis (enter nothing to go back to previous menu): ");
-            String updatedDiagnosis = scanner.nextLine().trim();
-            if (updatedDiagnosis.isEmpty()) {
-                return;
-            }
     
-            System.out.print("Enter updated consultation notes (enter nothing to go back to previous menu): ");
-            String updatedNotes = scanner.nextLine().trim();
-            if (updatedNotes.isEmpty()) {
-                return;
-            }
+            String updatedDiagnosis;
+            do {
+                System.out.print("\nEnter updated diagnosis (cannot be empty): ");
+                updatedDiagnosis = scanner.nextLine().trim();
+                if (updatedDiagnosis.isEmpty()) {
+                    System.out.println("Diagnosis cannot be empty. Please enter a valid diagnosis.");
+                }
+            } while (updatedDiagnosis.isEmpty());
+    
+            String updatedNotes;
+            do {
+                System.out.print("Enter updated consultation notes (cannot be empty): ");
+                updatedNotes = scanner.nextLine().trim();
+                if (updatedNotes.isEmpty()) {
+                    System.out.println("Consultation notes cannot be empty. Please enter valid notes.");
+                }
+            } while (updatedNotes.isEmpty());
     
             String prescriptionChoice;
             while (true) {
@@ -303,10 +286,10 @@ public class D_HomeUI implements IUserInterface {
                 }
                 System.out.println("Invalid input. Please enter 'yes' or 'no'.");
             }
-            
     
             HashMap<String, List<Object>> updatedPrescribedMedication = new HashMap<>();
             if (prescriptionChoice.equals("yes")) {
+
                 List<Medicine> availableMedicines = MedicineController.getAllMedicines();
     
                 if (availableMedicines.isEmpty()) {
@@ -315,7 +298,7 @@ public class D_HomeUI implements IUserInterface {
                     System.out.println("Available Medicines:");
                     for (int i = 0; i < availableMedicines.size(); i++) {
                         Medicine medicine = availableMedicines.get(i);
-                        System.out.printf("%d. %s (Stock: %d)%n", i + 1, medicine.getMedicineName(), medicine.getStockQuantity());
+                        System.out.printf("%d. %s, %.2fmg%n", i + 1, medicine.getMedicineName(), medicine.getDosage());
                     }
     
                     System.out.print("Enter the numbers of the medicines to prescribe (comma-separated): ");
@@ -324,41 +307,42 @@ public class D_HomeUI implements IUserInterface {
                     for (String num : selectedMedicineNumbers) {
                         try {
                             int medicineIndex = Integer.parseInt(num.trim()) - 1;
-                            if (medicineIndex >= 0 && medicineIndex < availableMedicines.size()) {
-                                Medicine selectedMedicine = availableMedicines.get(medicineIndex);
-    
-                                System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ": ");
-                                int quantity = scanner.nextInt();
-                                scanner.nextLine();
-                                if (quantity <= 0) {
-                                    System.out.println("Invalid quantity. Skipping this medicine.");
-                                    continue;
-                                }
-    
-                                if (quantity > selectedMedicine.getStockQuantity()) {
-                                    System.out.println("Quantity exceeds available stock. Skipping this medicine.");
-                                    continue;
-                                }
-    
-                                System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ": ");
-                                String prescriptionNotes = scanner.nextLine().trim();
-                                if (prescriptionNotes.isEmpty()) {
-                                    System.out.println("Medication notes cannot be empty. Skipping this medicine.");
-                                    continue;
-                                }
-    
-                                List<Object> medicineDetails = new ArrayList<>();
-                                medicineDetails.add(quantity);
-                                medicineDetails.add(prescriptionNotes + " (Prescribed for updated diagnosis)");
-                                updatedPrescribedMedication.put(selectedMedicine.getId(), medicineDetails);
-    
-                            } else {
+                            if (medicineIndex < 0 || medicineIndex >= availableMedicines.size()) {
                                 System.out.println("Invalid medicine selection. Skipping.");
+                                continue;
                             }
+    
+                            Medicine selectedMedicine = availableMedicines.get(medicineIndex);
+    
+                            int quantity;
+                            while (true) {
+                                System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ": ");
+                                try {
+                                    quantity = Integer.parseInt(scanner.nextLine().trim());
+                                    if (quantity <= 0) {
+                                        System.out.println("Invalid quantity. It must be a positive integer.");
+                                    } else {
+                                        break;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid input. Please enter a valid positive integer.");
+                                }
+                            }
+    
+                            System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ": ");
+                            String prescriptionNotes = scanner.nextLine().trim();
+                            if (prescriptionNotes.isEmpty()) {
+                                System.out.println("Medication notes cannot be empty. Skipping this medicine.");
+                                continue;
+                            }
+    
+                            List<Object> medicineDetails = new ArrayList<>();
+                            medicineDetails.add(quantity);
+                            medicineDetails.add(prescriptionNotes + " (Prescribed for updated diagnosis)");
+                            updatedPrescribedMedication.put(selectedMedicine.getId(), medicineDetails);
+    
                         } catch (NumberFormatException e) {
                             System.out.println("Invalid input. Skipping medicine.");
-                        } finally {
-                            ClearConsole.clearConsole();
                         }
                     }
                 }
@@ -371,10 +355,13 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
         } finally {
+            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
+    
     
     
     private void viewSchedule() {
@@ -612,68 +599,121 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("Record Appointment Outcome");
             System.out.println("=============================");
             List<Appointment> list = AppointmentController.getDoctorAppts((Doctor) session.getCurrentUser())
-                                    .stream()
-                                    .filter(appt -> appt.getStatus() == Status.CONFIRMED && appt.getApptDateTime().toLocalDate().isEqual(LocalDate.now())).toList();
-            System.out.println("Your appointments today");
+                    .stream()
+                    .filter(appt -> appt.getStatus() == Status.CONFIRMED && appt.getApptDateTime().toLocalDate().isEqual(LocalDate.now()))
+                    .toList();
+    
+            if (list.isEmpty()) {
+                System.out.println("No confirmed appointments for today.");
+                return;
+            }
+    
+            System.out.println("Your appointments today:");
             for (Appointment appt : list) {
                 System.out.println("=============================");
-                System.out.println(appt.toString());
+                System.out.println(appt);
             }
             System.out.println("=============================");
+    
             System.out.print("Enter appointment ID (enter nothing to go back to previous menu): ");
-            String appointmentId = scanner.nextLine();
-            Appointment appt = AppointmentController.getAppt(appointmentId);
+            String appointmentId = scanner.nextLine().trim();
+    
+            if (appointmentId.isEmpty()) {
+                return;
+            }
+    
+            Appointment appt = list.stream()
+                    .filter(a -> a.getId().equals(appointmentId))
+                    .findFirst()
+                    .orElse(null);
     
             if (appt == null) {
+                System.out.println("Invalid appointment ID. Please select an appointment from the list.");
                 return;
             }
     
-            System.out.print("Enter diagnosis: ");
-            String diagnosis = scanner.nextLine();
+            // Validate diagnosis input
+            String diagnosis;
+            do {
+                System.out.print("Enter diagnosis (cannot be empty): ");
+                diagnosis = scanner.nextLine().trim();
+                if (diagnosis.isEmpty()) {
+                    System.out.println("Diagnosis cannot be empty. Please enter a valid diagnosis.");
+                }
+            } while (diagnosis.isEmpty());
     
-            System.out.print("Enter consultation notes: ");
-            String consultationNotes = scanner.nextLine();
+            // Validate consultation notes input
+            String consultationNotes;
+            do {
+                System.out.print("Enter consultation notes (cannot be empty): ");
+                consultationNotes = scanner.nextLine().trim();
+                if (consultationNotes.isEmpty()) {
+                    System.out.println("Consultation notes cannot be empty. Please enter valid notes.");
+                }
+            } while (consultationNotes.isEmpty());
     
-            List<Medicine> availableMedicines = MedicineController.getAllMedicines();
-            if (availableMedicines.isEmpty()) {
-                System.out.println("No medicines available in the system.");
-                return;
-            }
-    
-            System.out.println("\nAvailable Medicines:");
-            for (int i = 0; i < availableMedicines.size(); i++) {
-                Medicine medicine = availableMedicines.get(i);
-                System.out.println((i + 1) + ". " + medicine.getMedicineName() + " (Stock: " + medicine.getStockQuantity() + ")");
-            }
-            
-            System.out.print("Enter the numbers of the medicines to prescribe (comma separated): ");
-            String[] selectedMedicineNumbers = scanner.nextLine().split(",");
             HashMap<String, List<Object>> prescriptionItems = new HashMap<>();
     
-            for (String num : selectedMedicineNumbers) {
-                int medicineIndex = Integer.parseInt(num.trim()) - 1;
+            System.out.print("Would you like to prescribe medication? (yes/no): ");
+            String prescribeMedication = scanner.nextLine().trim().toLowerCase();
     
-                if (medicineIndex >= 0 && medicineIndex < availableMedicines.size()) {
-                    Medicine selectedMedicine = availableMedicines.get(medicineIndex);
-    
-                    System.out.println("\nSelected medicine: " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage());
-    
-                    System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + ": ");
-                    int quantity = Integer.parseInt(scanner.nextLine());
-    
-                    System.out.print("Enter notes for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + ": ");
-                    String notes = scanner.nextLine();
-
-                    Prescription prescription = PrescriptionController.createPrescription(appointmentId);
-                    PrescriptionItem item = PrescriptionItemController.createPrescriptionItem(prescription.getId(), selectedMedicine.getId(), quantity, notes);
-                    List<Object> quantityNotes = new ArrayList<>();
-                    quantityNotes.add(item.getQuantity());
-                    quantityNotes.add(item.getNotes());
-                    prescriptionItems.put(selectedMedicine.getId(),quantityNotes);
-    
-                    System.out.println("\nPrescription created for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage());
+            if (prescribeMedication.equals("yes")) {
+                List<Medicine> availableMedicines = MedicineController.getAllMedicines();
+                if (availableMedicines.isEmpty()) {
+                    System.out.println("No medicines available in the system.");
                 } else {
-                    System.out.println("\nInvalid selection: " + num.trim());
+                    System.out.println("\nAvailable Medicines:");
+                    for (int i = 0; i < availableMedicines.size(); i++) {
+                        Medicine medicine = availableMedicines.get(i);
+                        System.out.println((i + 1) + ". " + medicine.getMedicineName() + ", " + medicine.getDosage() + "mg");
+                    }
+    
+                    System.out.print("Enter the numbers of the medicines to prescribe (comma separated, or press Enter to skip): ");
+                    String input = scanner.nextLine().trim();
+                    if (!input.isEmpty()) {
+                        String[] selectedMedicineNumbers = input.split(",");
+    
+                        for (String num : selectedMedicineNumbers) {
+                            int medicineIndex;
+                            try {
+                                medicineIndex = Integer.parseInt(num.trim()) - 1;
+                            } catch (NumberFormatException e) {
+                                System.out.println("\nInvalid selection: " + num.trim() + ". Please enter valid numbers.");
+                                continue;
+                            }
+    
+                            if (medicineIndex < 0 || medicineIndex >= availableMedicines.size()) {
+                                System.out.println("\nInvalid selection: " + num.trim());
+                                continue;
+                            }
+    
+                            Medicine selectedMedicine = availableMedicines.get(medicineIndex);
+    
+                            System.out.println("\nSelected medicine: " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + "mg");
+    
+                            int quantity;
+                            do {
+                                System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + "mg (positive integer): ");
+                                try {
+                                    quantity = Integer.parseInt(scanner.nextLine().trim());
+                                    if (quantity <= 0) {
+                                        System.out.println("Quantity must be a positive integer.");
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid input. Please enter a valid positive integer.");
+                                    quantity = -1; // Set invalid value to retry input
+                                }
+                            } while (quantity <= 0);
+    
+                            System.out.print("Enter notes for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + "mg: ");
+                            String notes = scanner.nextLine();
+    
+                            List<Object> quantityNotes = new ArrayList<>();
+                            quantityNotes.add(quantity);
+                            quantityNotes.add(notes);
+                            prescriptionItems.put(selectedMedicine.getId(), quantityNotes);
+                        }
+                    }
                 }
             }
     
@@ -685,6 +725,7 @@ public class D_HomeUI implements IUserInterface {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid number.");
         } finally {
+            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }

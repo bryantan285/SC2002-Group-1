@@ -1,5 +1,7 @@
 package entity.user;
 
+import java.time.LocalDate;
+
 /**
  * The Pharmacist class represents a pharmacist in the healthcare system. It extends the HospitalStaff
  * class and is associated with the role of a pharmacist.
@@ -21,9 +23,9 @@ public class Pharmacist extends HospitalStaff {
      * @param userId The unique identifier for the pharmacist.
      * @param name The name of the pharmacist.
      * @param gender The gender of the pharmacist.
-     * @param age The age of the pharmacist.
+     * @param dob The date of birth of the pharmacist.
      */
-    public Pharmacist(boolean isPatient, String userId, String name, String gender, int age) {
-        super(isPatient, userId, name, gender, Role.PHARMACIST, age);
+    public Pharmacist(boolean isPatient, String userId, String name, String gender, LocalDate dob) {
+        super(isPatient, userId, name, gender, dob, Role.PHARMACIST);
     }
 }

@@ -1,5 +1,7 @@
 package entity.user;
 
+import java.time.LocalDate;
+
 /**
  * The Administrator class represents a specific type of hospital staff who has administrative privileges.
  * It extends the HospitalStaff class and inherits its properties and methods, while specifying the role as ADMINISTRATOR.
@@ -19,9 +21,9 @@ public class Administrator extends HospitalStaff {
      * @param userId The unique identifier of the user.
      * @param name The name of the administrator.
      * @param gender The gender of the administrator.
-     * @param age The age of the administrator.
+     * @param dob The date of birth of the administrator.
      */
-    public Administrator(boolean isPatient, String userId, String name, String gender, int age) {
-        super(isPatient, userId, name, gender, Role.ADMINISTRATOR, age);
+    public Administrator(boolean isPatient, String userId, String name, String gender, LocalDate dob) {
+        super(isPatient, userId, name, gender, dob, Role.ADMINISTRATOR);
     }
 }
