@@ -1,8 +1,10 @@
 package boundary.user.doctor;
 
 import control.appointment.AppointmentController;
+import control.billing.InvoiceController;
 import control.medicine.MedicineController;
 import control.notification.NotificationController;
+import control.prescription.PrescriptionController;
 import control.user.SessionManager;
 import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
@@ -348,7 +350,9 @@ public class D_HomeUI implements IUserInterface {
                 }
             }
     
-            AppointmentController.updateAppointmentOutcomes(selectedAppointment, updatedDiagnosis, updatedNotes, updatedPrescribedMedication);
+            AppointmentController.updateAppointmentOutcomes(selectedAppointment, updatedDiagnosis, updatedNotes);
+            PrescriptionController.updatePrescription(selectedAppointment, updatedPrescribedMedication);
+            InvoiceController.recalculateInvoiceCost(selectedAppointment.getId());
             System.out.println("Medical record updated successfully.");
     
         } catch (NoUserLoggedInException | InvalidInputException e) {
@@ -632,7 +636,6 @@ public class D_HomeUI implements IUserInterface {
                 return;
             }
     
-            // Validate diagnosis input
             String diagnosis;
             do {
                 System.out.print("Enter diagnosis (cannot be empty): ");
@@ -642,7 +645,6 @@ public class D_HomeUI implements IUserInterface {
                 }
             } while (diagnosis.isEmpty());
     
-            // Validate consultation notes input
             String consultationNotes;
             do {
                 System.out.print("Enter consultation notes (cannot be empty): ");
@@ -701,7 +703,7 @@ public class D_HomeUI implements IUserInterface {
                                     }
                                 } catch (NumberFormatException e) {
                                     System.out.println("Invalid input. Please enter a valid positive integer.");
-                                    quantity = -1; // Set invalid value to retry input
+                                    quantity = -1;
                                 }
                             } while (quantity <= 0);
     
@@ -717,8 +719,11 @@ public class D_HomeUI implements IUserInterface {
                 }
             }
     
-            AppointmentController.completeAppointment(appt, diagnosis, consultationNotes, prescriptionItems);
-    
+            AppointmentController.completeAppointment(appt, diagnosis, consultationNotes);
+            if (!prescriptionItems.isEmpty()) {
+                PrescriptionController.updatePrescription(appt, prescriptionItems);
+            }
+            InvoiceController.createInvoice(appt.getPatientId(), appt.getId(), 0.09f);
             System.out.println("Outcome recorded successfully.");
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());

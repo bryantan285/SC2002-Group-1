@@ -176,7 +176,7 @@ public class PrescriptionItemController {
                 .orElse(null);
 
         if (item == null) {
-            item = PrescriptionItemController.createPrescriptionItem(prescriptionId, medicineId, quantity, notes);
+            item = createPrescriptionItem(prescriptionId, medicineId, quantity, notes);
         }
 
         item.setQuantity(quantity);

@@ -5,7 +5,9 @@ import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
 import exception.EntityNotFoundException;
 import exception.InvalidInputException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import repository.medicine.PrescriptionRepository;
 
 /**
@@ -179,5 +181,34 @@ public class PrescriptionController {
         }
         prescriptionRepository.remove(prescription);
         prescriptionRepository.save();
+    }
+
+    public static void updatePrescription(Appointment appt, HashMap<String, List<Object>> updatedPrescribedMedication) {
+        if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
+            Prescription prescription = null;
+            try {
+                prescription = PrescriptionController.getPrescriptionByAppt(appt);
+            } catch (EntityNotFoundException e) {
+                try {
+                    prescription = PrescriptionController.createPrescription(appt.getId());
+                } catch (InvalidInputException e2) {
+                    System.out.println("Error: " + e2.getMessage());
+                }
+            } catch (InvalidInputException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+
+            for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
+                String medicineId = med.getKey();
+                int quantity = (int) med.getValue().get(0);
+                String notes = (String) med.getValue().get(1);
+
+                try {
+                    PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
+                } catch (EntityNotFoundException | InvalidInputException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+            }
+        }
     }
 }

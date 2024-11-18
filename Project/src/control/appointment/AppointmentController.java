@@ -1,6 +1,5 @@
 package control.appointment;
 
-import control.billing.InvoiceController;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.user.HospitalStaffController;
@@ -19,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import repository.appointment.AppointmentRepository;
 
@@ -269,7 +267,7 @@ public class AppointmentController {
      * @throws InvalidInputException If any required input is null or empty.
      * @throws EntityNotFoundException If prescription creation fails.
      */
-    public static void completeAppointment(Appointment appt, String diagnosis, String consultationNotes, HashMap<String,List<Object>> prescribedMedication) throws InvalidInputException, EntityNotFoundException {
+    public static void completeAppointment(Appointment appt, String diagnosis, String consultationNotes) throws InvalidInputException, EntityNotFoundException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
         }
@@ -284,14 +282,6 @@ public class AppointmentController {
         appt.setNotes(consultationNotes);
         appt.setStatus(Appointment.Status.COMPLETED);
         appointmentRepository.save();
-        // prescribed medicine, get(0) is quantity, get(1) is notes
-        if (!prescribedMedication.isEmpty()) {
-            Prescription prescription = PrescriptionController.createPrescription(appt.getId());
-            for (Map.Entry<String,List<Object>> med : prescribedMedication.entrySet()) {
-                PrescriptionItemController.createPrescriptionItem(prescription.getId(), med.getKey(),(int) med.getValue().get(0),(String) med.getValue().get(1));
-            }
-        }
-        InvoiceController.createInvoice(appt.getPatientId(), appt.getId(), 0.09f);
     }
 
     /**
@@ -387,7 +377,7 @@ public class AppointmentController {
      * @throws InvalidInputException If the appointment is null or not completed, or if input values are invalid.
      * @throws EntityNotFoundException If the prescription or prescription items cannot be updated.
      */
-    public static void updateAppointmentOutcomes(Appointment appt, String updatedDiagnosis, String updatedConsultationNotes, HashMap<String, List<Object>> updatedPrescribedMedication) throws InvalidInputException, EntityNotFoundException {
+    public static void updateAppointmentOutcomes(Appointment appt, String updatedDiagnosis, String updatedConsultationNotes) throws InvalidInputException, EntityNotFoundException {
         if (appt == null) {
             throw new InvalidInputException("Appointment cannot be null.");
         }
@@ -402,28 +392,6 @@ public class AppointmentController {
 
         if (updatedConsultationNotes != null && !updatedConsultationNotes.isEmpty()) {
             appt.setNotes(updatedConsultationNotes);
-        }
-
-        if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
-            Prescription prescription = null;
-            try {
-                prescription = PrescriptionController.getPrescriptionByAppt(appt);
-            } catch (EntityNotFoundException e) {
-                prescription = PrescriptionController.createPrescription(appt.getId());
-            }
-
-            for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
-                String medicineId = med.getKey();
-                int quantity = (int) med.getValue().get(0);
-                String notes = (String) med.getValue().get(1);
-
-                try {
-                    PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
-                } catch (EntityNotFoundException e) {
-                    System.out.println("Error: " + e.getMessage());
-                }
-            }
-            InvoiceController.recalculateInvoiceCost(appt.getId());
         }
         appointmentRepository.save();
     }
