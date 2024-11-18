@@ -2,7 +2,6 @@ package repository.user;
 
 import entity.user.UnavailableDate;
 import java.io.IOException;
-import java.util.Iterator;
 import repository.Repository;
 
 /**
@@ -16,25 +15,6 @@ public class UnavailableDateRepository extends Repository<UnavailableDate> {
     private static final String FILE_PATH = "Project\\data\\UnavailableDate_List.csv";
     private static final String PREFIX = "UD";
 
-    /**
-     * The main method demonstrates how to use the UnavailableDateRepository. It prints the total number
-     * of unavailable dates and iterates through all the unavailable dates in the repository.
-     *
-     * @param args command line arguments (not used)
-     */
-    public static void main(String[] args) {
-        try {
-            UnavailableDateRepository repo = UnavailableDateRepository.getInstance();
-            Iterator<UnavailableDate> iterator = repo.iterator();
-            
-            System.out.println(repo.getSize());
-            while (iterator.hasNext()) {
-                System.out.println(iterator.next());
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
 
     /**
      * Private constructor for the UnavailableDateRepository. It calls the parent constructor

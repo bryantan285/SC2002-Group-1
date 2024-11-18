@@ -3,9 +3,9 @@ package repository.user;
 import entity.user.HospitalStaff;
 import entity.user.StaffFactory;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import repository.Repository;
+import utility.CSV_handler;
 
 /**
  * StaffRepository is a singleton class that manages the collection of HospitalStaff entities.
@@ -15,26 +15,6 @@ import repository.Repository;
 public class StaffRepository extends Repository<HospitalStaff> {
     private static StaffRepository repo = null;
     private static final String FILE_PATH = "Project\\data\\Staff_List.csv";
-
-    /**
-     * The main method demonstrates how to use the StaffRepository. It prints the total number
-     * of hospital staff and iterates through all staff members in the repository.
-     *
-     * @param args command line arguments (not used)
-     */
-    public static void main(String[] args) {
-        try {
-            StaffRepository repo = StaffRepository.getInstance();
-            Iterator<HospitalStaff> iterator = repo.iterator();
-            
-            System.out.println(repo.getSize());
-            while (iterator.hasNext()) {
-                System.out.println(iterator.next());
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
 
     /**
      * Private constructor for the StaffRepository. It calls the parent constructor
@@ -143,7 +123,7 @@ public class StaffRepository extends Repository<HospitalStaff> {
      */
     @Override
     public void load() throws IOException {
-        List<HospitalStaff> objs = super.getCSV_handler().readHospitalStaffFromCSV(getFilePath());
+        List<HospitalStaff> objs = ((CSV_handler)super.getCSV_handler()).readHospitalStaffFromCSV(getFilePath());
         setObjects(objs);
     }
 

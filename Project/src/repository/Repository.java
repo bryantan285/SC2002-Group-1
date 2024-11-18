@@ -2,6 +2,7 @@ package repository;
 
 import entity.EntityObject;
 import interfaces.repository.IRepository;
+import interfaces.utility.IStorageHandler;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import utility.CSV_handler;
 public abstract class Repository<T extends EntityObject> implements Iterable<T>, IRepository<T> {
 
     private final Map<String, T> objMap;
-    private final CSV_handler csv_handler;
+    private final IStorageHandler csv_handler;
 
     /**
      * Constructor initializes the repository and creates an empty map to store entities.
@@ -289,7 +290,7 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T>,
     /**
      * Retrieves CSV_handler instance.
      */
-    protected CSV_handler getCSV_handler() {
+    protected IStorageHandler getCSV_handler() {
         return this.csv_handler;
     }
 }
