@@ -15,14 +15,14 @@ import repository.user.StaffRepository;
  * the StaffRepository to perform data operations on hospital staff records.
  */
 public class HospitalStaffController {
-
+    private static final StaffRepository repo = StaffRepository.getInstance();
     /**
      * Retrieves all hospital staff from the repository.
      *
      * @return a list of all hospital staff
      */
     public static List<HospitalStaff> getAllStaff() {
-        return StaffRepository.getInstance().toList();
+        return repo.toList();
     }
 
     /**
@@ -68,7 +68,6 @@ public class HospitalStaffController {
         }
     
         try {
-            StaffRepository repo = StaffRepository.getInstance();
             HospitalStaff newStaff = StaffFactory.createStaffByRole(role);
             newStaff.setIsPatient(false);
             newStaff.changePassword("password");
@@ -129,8 +128,6 @@ public class HospitalStaffController {
         staff.setGender(gender);
         staff.setRole(role);
         staff.setDob(dob);
-
-        StaffRepository repo = StaffRepository.getInstance();
         repo.save();
     }
 
@@ -147,7 +144,6 @@ public class HospitalStaffController {
         if (staff == null) {
             throw new EntityNotFoundException("Staff", "null");
         }
-        StaffRepository repo = StaffRepository.getInstance();
         if (repo.get(staff.getId()) == null) {
             throw new EntityNotFoundException("Staff", staff.getId());
         }
@@ -164,7 +160,7 @@ public class HospitalStaffController {
      * @throws EntityNotFoundException if the staff member cannot be found
      */
     public static HospitalStaff findById(String id) throws EntityNotFoundException {
-        HospitalStaff staff = StaffRepository.getInstance().get(id);
+        HospitalStaff staff = repo.get(id);
         if (staff == null) {
             throw new EntityNotFoundException("Staff", id);
         }
@@ -184,6 +180,6 @@ public class HospitalStaffController {
         if (field == null || field.isEmpty() || value == null || value.isEmpty()) {
             throw new InvalidInputException("Field and value cannot be null or empty.");
         }
-        return StaffRepository.getInstance().findByField(field, value);
+        return repo.findByField(field, value);
     }
 }

@@ -13,6 +13,7 @@ import repository.user.PatientRepository;
  */
 public class PatientController {
 
+    private static final PatientRepository repo = PatientRepository.getInstance();
     /**
      * Retrieves a patient by their ID.
      * 
@@ -21,7 +22,7 @@ public class PatientController {
      * @throws EntityNotFoundException if the patient with the given ID is not found
      */
     public static Patient getById(String patientId) throws EntityNotFoundException {
-        Patient patient = PatientRepository.getInstance().get(patientId);
+        Patient patient = repo.get(patientId);
         if (patient == null) {
             throw new EntityNotFoundException("Patient", patientId);
         }
@@ -42,7 +43,6 @@ public class PatientController {
         if (email == null || !email.matches("^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
             throw new InvalidInputException("Invalid email format.");
         }
-        PatientRepository repo = PatientRepository.getInstance();
         // Find patient by user ID
         Patient patient = repo.findByField("id", user.getId()).stream()
                 .findFirst()
@@ -67,7 +67,6 @@ public class PatientController {
         if (contactNumber == null || !contactNumber.matches("^[89][0-9]{7}$")) {
             throw new InvalidInputException("Invalid Singaporean mobile number format. It must start with 8 or 9 and have exactly 8 digits.");
         }
-        PatientRepository repo = PatientRepository.getInstance();
         // Find patient by user ID
         Patient patient = repo.findByField("id", user.getId()).stream()
                 .findFirst()
