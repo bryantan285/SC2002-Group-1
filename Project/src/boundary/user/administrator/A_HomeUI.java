@@ -29,12 +29,21 @@ import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * Represents the administrator's home UI.
+ * Provides options for managing hospital staff, appointments, medication inventory, replenishment requests, and notifications.
+ */
 public class A_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
     private final NotificationController notificationController;
     private IObserver observer;
 
+    /**
+     * Constructs the A_HomeUI with the specified session manager.
+     * 
+     * @param session The session manager for the current administrator.
+     */
     public A_HomeUI(SessionManager session) {
         this.session = session;
         this.notificationController = NotificationController.getInstance();
@@ -47,10 +56,13 @@ public class A_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the main menu for the administrator and handles user choices.
+     */
     @Override
     public void show_options() {
         boolean exit = false;
-    
+
         while (!exit) {
             System.out.println("\n=== Administrator Menu ===");
             System.out.println("1. View and Manage Hospital Staff");
@@ -60,9 +72,9 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("5. View Notifications");
             System.out.println("6. Logout");
             System.out.println("====================");
-    
+
             int choice = 0;
-    
+
             while (true) {
                 try {
                     System.out.print("Please select an option: ");
@@ -75,18 +87,22 @@ public class A_HomeUI implements IUserInterface {
                     scanner.nextLine();
                 }
             }
-    
+
             if (choice == 6) exit = true;
             else {
                 ClearConsole.clearConsole();
                 handle_option(choice);
             }
         }
-    
+
         System.out.println("You have successfully logged out. Goodbye!");
     }
-    
 
+    /**
+     * Handles the option chosen by the administrator from the menu.
+     * 
+     * @param choice The option selected by the administrator.
+     */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
@@ -103,6 +119,9 @@ public class A_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays and manages options for viewing, updating, and adding hospital staff.
+     */
     private void viewAndManageHospitalStaff() {
         boolean exit = false;
 
@@ -119,7 +138,7 @@ public class A_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
             switch (choice) {
                 case 1 -> viewHospitalStaff();
-                case 2 ->  addHospitalStaff();
+                case 2 -> addHospitalStaff();
                 case 3 -> {
                     return;
                 }
@@ -130,6 +149,9 @@ public class A_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays a list of hospital staff and allows updating or deleting staff records.
+     */
     private void viewHospitalStaff() {
         List<HospitalStaff> list = HospitalStaffController.getAllStaff()
                                 .stream()
@@ -138,48 +160,48 @@ public class A_HomeUI implements IUserInterface {
 
         list.sort(Comparator.comparing(HospitalStaff::getId));
         System.out.println("View Hospital Staff");
-    
+
         if (list.isEmpty()) {
             System.out.println("No hospital staff found.");
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
             return;
         }
-    
+
         for (HospitalStaff staff : list) {
             System.out.println("==================");
             System.out.println(staff.toString());
         }
         System.out.println("==================");
-    
+
         try {
             HospitalStaff targetStaff = null;
             while (targetStaff == null) {
                 System.out.print("Enter hospital staff ID to update or delete (enter nothing to go back to previous menu): ");
                 String staffId = scanner.nextLine().trim();
-        
+
                 if (staffId.isEmpty()) {
                     ClearConsole.clearConsole();
                     return;
                 }
-        
+
                 targetStaff = list.stream()
                     .filter(staff -> staff.getId().equals(staffId))
                     .findFirst()
                     .orElse(null);
-        
+
                 if (targetStaff == null) {
                     System.out.println("Error: Hospital staff not found. Please enter a valid ID.");
                 }
             }
-        
+
             while (true) {
                 System.out.println("Selected Staff: " + targetStaff.getId());
                 System.out.println("1. Update Staff");
                 System.out.println("2. Delete Staff");
                 System.out.println("3. Return to Previous Menu");
                 System.out.print("Enter your choice: ");
-        
+
                 String choice = scanner.nextLine().trim();
                 switch (choice) {
                     case "1" -> {
@@ -207,191 +229,13 @@ public class A_HomeUI implements IUserInterface {
         } catch (EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
         }
-    
+
         KeystrokeWait.waitForKeyPress();
         ClearConsole.clearConsole();
     }
-
-private void updateHospitalStaff(HospitalStaff staff) {
-    System.out.println("Update Hospital Staff");
-    System.out.println("=====================");
-    System.out.println(staff.toString());
-
-    String name;
-    while (true) {
-        System.out.print("Enter new name (press Enter to keep current: " + staff.getName() + "): ");
-        name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            name = staff.getName();
-            break;
-        }
-        if (name.length() > 2) {
-            break;
-        } else {
-            System.out.println("Error: Name must be at least 3 characters long.");
-        }
-    }
-
-    String gender;
-    while (true) {
-        System.out.print("Select gender (1 for Male, 2 for Female, press Enter to keep current: " + staff.getGender() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            gender = staff.getGender();
-            break;
-        }
-        if (input.equals("1")) {
-            gender = "Male";
-            break;
-        } else if (input.equals("2")) {
-            gender = "Female";
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
-        }
-    }
-
-    HospitalStaff.Role role = staff.getRole();
-    while (true) {
-        System.out.println("Select role (1 for DOCTOR, 2 for PHARMACIST, press Enter to keep current: " + staff.getRole() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            break;
-        }
-        if (input.equals("1")) {
-            role = HospitalStaff.Role.DOCTOR;
-            break;
-        } else if (input.equals("2")) {
-            role = HospitalStaff.Role.PHARMACIST;
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 or 2.");
-        }
-    }
-
-    LocalDate dob = staff.getDob();
-    while (true) {
-        System.out.print("Enter new date of birth (dd-MM-yyyy, press Enter to keep current: " + staff.getDob() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            break;
-        }
-        try {
-            dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            break;
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
-        }
-    }
-
-    try {
-        HospitalStaffController.updateStaff(staff, name, gender, role, dob);
-        System.out.println("Hospital staff updated successfully.");
-    } catch (InvalidInputException e) {
-        System.out.println("Error: " + e.getMessage());
-    }
-
-    KeystrokeWait.waitForKeyPress();
-    ClearConsole.clearConsole();
-}
-
-    
-
-private void addHospitalStaff() {
-    System.out.println("Add Hospital Staff");
-    System.out.println("Enter any blank input to go back to previous menu");
-    System.out.println("====================================");
-
-    String name;
-    while (true) {
-        System.out.print("Enter staff name: ");
-        name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-        if (name.length() > 2) {
-            break;
-        } else {
-            System.out.println("Error: Name must be at least 3 characters long.");
-        }
-    }
-
-    String gender;
-    while (true) {
-        System.out.print("Select gender (1 for Male, 2 for Female): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-        if (input.equals("1")) {
-            gender = "Male";
-            break;
-        } else if (input.equals("2")) {
-            gender = "Female";
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
-        }
-    }
-
-    HospitalStaff.Role role = null;
-    boolean exit = false;
-    while (!exit) {
-        System.out.println("Select staff role:");
-        System.out.println("1. DOCTOR");
-        System.out.println("2. PHARMACIST");
-        System.out.print("Enter your choice: ");
-        String roleInput = scanner.nextLine().trim();
-
-        if (roleInput.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-
-        switch (roleInput) {
-            case "1" -> {
-                role = HospitalStaff.Role.DOCTOR;
-                exit = true;
-            }
-            case "2" -> {
-                role = HospitalStaff.Role.PHARMACIST;
-                exit = true;
-            }
-            default -> System.out.println("Error: Invalid choice. Please enter 1 or 2");
-        }
-    }
-
-    LocalDate dob;
-    while (true) {
-        System.out.print("Enter date of birth (dd-MM-yyyy): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-        try {
-            dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            break;
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
-        }
-    }
-
-    try {
-        HospitalStaffController.addStaff(name, gender, role, dob);
-        System.out.println("Hospital staff added successfully.");
-    } catch (InvalidInputException e) {
-        System.out.println("Error: " + e.getMessage());
-    }
-
-    KeystrokeWait.waitForKeyPress();
-    ClearConsole.clearConsole();
-}
-
-    
-
+    /**
+     * Displays all appointments and their details.
+     */
     private void viewAppointmentsDetails() {
         List<Appointment> list = AppointmentController.getAllAppts().stream().collect(Collectors.toCollection(ArrayList::new));
         list.sort(Comparator.comparing(Appointment::getId));
@@ -406,6 +250,9 @@ private void addHospitalStaff() {
         ClearConsole.clearConsole();
     }
 
+    /**
+     * Displays and manages medication inventory, allowing updates and stock changes.
+     */
     private void viewAndManageMedicationInventory() {
         List<Medicine> medList = MedicineController.getAllMedicines();
         if (medList.isEmpty()) {
@@ -438,9 +285,14 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Allows managing inventory for a specific medicine, including stock adjustments.
+     * 
+     * @param med The medicine to manage.
+     */
     private void manageMedicationInventory(Medicine med) {
         boolean exit = false;
-    
+
         while (!exit) {
             System.out.println("Manage Medication Inventory");
             System.out.println("===========================");
@@ -451,35 +303,40 @@ private void addHospitalStaff() {
             System.out.println("3. Update Medicine Stock");
             System.out.println("4. Update low stock threshold");
             System.out.println("5. Return to Previous Menu");
-    
+
             int choice = 0;
-    
+
             while (true) {
                 try {
                     System.out.print("Enter your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
-                    if (choice >= 1 && choice <= 4) break;
+                    if (choice >= 1 && choice <= 5) break;
                     System.out.println("Enter only a number between 1 and 5.");
                 } catch (InputMismatchException e) {
                     System.out.println("Invalid input. Please enter a number between 1 and 5.");
                     scanner.nextLine();
                 }
             }
-    
+
             ClearConsole.clearConsole();
-    
+
             switch (choice) {
                 case 1 -> increaseMedicineStock(med);
                 case 2 -> decreaseMedicineStock(med);
                 case 3 -> updateMedicineStock(med);
                 case 4 -> updateMedicineThreshold(med);
                 case 5 -> exit = true;
-                default -> System.out.println("Invalid choice. Please select an option from 1 to 4.");
+                default -> System.out.println("Invalid choice. Please select an option from 1 to 5.");
             }
         }
     }
 
+    /**
+     * Updates the low stock threshold for a specified medicine.
+     * 
+     * @param medicine The medicine whose threshold is to be updated.
+     */
     private void updateMedicineThreshold(Medicine medicine) {
         try {
             int newThreshold;
@@ -501,7 +358,7 @@ private void addHospitalStaff() {
                     scanner.nextLine();
                 }
             }
-    
+
             if (MedicineController.setLowStockThreshold(medicine, newThreshold)) {
                 System.out.printf("Updated threshold for medicine ID %s to %d units.%n", medicine.getId(), newThreshold);
             }
@@ -512,8 +369,12 @@ private void addHospitalStaff() {
             ClearConsole.clearConsole();
         }
     }
-    
 
+    /**
+     * Increases the stock for a specified medicine.
+     * 
+     * @param medicine The medicine whose stock is to be increased.
+     */
     private void increaseMedicineStock(Medicine medicine) {
         try {
             int quantity;
@@ -535,7 +396,7 @@ private void addHospitalStaff() {
                     scanner.nextLine();
                 }
             }
-            
+
             if (MedicineController.incMedStock(medicine, quantity)) {
                 System.out.printf("Increased stock for medicine ID %s by %d units.%n", medicine.getId(), quantity);
             }
@@ -547,6 +408,11 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Decreases the stock for a specified medicine.
+     * 
+     * @param medicine The medicine whose stock is to be decreased.
+     */
     private void decreaseMedicineStock(Medicine medicine) {
         try {
             int quantity;
@@ -580,6 +446,11 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Updates the stock for a specified medicine to a new quantity.
+     * 
+     * @param medicine The medicine whose stock is to be updated.
+     */
     private void updateMedicineStock(Medicine medicine) {
         try {
             int newQuantity;
@@ -609,126 +480,6 @@ private void addHospitalStaff() {
         } finally {
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
-        }
-    }
-
-    
-    private void manageReplenishmentRequests() {
-        while (true) {
-            try {
-                List<MedicineRequest> reqList = MedicineRequestController.getPendingRequests();
-        
-                if (reqList.isEmpty()) {
-                    System.out.println("No pending replenishment requests.");
-                    KeystrokeWait.waitForKeyPress();
-                    ClearConsole.clearConsole();
-                    return;
-                }
-        
-                System.out.println("Pending Replenishment Requests:");
-                for (MedicineRequest req : reqList) {
-                    System.out.println("=============================");
-                    Medicine med = MedicineController.getMedicineById(req.getMedicineId());
-                    System.out.println("Request ID: " + req.getId());
-                    System.out.println("Medicine ID: " + req.getMedicineId());
-                    System.out.println("Medicine Name: " + med.getMedicineName());
-                    System.out.println("Requestor ID: " + req.getRequestorId());
-                    System.out.println("Current Quantity: " + med.getStockQuantity());
-                    System.out.println("Requested Quantity: " + req.getQuantity());
-                }
-                System.out.println("=============================");
-        
-                MedicineRequest selectedRequest = null;
-                while (selectedRequest == null) {
-                    System.out.print("Enter a valid request ID to process (Enter nothing to go back to previous menu): ");
-                    String choice = scanner.nextLine();
-                    if (choice.isEmpty()) {
-                        ClearConsole.clearConsole();
-                        return;
-                    }
-        
-                    selectedRequest = reqList.stream()
-                        .filter(req -> req.getId().equals(choice))
-                        .findFirst()
-                        .orElse(null);
-        
-                    if (selectedRequest == null) {
-                        System.out.println("Invalid request ID. Please try again.");
-                    }
-                }
-        
-                ClearConsole.clearConsole();
-                processReplenishmentRequest(selectedRequest);
-            } catch (InvalidInputException | EntityNotFoundException  e) {
-                System.out.println("Error: " + e.getMessage());
-            } finally {
-                ClearConsole.clearConsole();
-            }
-        }
-    }
-    
-    private void processReplenishmentRequest(MedicineRequest selectedRequest) {
-        try {
-            Medicine selectedMedicine = MedicineController.getMedicineById(selectedRequest.getMedicineId());
-            boolean actionExit = false;
-    
-            while (!actionExit) {
-                System.out.println("Processing Replenishment Request:");
-                System.out.println("=============================");
-                System.out.println("Request ID: " + selectedRequest.getId());
-                System.out.println("Medicine ID: " + selectedRequest.getMedicineId());
-                System.out.println("Requestor ID: " + selectedRequest.getRequestorId());
-                System.out.println("Medicine Name: " + selectedMedicine.getMedicineName());
-                System.out.println("Current Quantity: " + selectedMedicine.getStockQuantity());
-                System.out.println("Requested Quantity: " + selectedRequest.getQuantity());
-                System.out.println("=============================");
-                System.out.println("1. Approve request");
-                System.out.println("2. Reject request");
-                System.out.println("3. Go back to the previous menu");
-                System.out.print("Enter your choice: ");
-    
-                int actionChoice = scanner.nextInt();
-                scanner.nextLine();
-                ClearConsole.clearConsole();
-    
-                switch (actionChoice) {
-                    case 1 -> {
-                        MedicineRequestController.approveReplenishmentRequest((HospitalStaff) session.getCurrentUser(), selectedRequest);
-                        System.out.println("Request approved. Stock has been updated.");
-                        KeystrokeWait.waitForKeyPress();
-                        actionExit = true;
-                    }
-                    case 2 -> {
-                        MedicineRequestController.rejectReplenishmentRequest((HospitalStaff) session.getCurrentUser(), selectedRequest);
-                        System.out.println("Request rejected.");
-                        KeystrokeWait.waitForKeyPress();
-                        actionExit = true;
-                    }
-                    case 3 -> actionExit = true;
-                    default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
-                }
-                ClearConsole.clearConsole();
-            }
-        } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-    
-    public void viewNotifications() {
-        try {
-            List<List<String>> notiList = observer.getNotificationHistory();
-            System.out.println("Notifications");
-            System.out.println("=============");
-            for (List<String> noti : notiList) {
-                System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
-            }
-            
-            // Mark all notifications as read
-            notificationController.markNotificationsRead(session.getCurrentUser().getId());
-            
-            KeystrokeWait.waitForKeyPress();
-            ClearConsole.clearConsole();
-        } catch (NoUserLoggedInException ex) {
         }
     }
 }
