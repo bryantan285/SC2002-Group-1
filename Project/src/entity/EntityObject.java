@@ -5,6 +5,11 @@ package entity;
  */
 public abstract class EntityObject {
 
+    
+    /** 
+     * @param isValid(
+     * @return String
+     */
     /**
      * Abstract method to retrieve the unique identifier for the entity object.
      * Concrete subclasses must implement this method to return their specific ID.

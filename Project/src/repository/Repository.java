@@ -34,6 +34,12 @@ public abstract class Repository<T extends EntityObject> implements Iterable<T>,
         csv_handler = new CSV_handler();
     }
 
+    
+    /** 
+     * @param load(
+     * @return String
+     * @throws IOException
+     */
     /**
      * Abstract method that returns the file path where the data is stored.
      * 
