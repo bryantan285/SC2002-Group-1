@@ -38,12 +38,31 @@ import utility.DateTimeSelect;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * The `P_HomeUI` class represents the user interface for a patient's home screen in a healthcare system.
+ * It implements the `IUserInterface` interface and provides various methods for the patient to interact with their appointments,
+ * view notifications, make payments, and more.
+ *
+ * This class handles operations such as scheduling, rescheduling, canceling appointments, viewing past appointments,
+ * viewing and paying invoices, and viewing notifications. It interacts with controllers for managing appointments,
+ * invoices, notifications, and user sessions.
+ * 
+ * It also provides methods to select dates, display doctor information, and handle payments for outstanding balances.
+ * 
+ * The patient interacts with this interface through various menu options that invoke these actions.
+ */
 public class P_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
     private final NotificationController notificationController;
     private IObserver observer;
 
+    /**
+     * Constructs a P_HomeUI instance to handle patient user interface actions.
+     * Initializes the session and notification controller for the patient.
+     * 
+     * @param session the session manager to handle the current user session
+     */
     public P_HomeUI(SessionManager session) {
         this.session = session;
         this.notificationController = NotificationController.getInstance();
@@ -56,6 +75,10 @@ public class P_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the main menu options for the patient interface.
+     * Provides options like viewing medical records, updating information, scheduling appointments, etc.
+     */
     @Override
     public void show_options() {
         boolean exit = false;
@@ -104,6 +127,12 @@ public class P_HomeUI implements IUserInterface {
         System.out.println("You have successfully logged out. Goodbye!");
     }
 
+    /**
+     * Handles the selected menu option by invoking the corresponding method.
+     * Each case corresponds to a specific patient action, such as viewing medical records or scheduling an appointment.
+     * 
+     * @param choice the menu option selected by the patient
+     */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
@@ -125,6 +154,9 @@ public class P_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the patient's medical record, including past appointment outcomes.
+     */
     private void viewMedicalRecord() {
         try {
             Patient patient = (Patient) session.getCurrentUser();
@@ -159,6 +191,9 @@ public class P_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Provides the patient with options to update their personal information, such as email, contact number, or password.
+     */
     private void updatePersonalInformation() {
         try {
             Patient patient = (Patient) session.getCurrentUser();
@@ -189,7 +224,12 @@ public class P_HomeUI implements IUserInterface {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    
+
+    /**
+     * Allows the patient to update their email address.
+     * 
+     * @param patient the current logged-in patient
+     */
     private void updateEmail(Patient patient) {
         while (true) {
             try {
@@ -212,7 +252,12 @@ public class P_HomeUI implements IUserInterface {
             }
         }
     }
-    
+
+    /**
+     * Allows the patient to update their contact number.
+     * 
+     * @param patient the current logged-in patient
+     */
     private void updateContactNumber(Patient patient) {
         while (true) {
             try {
@@ -235,7 +280,12 @@ public class P_HomeUI implements IUserInterface {
             }
         }
     }
-
+    
+    /**
+     * Allows the patient to change their password.
+     * 
+     * @param patient the current logged-in patient
+     */
     private void changePassword(Patient patient) {
         String newPassword;
         String confirmPassword;
@@ -276,7 +326,9 @@ public class P_HomeUI implements IUserInterface {
         }
     }
     
-
+    /**
+     * Displays the available appointment slots for the patient to choose from.
+     */
     private void viewAvailableAppointmentSlots() {
         while (true) {
             try {
@@ -334,7 +386,12 @@ public class P_HomeUI implements IUserInterface {
             }
         }
     }
-
+    
+    /**
+     * Schedules a new appointment with a doctor.
+     * This method allows the patient to view a list of doctors, select one, 
+     * choose an appointment time, and specify a service type for the appointment.
+     */
     private void scheduleAppointment() {
         try {
             System.out.println("List of Doctors:");
@@ -402,7 +459,12 @@ public class P_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
+
+    /**
+     * Reschedules an existing appointment for the patient.
+     * This method allows the patient to view their current appointments, select one,
+     * and choose a new date and time.
+     */
     private void rescheduleAppointment() {
         try {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
@@ -454,7 +516,11 @@ public class P_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
+
+    /**
+     * Cancels an existing appointment.
+     * This method allows the patient to select an appointment to cancel from a list of scheduled appointments.
+     */
     private void cancelAppointment() {
         try {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
@@ -501,7 +567,9 @@ public class P_HomeUI implements IUserInterface {
         }
     }
     
-
+    /**
+     * Displays a list of all scheduled appointments for the patient.
+     */
     private void viewScheduledAppointments() {
         try {
             List<Appointment> list = AppointmentController.getScheduledAppointments((Patient) session.getCurrentUser());
@@ -525,6 +593,9 @@ public class P_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the outcome records for past appointments, including prescriptions and prescribed items.
+     */
     private void viewPastAppointmentOutcomeRecords() {
         try {
             System.out.println("==========================================");
@@ -565,6 +636,10 @@ public class P_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays and allows the user to pay outstanding invoices.
+     * If the invoice is unpaid and has a balance, the patient can make a payment.
+     */
     private void viewAndPayInvoice() {
         try {
             List<Invoice> invList = InvoiceController.getInvoiceByCustomer(session.getCurrentUser().getId());
@@ -645,7 +720,10 @@ public class P_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
+
+    /**
+ * Displays and marks all notifications as read.
+ */
     public void viewNotifications() {
         try {
             List<List<String>> notiList = observer.getNotificationHistory();
