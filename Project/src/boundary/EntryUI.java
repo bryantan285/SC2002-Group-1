@@ -20,19 +20,37 @@ import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * Entry point for the Hospital Management System.
+ * Handles user login, password change, and navigation to role-specific UIs.
+ */
 public class EntryUI {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
 
+    /**
+     * Main method to launch the application.
+     *
+     * @param args Command-line arguments (not used).
+     * @throws InvalidUserTypeException If an invalid user type is encountered during login.
+     */
     public static void main(String[] args) throws InvalidUserTypeException {
         EntryUI entryUI = new EntryUI();
         entryUI.login();
     }
 
+    /**
+     * Constructor to initialize the EntryUI with a new session manager.
+     */
     public EntryUI() {
         this.session = new SessionManager();
     }
 
+    /**
+     * Handles the login process, including user authentication and optional password change.
+     *
+     * @throws InvalidUserTypeException If the user type cannot be determined.
+     */
     public void login() throws InvalidUserTypeException {
         System.out.println("\n===========================");
         System.out.println("██╗  ██╗███╗   ███╗███████╗");
@@ -54,7 +72,6 @@ public class EntryUI {
                 inputPassword = getPassword();
 
                 user = UserController.login(inputId, inputPassword);
-               
 
                 if (user != null) {
                     System.out.println("Login successful. Welcome, " + inputId + "!");
@@ -77,6 +94,11 @@ public class EntryUI {
         nextStep(session);
     }
 
+    /**
+     * Prompts the user to enter their user ID.
+     *
+     * @return The entered user ID.
+     */
     private String getUserId() {
         String userId;
         while (true) {
@@ -95,6 +117,11 @@ public class EntryUI {
         }
     }
 
+    /**
+     * Prompts the user to enter their password.
+     *
+     * @return The entered password.
+     */
     private String getPassword() {
         String password;
         while (true) {
@@ -112,6 +139,11 @@ public class EntryUI {
         }
     }
 
+    /**
+     * Handles the process of changing a user's password.
+     *
+     * @param user The user whose password is to be changed.
+     */
     public void changePassword(User user) {
         String newPassword;
         String confirmPassword;
@@ -143,6 +175,11 @@ public class EntryUI {
         }
     }
 
+    /**
+     * Redirects the user to their role-specific interface after successful login.
+     *
+     * @param session The current user session.
+     */
     public void nextStep(SessionManager session) {
         try {
             IUserInterface nextUI;
