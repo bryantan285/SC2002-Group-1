@@ -8,8 +8,6 @@ import exception.user.InvalidUserTypeException;
  * This class handles the initialization of the login process and handles any errors related to invalid user types.
  */
 public class Main {
-    // private static ArrayList<User> users = new ArrayList<>();
-    // private static Scanner scanner = new Scanner(System.in);
 
     /**
      * Main method that starts the application.
