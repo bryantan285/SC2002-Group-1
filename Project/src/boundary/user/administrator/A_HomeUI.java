@@ -34,7 +34,13 @@ public class A_HomeUI implements IUserInterface {
     private final SessionManager session;
     private final NotificationController notificationController;
     private IObserver observer;
-
+    
+    /**
+     * Constructor to initialize the Administrator Home UI.
+     * Registers the current user as an observer for notifications.
+     * 
+     * @param session The current user session.
+     */
     public A_HomeUI(SessionManager session) {
         this.session = session;
         this.notificationController = NotificationController.getInstance();
@@ -46,6 +52,9 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("No user logged in");
         }
     }
+    /**
+     * Displays the main menu for the administrator to choose an option.
+     */
     @Override
     public void show_options() {
         boolean exit = false;
@@ -82,6 +91,13 @@ public class A_HomeUI implements IUserInterface {
         }
         System.out.println("You have successfully logged out. Goodbye!");
     }
+
+    /**
+     * Handles the user's selection from the main menu.
+     * Routes the selection to the corresponding method.
+     * 
+     * @param choice The user's selection from the main menu.
+     */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
@@ -97,7 +113,11 @@ public class A_HomeUI implements IUserInterface {
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
     }
-
+    
+    /**
+     * Displays options to view, update, or delete hospital staff,
+     * and allows adding new hospital staff.
+     */
     private void viewAndManageHospitalStaff() {
         boolean exit = false;
 
@@ -125,6 +145,10 @@ public class A_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays a list of hospital staff (doctors and pharmacists),
+     * and allows the administrator to update or delete staff members.
+     */
     private void viewHospitalStaff() {
         List<HospitalStaff> list = HospitalStaffController.getAllStaff()
                                 .stream()
@@ -205,186 +229,198 @@ public class A_HomeUI implements IUserInterface {
         }
     }
 
-private void updateHospitalStaff(HospitalStaff staff) {
-    System.out.println("Update Hospital Staff");
-    System.out.println("=====================");
-    System.out.println(staff.toString());
-
-    String name;
-    while (true) {
-        System.out.print("Enter new name (press Enter to keep current: " + staff.getName() + "): ");
-        name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            name = staff.getName();
-            break;
-        }
-        if (name.length() > 2) {
-            break;
-        } else {
-            System.out.println("Error: Name must be at least 3 characters long.");
-        }
-    }
-
-    String gender;
-    while (true) {
-        System.out.print("Select gender (1 for Male, 2 for Female, press Enter to keep current: " + staff.getGender() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            gender = staff.getGender();
-            break;
-        }
-        if (input.equals("1")) {
-            gender = "Male";
-            break;
-        } else if (input.equals("2")) {
-            gender = "Female";
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
-        }
-    }
-
-    HospitalStaff.Role role = staff.getRole();
-    while (true) {
-        System.out.println("Select role (1 for DOCTOR, 2 for PHARMACIST, press Enter to keep current: " + staff.getRole() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            break;
-        }
-        if (input.equals("1")) {
-            role = HospitalStaff.Role.DOCTOR;
-            break;
-        } else if (input.equals("2")) {
-            role = HospitalStaff.Role.PHARMACIST;
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 or 2.");
-        }
-    }
-
-    LocalDate dob = staff.getDob();
-    while (true) {
-        System.out.print("Enter new date of birth (dd-MM-yyyy, press Enter to keep current: " + staff.getDob() + "): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            break;
-        }
-        try {
-            dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            break;
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
-        }
-    }
-
-    try {
-        HospitalStaffController.updateStaff(staff, name, gender, role, dob);
-        System.out.println("Hospital staff updated successfully.");
-    } catch (InvalidInputException e) {
-        System.out.println("Error: " + e.getMessage());
-    }
-
-    KeystrokeWait.waitForKeyPress();
-    ClearConsole.clearConsole();
-}
-
+    /**
+     * Prompts the administrator to update the details of a specific hospital staff member.
+     * 
+     * @param staff The staff member to be updated.
+     */
+    private void updateHospitalStaff(HospitalStaff staff) {
+        System.out.println("Update Hospital Staff");
+        System.out.println("=====================");
+        System.out.println(staff.toString());
     
-
-private void addHospitalStaff() {
-    System.out.println("Add Hospital Staff");
-    System.out.println("Enter any blank input to go back to previous menu");
-    System.out.println("====================================");
-
-    String name;
-    while (true) {
-        System.out.print("Enter staff name: ");
-        name = scanner.nextLine().trim();
-        if (name.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
+        String name;
+        while (true) {
+            System.out.print("Enter new name (press Enter to keep current: " + staff.getName() + "): ");
+            name = scanner.nextLine().trim();
+            if (name.isEmpty()) {
+                name = staff.getName();
+                break;
+            }
+            if (name.length() > 2) {
+                break;
+            } else {
+                System.out.println("Error: Name must be at least 3 characters long.");
+            }
         }
-        if (name.length() > 2) {
-            break;
-        } else {
-            System.out.println("Error: Name must be at least 3 characters long.");
+    
+        String gender;
+        while (true) {
+            System.out.print("Select gender (1 for Male, 2 for Female, press Enter to keep current: " + staff.getGender() + "): ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                gender = staff.getGender();
+                break;
+            }
+            if (input.equals("1")) {
+                gender = "Male";
+                break;
+            } else if (input.equals("2")) {
+                gender = "Female";
+                break;
+            } else {
+                System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
+            }
         }
-    }
-
-    String gender;
-    while (true) {
-        System.out.print("Select gender (1 for Male, 2 for Female): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-        if (input.equals("1")) {
-            gender = "Male";
-            break;
-        } else if (input.equals("2")) {
-            gender = "Female";
-            break;
-        } else {
-            System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
-        }
-    }
-
-    HospitalStaff.Role role = null;
-    boolean exit = false;
-    while (!exit) {
-        System.out.println("Select staff role:");
-        System.out.println("1. DOCTOR");
-        System.out.println("2. PHARMACIST");
-        System.out.print("Enter your choice: ");
-        String roleInput = scanner.nextLine().trim();
-
-        if (roleInput.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
-        }
-
-        switch (roleInput) {
-            case "1" -> {
+    
+        HospitalStaff.Role role = staff.getRole();
+        while (true) {
+            System.out.println("Select role (1 for DOCTOR, 2 for PHARMACIST, press Enter to keep current: " + staff.getRole() + "): ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                break;
+            }
+            if (input.equals("1")) {
                 role = HospitalStaff.Role.DOCTOR;
-                exit = true;
-            }
-            case "2" -> {
+                break;
+            } else if (input.equals("2")) {
                 role = HospitalStaff.Role.PHARMACIST;
-                exit = true;
+                break;
+            } else {
+                System.out.println("Error: Invalid choice. Please enter 1 or 2.");
             }
-            default -> System.out.println("Error: Invalid choice. Please enter 1 or 2");
         }
-    }
-
-    LocalDate dob;
-    while (true) {
-        System.out.print("Enter date of birth (dd-MM-yyyy): ");
-        String input = scanner.nextLine().trim();
-        if (input.isEmpty()) {
-            ClearConsole.clearConsole();
-            return;
+    
+        LocalDate dob = staff.getDob();
+        while (true) {
+            System.out.print("Enter new date of birth (dd-MM-yyyy, press Enter to keep current: " + staff.getDob() + "): ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                break;
+            }
+            try {
+                dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                break;
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
+            }
         }
+    
         try {
-            dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            break;
-        } catch (DateTimeParseException e) {
-            System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
+            HospitalStaffController.updateStaff(staff, name, gender, role, dob);
+            System.out.println("Hospital staff updated successfully.");
+        } catch (InvalidInputException e) {
+            System.out.println("Error: " + e.getMessage());
         }
+    
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
     }
-
-    try {
-        HospitalStaffController.addStaff(name, gender, role, dob);
-        System.out.println("Hospital staff added successfully.");
-    } catch (InvalidInputException e) {
-        System.out.println("Error: " + e.getMessage());
-    }
-
-    KeystrokeWait.waitForKeyPress();
-    ClearConsole.clearConsole();
-}
 
     
+    /**
+     * Adds a new hospital staff member by taking input for name, gender, role, and date of birth.
+     * Ensures the input is valid before adding the staff member to the system.
+     * If the user inputs an empty string at any stage, they are returned to the previous menu.
+     */
+    private void addHospitalStaff() {
+        System.out.println("Add Hospital Staff");
+        System.out.println("Enter any blank input to go back to previous menu");
+        System.out.println("====================================");
+    
+        String name;
+        while (true) {
+            System.out.print("Enter staff name: ");
+            name = scanner.nextLine().trim();
+            if (name.isEmpty()) {
+                ClearConsole.clearConsole();
+                return;
+            }
+            if (name.length() > 2) {
+                break;
+            } else {
+                System.out.println("Error: Name must be at least 3 characters long.");
+            }
+        }
+    
+        String gender;
+        while (true) {
+            System.out.print("Select gender (1 for Male, 2 for Female): ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                ClearConsole.clearConsole();
+                return;
+            }
+            if (input.equals("1")) {
+                gender = "Male";
+                break;
+            } else if (input.equals("2")) {
+                gender = "Female";
+                break;
+            } else {
+                System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
+            }
+        }
+    
+        HospitalStaff.Role role = null;
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Select staff role:");
+            System.out.println("1. DOCTOR");
+            System.out.println("2. PHARMACIST");
+            System.out.print("Enter your choice: ");
+            String roleInput = scanner.nextLine().trim();
+    
+            if (roleInput.isEmpty()) {
+                ClearConsole.clearConsole();
+                return;
+            }
+    
+            switch (roleInput) {
+                case "1" -> {
+                    role = HospitalStaff.Role.DOCTOR;
+                    exit = true;
+                }
+                case "2" -> {
+                    role = HospitalStaff.Role.PHARMACIST;
+                    exit = true;
+                }
+                default -> System.out.println("Error: Invalid choice. Please enter 1 or 2");
+            }
+        }
+    
+        LocalDate dob;
+        while (true) {
+            System.out.print("Enter date of birth (dd-MM-yyyy): ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                ClearConsole.clearConsole();
+                return;
+            }
+            try {
+                dob = LocalDate.parse(input, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                break;
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
+            }
+        }
+    
+        try {
+            HospitalStaffController.addStaff(name, gender, role, dob);
+            System.out.println("Hospital staff added successfully.");
+        } catch (InvalidInputException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    
+        KeystrokeWait.waitForKeyPress();
+        ClearConsole.clearConsole();
+    }
 
+    
+    /**
+     * Displays all appointments, sorted by their ID.
+     * Each appointment's details are printed to the console.
+     */
     private void viewAppointmentsDetails() {
         List<Appointment> list = AppointmentController.getAllAppts().stream().collect(Collectors.toCollection(ArrayList::new));
         list.sort(Comparator.comparing(Appointment::getId));
@@ -399,6 +435,10 @@ private void addHospitalStaff() {
         ClearConsole.clearConsole();
     }
 
+    /**
+     * Displays all the medicines in the inventory and allows the user to manage them.
+     * If the user selects a medicine, they are able to modify its stock or update its threshold.
+     */
     private void viewAndManageMedicationInventory() {
         List<Medicine> medList = MedicineController.getAllMedicines();
         if (medList.isEmpty()) {
@@ -431,6 +471,13 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Provides a menu to manage a specific medicine's inventory.
+     * This includes increasing, decreasing, or updating the stock,
+     * or modifying the low-stock threshold.
+     *
+     * @param med The medicine whose inventory is being managed.
+     */
     private void manageMedicationInventory(Medicine med) {
         boolean exit = false;
     
@@ -473,6 +520,12 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Updates the threshold for when a medicine is considered low in stock.
+     * Allows the user to specify a new threshold value.
+     *
+     * @param medicine The medicine whose low stock threshold is being updated.
+     */
     private void updateMedicineThreshold(Medicine medicine) {
         try {
             int newThreshold;
@@ -507,6 +560,12 @@ private void addHospitalStaff() {
     }
     
 
+    /**
+     * Increases the stock quantity for a specific medicine.
+     * Prompts the user to input the quantity to increase.
+     *
+     * @param medicine The medicine whose stock is being increased.
+     */
     private void increaseMedicineStock(Medicine medicine) {
         try {
             int quantity;
@@ -540,6 +599,12 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Decreases the stock quantity for a specific medicine.
+     * Prompts the user to input the quantity to decrease.
+     *
+     * @param medicine The medicine whose stock is being decreased.
+     */
     private void decreaseMedicineStock(Medicine medicine) {
         try {
             int quantity;
@@ -573,6 +638,12 @@ private void addHospitalStaff() {
         }
     }
 
+    /**
+     * Updates the stock quantity for a specific medicine.
+     * Prompts the user to input a new stock quantity.
+     *
+     * @param medicine The medicine whose stock quantity is being updated.
+     */
     private void updateMedicineStock(Medicine medicine) {
         try {
             int newQuantity;
@@ -605,7 +676,10 @@ private void addHospitalStaff() {
         }
     }
 
-    
+    /**
+     * Displays and processes replenishment requests for medicines.
+     * Allows the user to approve or reject requests for replenishing stock.
+     */
     private void manageReplenishmentRequests() {
         while (true) {
             try {
@@ -657,7 +731,12 @@ private void addHospitalStaff() {
             }
         }
     }
-    
+
+    /**
+     * Processes a selected replenishment request, allowing the user to approve or reject it.
+     *
+     * @param selectedRequest The replenishment request to process.
+     */
     private void processReplenishmentRequest(MedicineRequest selectedRequest) {
         try {
             Medicine selectedMedicine = MedicineController.getMedicineById(selectedRequest.getMedicineId());
@@ -704,7 +783,9 @@ private void addHospitalStaff() {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    
+    /**
+     * Displays a list of notifications and marks them as read after displaying.
+     */
     public void viewNotifications() {
         try {
             List<List<String>> notiList = observer.getNotificationHistory();
