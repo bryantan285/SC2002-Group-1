@@ -115,7 +115,7 @@ public class MedicineController {
         }
     }
 
-    public static Boolean updateMedStock(Medicine med, int amount) throws InvalidInputException, EntityNotFoundException {
+    public static Boolean updateMedStock(Medicine med, int amount) throws InvalidInputException, EntityNotFoundException, IllegalArgumentException {
         if (med == null) {
             throw new EntityNotFoundException("Medicine", "null");
         }
@@ -127,7 +127,7 @@ public class MedicineController {
             medicineRepository.save();
             return true;
         } catch (Exception e) {
-            throw new InvalidInputException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 

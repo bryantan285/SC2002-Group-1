@@ -33,6 +33,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 import observer.NotificationObserver;
 import utility.ClearConsole;
+import utility.DateFormat;
 import utility.DateTimeSelect;
 import utility.InputHandler;
 import utility.KeystrokeWait;
@@ -313,13 +314,13 @@ public class P_HomeUI implements IUserInterface {
                 List<LocalDateTime> availableSlots = AppointmentController.getAvailableTimeSlots(doc, selectedDate);
     
                 if (availableSlots.isEmpty()) {
-                    System.out.println("No available slots for this doctor on " + selectedDate + ".");
+                    System.out.println("No available slots for this doctor on " + DateFormat.format(selectedDate) + ".");
                     return;
                 }
     
-                System.out.println("Available slots for Doctor " + doctorId + " on " + selectedDate + ":");
+                System.out.println("Available slots for Doctor " + doctorId + " on " + DateFormat.format(selectedDate) + ":");
                 for (int i = 0; i < availableSlots.size(); i++) {
-                    System.out.println((i + 1) + ". " + availableSlots.get(i));
+                    System.out.println((i + 1) + ". " +  DateFormat.formatWithTime(availableSlots.get(i)));
                 }
                 return;
     
