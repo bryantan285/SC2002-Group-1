@@ -34,12 +34,23 @@ import utility.DateFormat;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * This class implements the user interface for the Doctor role.
+ * It allows the doctor to view and manage patient medical records, view and update appointments, 
+ * manage availability, and handle notifications.
+ */
 public class D_HomeUI implements IUserInterface {
     private final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
     private final NotificationController notificationController;
     private IObserver observer;
 
+    /**
+     * Constructs a D_HomeUI instance for a doctor user interface.
+     * Registers the doctor as an observer for notifications.
+     *
+     * @param session The session manager that holds the current session information.
+     */
     public D_HomeUI(SessionManager session) {
         this.session = session;
         this.notificationController = NotificationController.getInstance();
@@ -52,6 +63,10 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the main menu for the doctor to choose various actions.
+     * Loops until the user selects the option to log out.
+     */
     @Override
     public void show_options() {
         boolean exit = false;
@@ -95,6 +110,12 @@ public class D_HomeUI implements IUserInterface {
     }
     
 
+    /**
+     * Handles the option selected by the user from the main menu.
+     * Calls appropriate methods based on the selected choice.
+     *
+     * @param choice The option selected by the doctor in the main menu.
+     */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
@@ -114,6 +135,10 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the medical records of patients under the doctor's care.
+     * Allows the doctor to select a patient and view detailed information about past appointments and diagnoses.
+     */
     private void viewPatientMedicalRecords() {
         try {
             User user = session.getCurrentUser();
@@ -178,6 +203,10 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Allows the doctor to update the medical records of a selected patient.
+     * The doctor can update the diagnosis, consultation notes, and prescribe new medication.
+     */
     private void updatePatientMedicalRecord() {
         try {
             System.out.println("=== Update Patient Medical Records ===");
@@ -369,8 +398,11 @@ public class D_HomeUI implements IUserInterface {
         }
     }
     
-    
-    
+    /**
+     * Displays the current schedule of the doctor, showing all appointments scheduled for the day.
+     * This method pulls the doctor’s schedule and formats the list of appointments by date.
+     * If no appointments are scheduled, it notifies the user accordingly.
+     */
     private void viewSchedule() {
         try {
             Doctor doctor = (Doctor) session.getCurrentUser();
@@ -441,7 +473,11 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
-
+    /**
+     * Allows the doctor to set their availability for appointments.
+     * This method prompts the user to input the start and end times of their availability.
+     * It validates the input and updates the doctor's availability in the system.
+     */
     private void setAvailability() {
         try {
             User user = session.getCurrentUser();
@@ -515,6 +551,11 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Allows the doctor to accept or decline pending appointment requests.
+     * Displays a list of pending appointments and allows the doctor to make a decision for each one.
+     * The doctor's decision is then communicated to the patient via a notification.
+     */
     private void acceptDeclineApptRequest() {
         try {
             User user = session.getCurrentUser();
@@ -577,6 +618,10 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the upcoming appointments for the doctor.
+     * This includes details such as the appointment ID, date, patient, and service.
+     */
     private void viewUpcomingAppointments() {
         try {
             User user = session.getCurrentUser();
@@ -605,6 +650,11 @@ public class D_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Records the outcome of a completed appointment.
+     * The doctor can enter diagnosis, consultation notes, and prescribe medications for the patient.
+     * Afterward, an invoice is created for the patient.
+     */
     private void recordApptOutcome() {
         try {
             System.out.println("Record Appointment Outcome");
@@ -742,7 +792,10 @@ public class D_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
+
+    /**
+     * Displays the list of notifications for the current user and marks them as read.
+     */
     public void viewNotifications() {
         try {
             List<List<String>> notiList = observer.getNotificationHistory();
