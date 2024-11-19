@@ -2,6 +2,14 @@ package entity.user;
 import entity.EntityObject;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a specific date and time during which a staff member is unavailable.
+ * This class is used to manage unavailable slots for scheduling purposes.
+ * 
+ * Features:
+ * - Tracks the unique identifier, staff member's ID, and the unavailable date/time.
+ * - Provides methods to validate durations and manipulate data.
+ */
 public class UnavailableDate extends EntityObject {
     private String id;
     private String staffId;
