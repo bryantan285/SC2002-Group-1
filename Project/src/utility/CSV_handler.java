@@ -56,6 +56,7 @@ public class CSV_handler implements IStorageHandler {
      * @param headers The headers from the CSV file.
      * @return A HospitalStaff entity.
      */
+    @SuppressWarnings(value = { "unchecked" })
     private HospitalStaff createHospitalStaffFromCSV(String[] values, String[] headers) {
         try {
             String id = values[1].trim();
@@ -148,6 +149,7 @@ public class CSV_handler implements IStorageHandler {
      * @return A list of entities of the specified class.
      * @throws IOException If an I/O error occurs or the CSV file is empty.
      */
+    @SuppressWarnings(value = {"unchecked"})
     @Override
     public <T> List<T> readFromFile(String filePath, Class<T> clazz) throws IOException {
         List<T> entities = new ArrayList<>();
@@ -179,6 +181,7 @@ public class CSV_handler implements IStorageHandler {
      * @param <T> The type of the entity.
      * @return An entity of the specified class.
      */
+    @SuppressWarnings(value="unchecked")
     private <T> T createEntityFromCSV(String[] values, String[] headers, Class<T> clazz) {
         try {
             T entity = clazz.getDeclaredConstructor().newInstance();
