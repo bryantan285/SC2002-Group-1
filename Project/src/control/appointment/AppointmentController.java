@@ -183,7 +183,16 @@ public class AppointmentController {
     
         return result;
     }
-    
+    /**
+     * Retrieves available time slots for a given hospital staff (doctor) on a specific date.
+     * The method checks the default time slots and filters out the unavailable ones based on the 
+     * existing unavailability records for the doctor on the specified date.
+     *
+     * @param doc The hospital staff (doctor) for whom the available time slots are to be retrieved.
+     * @param date The date for which to retrieve available time slots.
+     * @return A list of available time slots as {@link LocalDateTime} objects.
+     * @throws InvalidInputException If either the {@code doc} or {@code date} is null.
+     */
     public static List<LocalDateTime> getAvailableTimeSlots(HospitalStaff doc, LocalDate date) throws InvalidInputException {
         
         if (doc == null) {
