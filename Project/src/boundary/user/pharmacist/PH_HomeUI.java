@@ -23,12 +23,21 @@ import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * Represents the home UI for a pharmacist in the hospital management system.
+ * Provides options to manage prescriptions, medicines, replenishment requests, and notifications.
+ */
 public class PH_HomeUI implements IUserInterface {
     private final SessionManager session;
     private static final Scanner scanner = InputHandler.getInstance();
     private final NotificationController notificationController;
     private IObserver observer;
 
+    /**
+     * Initializes a new instance of PH_HomeUI for the given session.
+     * 
+     * @param session The session manager associated with the current user.
+     */
     public PH_HomeUI(SessionManager session) {
         this.session = session;
         this.notificationController = NotificationController.getInstance();
@@ -41,6 +50,9 @@ public class PH_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays the pharmacist menu and processes user input to navigate options.
+     */
     @Override
     public void show_options() {
         boolean exit = false;
@@ -80,8 +92,12 @@ public class PH_HomeUI implements IUserInterface {
     
         System.out.println("You have successfully logged out. Goodbye!");
     }
-    
 
+    /**
+     * Handles the specific option chosen by the user from the pharmacist menu.
+     * 
+     * @param choice The option selected by the user.
+     */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
@@ -99,6 +115,9 @@ public class PH_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays all active prescriptions.
+     */
     private void viewActivePrescriptions() {
         List<Prescription> activePrescriptions = PrescriptionController.getActivePrescriptions();
 
@@ -108,10 +127,6 @@ public class PH_HomeUI implements IUserInterface {
             System.out.println("Active prescriptions");
             for (Prescription prescription : activePrescriptions) {
                 System.out.println("=============================");
-                // System.out.printf("Prescription ID: %s, Appointment ID: %s, Active: %s%n",
-                //         prescription.getId(),
-                //         prescription.getApptId(),
-                //         prescription.getIsActive());
                 System.out.println(prescription.toString());
             }
             System.out.println("=============================");
@@ -120,6 +135,9 @@ public class PH_HomeUI implements IUserInterface {
         ClearConsole.clearConsole();
     }
 
+    /**
+     * Displays the items of a specific prescription.
+     */
     private void viewPrescriptionItems() {
         try {
             System.out.print("Enter prescription ID to view items: ");
@@ -139,10 +157,6 @@ public class PH_HomeUI implements IUserInterface {
                 for (PrescriptionItem item : prescriptionItems) {
                     System.out.println("=============================");
                     System.out.println(item.toString());
-                    // System.out.printf("Item ID: %s, Medicine: %s, Quantity: %d%n",
-                    //         item.getId(),
-                    //         item.getMedicineId(),
-                    //         item.getQuantity());
                 }
                 System.out.println("=============================");
             }
@@ -154,6 +168,9 @@ public class PH_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Dispenses prescription items for a specific prescription.
+     */
     private void dispensePrescriptionItem() {
         try {
             System.out.print("Enter prescription ID to view pending items: ");
@@ -220,9 +237,10 @@ public class PH_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
-    
 
+    /**
+     * Creates a replenishment request for medicine stock.
+     */
     private void createReplenishmentRequest() {
         try {
             System.out.print("Enter medicine ID to replenish: ");
@@ -241,6 +259,9 @@ public class PH_HomeUI implements IUserInterface {
         }
     }
 
+    /**
+     * Displays all medicines and their details.
+     */
     private void viewAllMedicines() {
         List<Medicine> medicines = MedicineController.getAllMedicines();
 
@@ -257,7 +278,10 @@ public class PH_HomeUI implements IUserInterface {
         KeystrokeWait.waitForKeyPress();
         ClearConsole.clearConsole();
     }
-    
+
+    /**
+     * Displays the notification history for the logged-in user.
+     */
     public void viewNotifications() {
         List<List<String>> notiList = observer.getNotificationHistory();
         System.out.println("Notifications");
