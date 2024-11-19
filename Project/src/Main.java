@@ -3,9 +3,21 @@ import exception.user.InvalidUserTypeException;
 
 //import User.Role;
 
+/**
+ * The entry point for the application.
+ * This class handles the initialization of the login process and handles any errors related to invalid user types.
+ */
 public class Main {
     // private static ArrayList<User> users = new ArrayList<>();
     // private static Scanner scanner = new Scanner(System.in);
+
+    /**
+     * Main method that starts the application.
+     * Initializes the EntryUI and calls its login method to begin the login process.
+     * Catches and handles the InvalidUserTypeException if the user type is invalid.
+     *
+     * @param args Command line arguments (not used in this case).
+     */
     public static void main(String[] args) {
         try {
             EntryUI entryUI = new EntryUI();
@@ -14,5 +26,4 @@ public class Main {
             System.out.println("Error: " + e.getMessage());
         }
     }
-
 }
