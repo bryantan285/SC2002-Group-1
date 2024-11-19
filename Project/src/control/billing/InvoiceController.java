@@ -19,6 +19,7 @@ import repository.billing.InvoiceRepository;
 
 /**
  * Controller for managing invoices.
+ * Handles creation, calculation, retrieval, and modification of invoices.
  */
 public class InvoiceController {
 
@@ -28,10 +29,10 @@ public class InvoiceController {
      * Creates a new invoice based on the specified prescription.
      *
      * @param customerId     The ID of the customer.
-     * @param prescriptionId The ID of the prescription.
-     * @param taxRate        The tax rate to apply.
-     * @throws InvalidInputException   If any input is invalid.
-     * @throws EntityNotFoundException If the prescription or items are not found.
+     * @param apptId         The ID of the appointment associated with the invoice.
+     * @param taxRate        The tax rate to apply to the invoice.
+     * @throws InvalidInputException   If any input is invalid (e.g., negative tax rate or empty customer ID).
+     * @throws EntityNotFoundException If the prescription or appointment is not found.
      */
     public static void createInvoice(String customerId, String apptId, double taxRate) throws InvalidInputException, EntityNotFoundException {
         if (customerId == null || customerId.isEmpty()) {
@@ -69,46 +70,60 @@ public class InvoiceController {
         invoiceRepository.save();
     }
     
+    /**
+     * Recalculates the cost of an existing invoice based on prescription items.
+     *
+     * @param apptId The ID of the appointment for which the invoice cost needs to be recalculated.
+     * @throws InvalidInputException   If the appointment ID is invalid.
+     * @throws EntityNotFoundException If the invoice or prescription is not found.
+     */
     public static void recalculateInvoiceCost(String apptId) throws InvalidInputException, EntityNotFoundException {
-    if (apptId == null || apptId.isEmpty()) {
-        throw new InvalidInputException("Prescription ID cannot be null or empty.");
-    }
-
-    Invoice invoice = InvoiceController.getInvoiceByAppt(apptId);
-    if (invoice == null) {
-        throw new EntityNotFoundException("Invoice of", apptId);
-    }
-    Appointment appt = AppointmentController.getAppt(apptId);
-    try {
-        Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
-        try {
-            List<PrescriptionItem> items = PrescriptionItemController.getPrescriptionItems(prescription);
-            
-            double totalCost = 0.0;
-            for (PrescriptionItem item : items) {
-                Medicine med = MedicineController.getMedicineById(item.getMedicineId());
-                if (med != null) {
-                    totalCost += item.getQuantity() * med.getUnitCost();
-                }
-            }
-            invoice.setTotalAmount(totalCost + invoice.getServiceFee());
-            invoice.setTotalPayable(invoice.getTotalAmount()*(1+invoice.getTaxRate()));
-            if (invoice.getTotalPayable() - invoice.getCurrentPaid() < 0) {
-                invoice.setCurrentPaid(invoice.getCurrentPaid() - invoice.getTotalPayable());
-                invoice.setBalance(0);
-            } else {
-                invoice.setBalance(invoice.getTotalPayable() - invoice.getCurrentPaid());
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+        if (apptId == null || apptId.isEmpty()) {
+            throw new InvalidInputException("Prescription ID cannot be null or empty.");
         }
-    } catch (EntityNotFoundException e) {
-        PrescriptionController.createPrescription(appt.getId());
+
+        Invoice invoice = InvoiceController.getInvoiceByAppt(apptId);
+        if (invoice == null) {
+            throw new EntityNotFoundException("Invoice of", apptId);
+        }
+        Appointment appt = AppointmentController.getAppt(apptId);
+        try {
+            Prescription prescription = PrescriptionController.getPrescriptionByAppt(appt);
+            try {
+                List<PrescriptionItem> items = PrescriptionItemController.getPrescriptionItems(prescription);
+                
+                double totalCost = 0.0;
+                for (PrescriptionItem item : items) {
+                    Medicine med = MedicineController.getMedicineById(item.getMedicineId());
+                    if (med != null) {
+                        totalCost += item.getQuantity() * med.getUnitCost();
+                    }
+                }
+                invoice.setTotalAmount(totalCost + invoice.getServiceFee());
+                invoice.setTotalPayable(invoice.getTotalAmount()*(1+invoice.getTaxRate()));
+                if (invoice.getTotalPayable() - invoice.getCurrentPaid() < 0) {
+                    invoice.setCurrentPaid(invoice.getCurrentPaid() - invoice.getTotalPayable());
+                    invoice.setBalance(0);
+                } else {
+                    invoice.setBalance(invoice.getTotalPayable() - invoice.getCurrentPaid());
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } catch (EntityNotFoundException e) {
+            PrescriptionController.createPrescription(appt.getId());
+        }
+        invoiceRepository.save();
     }
-    invoiceRepository.save();
-}
 
-
+    /**
+     * Calculates the total amount for an invoice based on the prescription items.
+     *
+     * @param items The list of prescription items.
+     * @return The total amount for the prescription items.
+     * @throws EntityNotFoundException If a medicine ID in the prescription item list is not found.
+     * @throws InvalidInputException   If any input is invalid.
+     */
     private static double calculateTotalAmount(List<PrescriptionItem> items) throws EntityNotFoundException, InvalidInputException {
         double totalAmount = 0.0;
 
@@ -123,6 +138,13 @@ public class InvoiceController {
         return totalAmount;
     }
     
+    /**
+     * Increases the balance of a given invoice by a specified cost.
+     *
+     * @param inv  The invoice to update.
+     * @param cost The cost to add to the invoice's balance.
+     * @throws InvalidInputException If the cost is negative.
+     */
     public static void incBalance(Invoice inv, double cost) throws InvalidInputException {
         if (cost < 0) {
             throw new InvalidInputException("Cost cannot be negative.");
@@ -132,6 +154,13 @@ public class InvoiceController {
         invoiceRepository.save();
     }
     
+    /**
+     * Makes a payment towards the balance of a given invoice.
+     *
+     * @param inv      The invoice to make a payment against.
+     * @param payment  The payment amount.
+     * @throws InvalidInputException If the payment is less than or equal to zero, or exceeds the current balance.
+     */
     public static void payBalance(Invoice inv, double payment) throws InvalidInputException {
         if (payment <= 0) {
             throw new InvalidInputException("Payment must be greater than zero.");
@@ -147,9 +176,8 @@ public class InvoiceController {
         invoiceRepository.save();
     }
     
-
     /**
-     * Retrieves an Invoice by its ID.
+     * Retrieves an invoice by its ID.
      *
      * @param invoiceId The ID of the invoice.
      * @return The Invoice object.
@@ -168,6 +196,12 @@ public class InvoiceController {
         return invoice;
     }
 
+    /**
+     * Retrieves a list of invoices for a specified customer.
+     *
+     * @param customerId The ID of the customer.
+     * @return A list of invoices for the customer, sorted by invoice ID.
+     */
     public static List<Invoice> getInvoiceByCustomer(String customerId) {
         List<Invoice> list = invoiceRepository.findByField("customerId", customerId);
         list.sort(Comparator.comparing(Invoice::getId));
@@ -177,7 +211,7 @@ public class InvoiceController {
     /**
      * Retrieves a list of all invoices.
      *
-     * @return A list of all invoices.
+     * @return A list of all invoices, sorted by invoice ID.
      */
     public static List<Invoice> getAllInvoices() {
         List<Invoice> invoices = invoiceRepository.toList();
@@ -218,6 +252,12 @@ public class InvoiceController {
         invoiceRepository.save();
     }
 
+    /**
+     * Retrieves an invoice by its associated appointment ID.
+     *
+     * @param apptId The ID of the appointment.
+     * @return The corresponding invoice.
+     */
     public static Invoice getInvoiceByAppt(String apptId) {
         Invoice inv = invoiceRepository.findByField("apptId", apptId).getFirst();
         return inv;
