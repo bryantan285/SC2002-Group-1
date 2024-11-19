@@ -259,30 +259,37 @@ public class D_HomeUI implements IUserInterface {
             Appointment selectedAppointment = completedAppointments.get(appointmentChoice - 1);
     
             String updatedDiagnosis;
-            do {
-                System.out.print("\nEnter updated diagnosis (cannot be empty): ");
+            while (true) {
+                System.out.print("\nEnter updated diagnosis (leave empty to keep current): ");
                 updatedDiagnosis = scanner.nextLine().trim();
                 if (updatedDiagnosis.isEmpty()) {
-                    System.out.println("Diagnosis cannot be empty. Please enter a valid diagnosis.");
+                    updatedDiagnosis = selectedAppointment.getDiagnosis();
+                    break;
+                } else if (!updatedDiagnosis.isEmpty()) {
+                    break;
+                } else {
+                    System.out.println("Invalid input. Please try again.");
                 }
-            } while (updatedDiagnosis.isEmpty());
+            }
     
             String updatedNotes;
-            do {
-                System.out.print("Enter updated consultation notes (cannot be empty): ");
+            while (true) {
+                System.out.print("Enter updated consultation notes (leave empty to keep current): ");
                 updatedNotes = scanner.nextLine().trim();
                 if (updatedNotes.isEmpty()) {
-                    System.out.println("Consultation notes cannot be empty. Please enter valid notes.");
+                    updatedNotes = selectedAppointment.getNotes();
+                    break;
+                } else if (!updatedNotes.isEmpty()) {
+                    break;
+                } else {
+                    System.out.println("Invalid input. Please try again.");
                 }
-            } while (updatedNotes.isEmpty());
+            }
     
             String prescriptionChoice;
             while (true) {
-                System.out.print("Do you want to update the prescription? (yes/no) (enter nothing to go back to previous menu): ");
+                System.out.print("Do you want to update the prescription? (yes/no): ");
                 prescriptionChoice = scanner.nextLine().trim().toLowerCase();
-                if (prescriptionChoice.isEmpty()) {
-                    return;
-                }
                 if (prescriptionChoice.equals("yes") || prescriptionChoice.equals("no")) {
                     break;
                 }
@@ -318,7 +325,7 @@ public class D_HomeUI implements IUserInterface {
     
                             int quantity;
                             while (true) {
-                                System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ": ");
+                                System.out.print("Enter quantity for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + "mg: ");
                                 try {
                                     quantity = Integer.parseInt(scanner.nextLine().trim());
                                     if (quantity <= 0) {
@@ -331,10 +338,10 @@ public class D_HomeUI implements IUserInterface {
                                 }
                             }
     
-                            System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ": ");
+                            System.out.print("Enter medication notes for " + selectedMedicine.getMedicineName() + ", " + selectedMedicine.getDosage() + "mg (leave empty to keep current): ");
                             String prescriptionNotes = scanner.nextLine().trim();
                             if (prescriptionNotes.isEmpty()) {
-                                System.out.println("Medication notes cannot be empty. Skipping this medicine.");
+                                System.out.println("Keeping same notes.");
                                 continue;
                             }
     

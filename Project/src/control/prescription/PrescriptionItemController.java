@@ -177,6 +177,10 @@ public class PrescriptionItemController {
 
         if (item == null) {
             item = createPrescriptionItem(prescriptionId, medicineId, quantity, notes);
+        } else {
+            if (notes.isEmpty()) {
+                notes = item.getNotes();
+            }
         }
 
         item.setQuantity(quantity);
