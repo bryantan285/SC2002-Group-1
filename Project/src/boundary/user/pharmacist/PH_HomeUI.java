@@ -1,11 +1,15 @@
 package boundary.user.pharmacist;
 
+import control.appointment.AppointmentController;
+import control.billing.InvoiceController;
 import control.medicine.MedicineController;
 import control.notification.NotificationController;
 import control.prescription.PrescriptionController;
 import control.prescription.PrescriptionItemController;
 import control.request.MedicineRequestController;
 import control.user.SessionManager;
+import entity.appointment.Appointment;
+import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
@@ -217,6 +221,11 @@ public class PH_HomeUI implements IUserInterface {
     
                     if (isDispensed) {
                         System.out.println("Item dispensed successfully: " + itemId);
+                        Prescription prescription = PrescriptionController.getPrescriptionById(itemToDispense.getPrescriptionId());
+                        Appointment appointment = AppointmentController.getAppt(prescription.getApptId());
+                        Invoice invoice = InvoiceController.getInvoiceByAppt(appointment.getId());
+                        double itemCost = itemToDispense.getQuantity() * med.getUnitCost();
+                        InvoiceController.incBalance(invoice, itemCost);
                     } else {
                         System.out.println("Failed to dispense item: " + itemId);
                     }

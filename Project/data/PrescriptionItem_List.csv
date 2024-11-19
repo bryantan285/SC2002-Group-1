@@ -1,4 +1,4 @@
 id,prescriptionId,medicineId,quantity,status,notes
 PRSCI002,PRSC001,MED003,10,PENDING,medication updated (Prescribed for updated diagnosis)
-PRSCI001,PRSC001,MED001,10,PENDING,1 (Prescribed for updated diagnosis)
+PRSCI001,PRSC001,MED001,10,DISPENSED,1 (Prescribed for updated diagnosis)
 PRSCI003,PRSC002,MED003,10,PENDING,take 2 doses 3 times a day

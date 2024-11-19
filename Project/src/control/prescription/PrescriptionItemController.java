@@ -1,8 +1,6 @@
 package control.prescription;
 
-import control.billing.InvoiceController;
 import control.medicine.MedicineController;
-import entity.billing.Invoice;
 import entity.medicine.Medicine;
 import entity.medicine.Prescription;
 import entity.medicine.PrescriptionItem;
@@ -107,10 +105,6 @@ public class PrescriptionItemController {
             item.setStatus(PrescriptionItem.ItemStatus.DISPENSED);
             prescriptionItemRepository.save();
             
-            String prescriptionId = item.getPrescriptionId();
-            Invoice invoice = InvoiceController.getInvoiceById(prescriptionId);
-            double itemCost = item.getQuantity() * med.getUnitCost();
-            InvoiceController.incBalance(invoice, itemCost);
             return true;
         }
         return false;

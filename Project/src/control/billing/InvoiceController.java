@@ -189,7 +189,7 @@ public class InvoiceController {
             throw new InvalidInputException("Invoice ID cannot be null or empty.");
         }
 
-        Invoice invoice = invoiceRepository.findByField("invoiceId", invoiceId).stream().findFirst().orElse(null);
+        Invoice invoice = invoiceRepository.findByField("id", invoiceId).stream().findFirst().orElse(null);
         if (invoice == null) {
             throw new EntityNotFoundException("Invoice", invoiceId);
         }
