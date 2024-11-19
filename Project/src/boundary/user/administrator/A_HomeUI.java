@@ -29,6 +29,11 @@ import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
+/**
+ * A_HomeUI class represents the user interface for the administrator
+ * to manage hospital staff, appointments, medications, replenishment requests, and notifications.
+ * It provides a menu-driven system for an administrator to select options and perform tasks.
+ */
 public class A_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
