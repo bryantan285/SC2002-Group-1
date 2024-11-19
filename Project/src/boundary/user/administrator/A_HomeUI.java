@@ -136,8 +136,6 @@ public class A_HomeUI implements IUserInterface {
     
         if (list.isEmpty()) {
             System.out.println("No hospital staff found.");
-            KeystrokeWait.waitForKeyPress();
-            ClearConsole.clearConsole();
             return;
         }
     
@@ -201,10 +199,10 @@ public class A_HomeUI implements IUserInterface {
             }
         } catch (EntityNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
-    
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 
 private void updateHospitalStaff(HospitalStaff staff) {
@@ -615,8 +613,6 @@ private void addHospitalStaff() {
         
                 if (reqList.isEmpty()) {
                     System.out.println("No pending replenishment requests.");
-                    KeystrokeWait.waitForKeyPress();
-                    ClearConsole.clearConsole();
                     return;
                 }
         
@@ -656,6 +652,7 @@ private void addHospitalStaff() {
             } catch (InvalidInputException | EntityNotFoundException  e) {
                 System.out.println("Error: " + e.getMessage());
             } finally {
+                KeystrokeWait.waitForKeyPress();
                 ClearConsole.clearConsole();
             }
         }
