@@ -163,6 +163,8 @@ public class P_HomeUI implements IUserInterface {
 
             List<Object> list = AppointmentController.getAppointmentOutcomes(patient);
             List<Appointment> pastAppts = (List<Appointment>) list.get(0);
+            HashMap<String, Prescription> pastPrescriptions = (HashMap<String, Prescription>) list.get(1);
+            HashMap<String, List<PrescriptionItem>> prescriptionItems = (HashMap<String, List<PrescriptionItem>>) list.get(2);
 
             System.out.println("==========================================");
             System.out.println("View Medical Record");
@@ -179,6 +181,24 @@ public class P_HomeUI implements IUserInterface {
                 System.out.println("\tDiagnosis: " + appt.getDiagnosis());
                 System.out.println("\tConsultation Notes: " + appt.getNotes());
                 System.out.println("----------------------------------");
+                System.out.println("Prescription items:");
+                Prescription prescription = pastPrescriptions.get(appt.getId());
+                if (prescription == null) {
+                    System.out.println("No prescribed items.");
+                } else {
+                    for (PrescriptionItem item : prescriptionItems.get(prescription.getId())) {
+                        Medicine med = null;
+                        try {
+                            med = MedicineController.getMedicineById(item.getMedicineId());
+                        } catch (EntityNotFoundException ex) {
+                        }
+                        System.out.println("\tName: " + med.getMedicineName());
+                        System.out.println("\tDosage: " + med.getDosage());
+                        System.out.println("\tQuantity: " + item.getQuantity());
+                        System.out.println("\tStatus: " + item.getStatus());
+                        System.out.println("----------------------------------");
+                    }
+                }
             }
             System.out.println("==========================================");
         } catch (NoUserLoggedInException e) {
@@ -332,6 +352,27 @@ public class P_HomeUI implements IUserInterface {
     private void viewAvailableAppointmentSlots() {
         while (true) {
             try {
+                System.out.println("==================");
+            System.out.println("List of Doctors:");
+            List<HospitalStaff> list = HospitalStaffController.getAllStaff()
+                .stream()
+                .filter(staff -> staff.getId().startsWith("D"))
+                .sorted(Comparator.comparing(HospitalStaff::getId))
+                .collect(Collectors.toList());
+    
+            if (list.isEmpty()) {
+                System.out.println("No doctors available.");
+                KeystrokeWait.waitForKeyPress();
+                ClearConsole.clearConsole();
+                return;
+            }
+    
+            for (HospitalStaff s : list) {
+                System.out.println("==================");
+                System.out.println("ID: " + s.getId());
+                System.out.println("Name: " + s.getName());
+            }
+            System.out.println("==================");
                 System.out.print("Enter doctor ID to view available slots (enter nothing to go back to previous menu): ");
                 String doctorId = scanner.nextLine().trim();
     
@@ -359,7 +400,7 @@ public class P_HomeUI implements IUserInterface {
                             break;
                         }
                     } catch (DateTimeParseException e) {
-                        System.out.println("Invalid date format. Please enter the date in YYYY-MM-DD format.");
+                        System.out.println("Invalid date format. Please enter the date in DD-MM-YYYY format.");
                     }
                 }
     
@@ -394,6 +435,7 @@ public class P_HomeUI implements IUserInterface {
      */
     private void scheduleAppointment() {
         try {
+            System.out.println("==================");
             System.out.println("List of Doctors:");
             List<HospitalStaff> list = HospitalStaffController.getAllStaff()
                 .stream()

@@ -200,29 +200,40 @@ public class PrescriptionController {
     public static void updatePrescription(Appointment appt, HashMap<String, List<Object>> updatedPrescribedMedication) {
         if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
             Prescription prescription = null;
+            
+            // Try to fetch the existing prescription by appointment
             try {
                 prescription = PrescriptionController.getPrescriptionByAppt(appt);
             } catch (EntityNotFoundException e) {
-                try {
-                    prescription = PrescriptionController.createPrescription(appt.getId());
-                } catch (InvalidInputException e2) {
-                    System.out.println("Error: " + e2.getMessage());
-                }
+                System.out.println("No existing prescription found. A new prescription will be created.");
             } catch (InvalidInputException e) {
                 System.out.println("Error: " + e.getMessage());
             }
-
+    
+            // If the prescription doesn't exist, create a new one
+            if (prescription == null) {
+                try {
+                    prescription = PrescriptionController.createPrescription(appt.getId());
+                } catch (InvalidInputException e) {
+                    System.out.println("Error creating new prescription: " + e.getMessage());
+                    return; // Exit method if prescription creation fails
+                }
+            }
+    
+            // Now, proceed to update the prescription items
             for (Map.Entry<String, List<Object>> med : updatedPrescribedMedication.entrySet()) {
                 String medicineId = med.getKey();
                 int quantity = (int) med.getValue().get(0);
                 String notes = (String) med.getValue().get(1);
-
+    
                 try {
+                    // Update the prescription item with the new details
                     PrescriptionItemController.updatePrescriptionItem(prescription.getId(), medicineId, quantity, notes);
                 } catch (EntityNotFoundException | InvalidInputException e) {
-                    System.out.println("Error: " + e.getMessage());
+                    System.out.println("Error updating prescription item: " + e.getMessage());
                 }
             }
         }
     }
+    
 }

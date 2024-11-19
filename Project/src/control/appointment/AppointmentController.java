@@ -210,7 +210,8 @@ public class AppointmentController {
                 date.atTime(15, 0),
                 date.atTime(16, 0)
         );
-            // Fetch the unavailable slots for the specified staff and date
+            
+        // Fetch the unavailable slots for the specified staff and date
         List<LocalDateTime> unavailableSlots = UnavailableDateController.getUnavailableSlotsByDate(doc, date);
 
         // Filter out unavailable slots from the default time slots

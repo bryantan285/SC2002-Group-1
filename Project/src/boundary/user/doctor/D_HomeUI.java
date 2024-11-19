@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.DateFormat;
@@ -626,7 +627,16 @@ public class D_HomeUI implements IUserInterface {
         try {
             User user = session.getCurrentUser();
 
-            List<Appointment> upcomingAppointments = AppointmentController.getDoctorAppts((Doctor) user);
+            List<Appointment> allAppointments = AppointmentController.getDoctorAppts((Doctor) user);
+
+            // Get today's date
+            LocalDate today = LocalDate.now();
+
+            // Filter the upcoming appointments (appointments from today onwards)
+            List<Appointment> upcomingAppointments = allAppointments.stream()
+                    .filter(appt -> !appt.getApptDateTime().toLocalDate().isBefore(today)) // Filter out past appointments
+                    .filter(appt -> appt.getStatus() == Status.CONFIRMED) // Filter only confirmed appointments (or your equivalent status check)
+                    .collect(Collectors.toList());
     
             // Display the appointments
             System.out.println("\n=== Upcoming Appointments ===");
@@ -661,7 +671,7 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("=============================");
             List<Appointment> list = AppointmentController.getDoctorAppts((Doctor) session.getCurrentUser())
                     .stream()
-                    .filter(appt -> appt.getStatus() == Status.CONFIRMED && appt.getApptDateTime().toLocalDate().isEqual(LocalDate.now()))
+                    .filter(appt -> appt.getStatus() == Status.CONFIRMED)
                     .toList();
     
             if (list.isEmpty()) {

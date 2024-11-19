@@ -201,7 +201,7 @@ public class PH_HomeUI implements IUserInterface {
                 String itemId = id.trim();
                 try {
                     PrescriptionItem itemToDispense = PrescriptionItemController.getPrescriptionItemById(itemId);
-                    Medicine med = MedicineController.getMedicineById(itemToDispense.getId());
+                    Medicine med = MedicineController.getMedicineById(itemToDispense.getMedicineId());
     
                     if (itemToDispense == null || !itemToDispense.getPrescriptionId().equals(prescriptionId)) {
                         System.out.println("Invalid prescription item ID: " + itemId);

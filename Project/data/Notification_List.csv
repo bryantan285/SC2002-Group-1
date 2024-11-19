@@ -1,3 +1,5 @@
 id,userId,message,datetime,read
+NOTI004,D002,Patient P1001 has scheduled an appointment with you on 21-11-2024 11:00,2024-11-19T18:13,false
 NOTI002,D002,Patient P1003 has scheduled an appointment with you on 19-11-2024 11:00,2024-11-19T14:02,true
-NOTI001,D001,Patient P1001 has scheduled an appointment with you on 25-11-2024 09:00,2024-11-18T02:34,true
+NOTI003,D002,Patient P1001 has scheduled an appointment with you on 20-11-2024 11:00,2024-11-19T18:03,false
+NOTI001,D001,Patient P1001 has scheduled an appointment with you on 25-11-2024 09:00,2024-11-18T02:34,false
