@@ -197,7 +197,6 @@ public class P_HomeUI implements IUserInterface {
                 System.out.print("Enter new email (enter nothing to go back to previous menu): ");
                 String email = scanner.nextLine();
                 if (email.isEmpty()) {
-                    ClearConsole.clearConsole();
                     return;
                 }
     
@@ -206,11 +205,11 @@ public class P_HomeUI implements IUserInterface {
                 break;
             } catch (InvalidInputException | EntityNotFoundException e) {
                 System.out.println("Error: " + e.getMessage());
+            } finally {
+                KeystrokeWait.waitForKeyPress();
+                ClearConsole.clearConsole();
             }
         }
-    
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
     
     private void updateContactNumber(Patient patient) {
@@ -221,7 +220,6 @@ public class P_HomeUI implements IUserInterface {
                 System.out.print("Enter new contact number (enter nothing to go back to previous menu): ");
                 String contactNumber = scanner.nextLine();
                 if (contactNumber.isEmpty()) {
-                    ClearConsole.clearConsole();
                     return;
                 }
     
@@ -230,11 +228,11 @@ public class P_HomeUI implements IUserInterface {
                 break;
             } catch (InvalidInputException | EntityNotFoundException e) {
                 System.out.println("Error: " + e.getMessage());
+            } finally {
+                KeystrokeWait.waitForKeyPress();
+                ClearConsole.clearConsole();
             }
         }
-    
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 
     private void changePassword(Patient patient) {
@@ -271,6 +269,7 @@ public class P_HomeUI implements IUserInterface {
             } catch (InvalidInputException e) {
                 System.out.println("Error: " + e.getMessage());
             } finally {
+                KeystrokeWait.waitForKeyPress();
                 ClearConsole.clearConsole();
             }
         }
@@ -315,8 +314,6 @@ public class P_HomeUI implements IUserInterface {
     
                 if (availableSlots.isEmpty()) {
                     System.out.println("No available slots for this doctor on " + selectedDate + ".");
-                    KeystrokeWait.waitForKeyPress();
-                    ClearConsole.clearConsole();
                     return;
                 }
     
@@ -324,9 +321,6 @@ public class P_HomeUI implements IUserInterface {
                 for (int i = 0; i < availableSlots.size(); i++) {
                     System.out.println((i + 1) + ". " + availableSlots.get(i));
                 }
-    
-                KeystrokeWait.waitForKeyPress();
-                ClearConsole.clearConsole();
                 return;
     
             } catch (EntityNotFoundException e) {
@@ -334,6 +328,7 @@ public class P_HomeUI implements IUserInterface {
             } catch (InvalidInputException e) {
                 System.out.println("Error: " + e.getMessage());
             } finally {
+                KeystrokeWait.waitForKeyPress();
                 ClearConsole.clearConsole();
             }
         }
@@ -350,8 +345,6 @@ public class P_HomeUI implements IUserInterface {
     
             if (list.isEmpty()) {
                 System.out.println("No doctors available.");
-                KeystrokeWait.waitForKeyPress();
-                ClearConsole.clearConsole();
                 return;
             }
     
@@ -404,6 +397,7 @@ public class P_HomeUI implements IUserInterface {
         } catch (EntityNotFoundException | InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
+            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
@@ -415,7 +409,6 @@ public class P_HomeUI implements IUserInterface {
     
             if (list.isEmpty()) {
                 System.out.println("You have no scheduled appointments.");
-                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
@@ -448,16 +441,15 @@ public class P_HomeUI implements IUserInterface {
             LocalDateTime newDateTime = DateTimeSelect.selectNewDateAndTime(doc);
     
             if (newDateTime == null) {
-                ClearConsole.clearConsole();
                 return;
             }
     
             AppointmentController.rescheduleAppointment(selectedAppointment, newDateTime);
             System.out.println("Appointment rescheduled successfully.");
-            KeystrokeWait.waitForKeyPress();
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
+            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
@@ -469,7 +461,6 @@ public class P_HomeUI implements IUserInterface {
     
             if (list.isEmpty()) {
                 System.out.println("You have no scheduled appointments.");
-                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
@@ -501,10 +492,10 @@ public class P_HomeUI implements IUserInterface {
     
             AppointmentController.cancelAppointment(selectedAppointment);
             System.out.println("Appointment canceled successfully.");
-            KeystrokeWait.waitForKeyPress();
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
+            KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }
     }
@@ -653,7 +644,6 @@ public class P_HomeUI implements IUserInterface {
             ClearConsole.clearConsole();
         }
     }
-    
     
     public void viewNotifications() {
         try {

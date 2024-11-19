@@ -165,8 +165,6 @@ public class EntryUI {
                 } else {
                     UserController.passwordChange(user, newPassword);
                     System.out.println("Password changed successfully.");
-                    KeystrokeWait.waitForKeyPress();
-                    ClearConsole.clearConsole();
                     break;
                 }
             } catch (InvalidInputException e) {

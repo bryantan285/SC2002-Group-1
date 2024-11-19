@@ -122,8 +122,6 @@ public class D_HomeUI implements IUserInterface {
 
             if (patients.isEmpty()) {
                 System.out.println("You currently have no patients under your care.");
-                KeystrokeWait.waitForKeyPress();
-                ClearConsole.clearConsole();
                 return;
             }
 
@@ -189,7 +187,6 @@ public class D_HomeUI implements IUserInterface {
     
             if (patientsUnderCare.isEmpty()) {
                 System.out.println("You have no patients under your care.");
-                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
@@ -223,7 +220,6 @@ public class D_HomeUI implements IUserInterface {
     
             if (completedAppointments.isEmpty()) {
                 System.out.println("This patient has no completed appointments to update.");
-                KeystrokeWait.waitForKeyPress();
                 return;
             }
     
