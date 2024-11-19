@@ -28,23 +28,19 @@ import observer.NotificationObserver;
 import utility.ClearConsole;
 import utility.InputHandler;
 import utility.KeystrokeWait;
-
 /**
- * A_HomeUI class represents the user interface for the administrator
- * to manage hospital staff, appointments, medications, replenishment requests, and notifications.
- * It provides a menu-driven system for an administrator to select options and perform tasks.
+ * The Administrator Home User Interface (A_HomeUI) class provides an interface for administrators to
+ * carry out their available functions.
  */
 public class A_HomeUI implements IUserInterface {
     private static final Scanner scanner = InputHandler.getInstance();
     private final SessionManager session;
     private final NotificationController notificationController;
     private IObserver observer;
-    
     /**
-     * Constructor to initialize the Administrator Home UI.
-     * Registers the current user as an observer for notifications.
+     * Constructs the Administrator Home User Interface.
      * 
-     * @param session The current user session.
+     * @param session The current session manager for handling user login information.
      */
     public A_HomeUI(SessionManager session) {
         this.session = session;
@@ -57,8 +53,9 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("No user logged in");
         }
     }
+
     /**
-     * Displays the main menu for the administrator to choose an option.
+     * Displays the administrator menu and handles menu options.
      */
     @Override
     public void show_options() {
@@ -98,17 +95,16 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Handles the user's selection from the main menu.
-     * Routes the selection to the corresponding method.
+     * Handles the selected menu option.
      * 
-     * @param choice The user's selection from the main menu.
+     * @param choice The choice made by the user from the administrator menu.
      */
     @Override
     public void handle_option(int choice) {
         switch (choice) {
             case 1 -> viewAndManageHospitalStaff();
             case 2 -> viewAppointmentsDetails();
-            case 3 -> viewAndManageMedicationInventory();
+            case 3 -> medicationInventoryOptions();
             case 4 -> manageReplenishmentRequests();
             case 5 -> viewNotifications();
             case 6 -> {
@@ -118,10 +114,9 @@ public class A_HomeUI implements IUserInterface {
             default -> System.out.println("Invalid choice. Please select a valid option.");
         }
     }
-    
+
     /**
-     * Displays options to view, update, or delete hospital staff,
-     * and allows adding new hospital staff.
+     * Displays and manages hospital staff.
      */
     private void viewAndManageHospitalStaff() {
         boolean exit = false;
@@ -151,8 +146,7 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Displays a list of hospital staff (doctors and pharmacists),
-     * and allows the administrator to update or delete staff members.
+     * Displays the list of hospital staff and provides options to update or delete staff.
      */
     private void viewHospitalStaff() {
         List<HospitalStaff> list = HospitalStaffController.getAllStaff()
@@ -235,9 +229,9 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Prompts the administrator to update the details of a specific hospital staff member.
+     * Updates the details of a hospital staff member.
      * 
-     * @param staff The staff member to be updated.
+     * @param staff The hospital staff member to update.
      */
     private void updateHospitalStaff(HospitalStaff staff) {
         System.out.println("Update Hospital Staff");
@@ -324,15 +318,13 @@ public class A_HomeUI implements IUserInterface {
 
     
     /**
-     * Adds a new hospital staff member by taking input for name, gender, role, and date of birth.
-     * Ensures the input is valid before adding the staff member to the system.
-     * If the user inputs an empty string at any stage, they are returned to the previous menu.
+     * Adds a new hospital staff member.
      */
     private void addHospitalStaff() {
         System.out.println("Add Hospital Staff");
         System.out.println("Enter any blank input to go back to previous menu");
         System.out.println("====================================");
-    
+
         String name;
         while (true) {
             System.out.print("Enter staff name: ");
@@ -347,7 +339,7 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Name must be at least 3 characters long.");
             }
         }
-    
+
         String gender;
         while (true) {
             System.out.print("Select gender (1 for Male, 2 for Female): ");
@@ -366,7 +358,7 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Invalid choice. Please enter 1 for Male or 2 for Female.");
             }
         }
-    
+
         HospitalStaff.Role role = null;
         boolean exit = false;
         while (!exit) {
@@ -375,12 +367,12 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("2. PHARMACIST");
             System.out.print("Enter your choice: ");
             String roleInput = scanner.nextLine().trim();
-    
+
             if (roleInput.isEmpty()) {
                 ClearConsole.clearConsole();
                 return;
             }
-    
+
             switch (roleInput) {
                 case "1" -> {
                     role = HospitalStaff.Role.DOCTOR;
@@ -393,7 +385,7 @@ public class A_HomeUI implements IUserInterface {
                 default -> System.out.println("Error: Invalid choice. Please enter 1 or 2");
             }
         }
-    
+
         LocalDate dob;
         while (true) {
             System.out.print("Enter date of birth (dd-MM-yyyy): ");
@@ -409,22 +401,20 @@ public class A_HomeUI implements IUserInterface {
                 System.out.println("Error: Invalid date format. Please enter date in dd-MM-yyyy format.");
             }
         }
-    
+
         try {
             HospitalStaffController.addStaff(name, gender, role, dob);
             System.out.println("Hospital staff added successfully.");
         } catch (InvalidInputException e) {
             System.out.println("Error: " + e.getMessage());
         }
-    
+
         KeystrokeWait.waitForKeyPress();
         ClearConsole.clearConsole();
     }
 
-    
     /**
-     * Displays all appointments, sorted by their ID.
-     * Each appointment's details are printed to the console.
+     * Displays the list of appointments.
      */
     private void viewAppointmentsDetails() {
         List<Appointment> list = AppointmentController.getAllAppts().stream().collect(Collectors.toCollection(ArrayList::new));
@@ -441,10 +431,140 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Displays all the medicines in the inventory and allows the user to manage them.
-     * If the user selects a medicine, they are able to modify its stock or update its threshold.
+     * Provides options for managing the medication inventory.
      */
-    private void viewAndManageMedicationInventory() {
+    private void medicationInventoryOptions() {
+        int choice = -1;
+        while (choice != 3) {
+            System.out.println("Select an option:");
+            System.out.println("1. Add Medicine");
+            System.out.println("2. View and Manage Medication");
+            System.out.println("3. Go Back to Previous Menu");
+            System.out.print("Enter your choice: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+                switch (choice) {
+                    case 1 -> addMedication();
+                    case 2 -> manageMedicationInventory();
+                    case 3 -> {
+                        ClearConsole.clearConsole();
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Please select 1, 2, or 3.");
+                }
+                ClearConsole.clearConsole();
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    }
+    
+    /**
+     * Adds a new medicine to the inventory.
+     */
+    private void addMedication() {
+        System.out.println("Add Medicine");
+        System.out.println("==================");
+    
+        String name;
+        do {
+            System.out.print("Enter medicine name: ");
+            name = scanner.nextLine().trim();
+            if (name.isEmpty()) {
+                System.out.println("Medicine name cannot be empty. Please try again.");
+            }
+        } while (name.isEmpty());
+    
+        int stock;
+        while (true) {
+            System.out.print("Enter current stock (non-negative integer): ");
+            try {
+                stock = Integer.parseInt(scanner.nextLine());
+                if (stock < 0) {
+                    System.out.println("Stock cannot be negative. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer.");
+            }
+        }
+    
+        int quantity;
+        while (true) {
+            System.out.print("Enter quantity per dose (positive integer): ");
+            try {
+                quantity = Integer.parseInt(scanner.nextLine());
+                if (quantity <= 0) {
+                    System.out.println("Quantity per dose must be greater than 0. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer.");
+            }
+        }
+    
+        double unitCost;
+        while (true) {
+            System.out.print("Enter unit cost (positive number): ");
+            try {
+                unitCost = Double.parseDouble(scanner.nextLine());
+                if (unitCost <= 0) {
+                    System.out.println("Unit cost must be greater than 0. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    
+        double dosage;
+        while (true) {
+            System.out.print("Enter dosage (positive number): ");
+            try {
+                dosage = Double.parseDouble(scanner.nextLine());
+                if (dosage <= 0) {
+                    System.out.println("Dosage must be greater than 0. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+        }
+    
+        int lowStockThreshold;
+        while (true) {
+            System.out.print("Enter low stock threshold (non-negative integer): ");
+            try {
+                lowStockThreshold = Integer.parseInt(scanner.nextLine());
+                if (lowStockThreshold < 0) {
+                    System.out.println("Low stock threshold cannot be negative. Please try again.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid integer.");
+            }
+        }
+    
+        try {
+            MedicineController.addMedicine(name, stock, quantity, unitCost, dosage, lowStockThreshold);
+            System.out.println("Medicine added successfully!");
+        } catch (Exception e) {
+            System.out.println("Failed to add medicine: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        }
+    }
+
+    /**
+     * Manages the list of medications in the inventory.
+     */
+    private void manageMedicationInventory() {
         List<Medicine> medList = MedicineController.getAllMedicines();
         if (medList.isEmpty()) {
             System.out.println("No medicines.");
@@ -477,11 +597,9 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Provides a menu to manage a specific medicine's inventory.
-     * This includes increasing, decreasing, or updating the stock,
-     * or modifying the low-stock threshold.
-     *
-     * @param med The medicine whose inventory is being managed.
+     * Provides options to manage a specific medication in the inventory.
+     * 
+     * @param med The medication to manage.
      */
     private void manageMedicationInventory(Medicine med) {
         boolean exit = false;
@@ -495,7 +613,8 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("2. Decrease Medicine Stock");
             System.out.println("3. Update Medicine Stock");
             System.out.println("4. Update low stock threshold");
-            System.out.println("5. Return to Previous Menu");
+            System.out.println("5. Delete medicine");
+            System.out.println("6. Return to Previous Menu");
     
             int choice = 0;
     
@@ -504,10 +623,10 @@ public class A_HomeUI implements IUserInterface {
                     System.out.print("Enter your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
-                    if (choice >= 1 && choice <= 4) break;
-                    System.out.println("Enter only a number between 1 and 5.");
+                    if (choice >= 1 && choice <= 6) break;
+                    System.out.println("Enter only a number between 1 and 6.");
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid input. Please enter a number between 1 and 5.");
+                    System.out.println("Invalid input. Please enter a number between 1 and 6.");
                     scanner.nextLine();
                 }
             }
@@ -519,17 +638,34 @@ public class A_HomeUI implements IUserInterface {
                 case 2 -> decreaseMedicineStock(med);
                 case 3 -> updateMedicineStock(med);
                 case 4 -> updateMedicineThreshold(med);
-                case 5 -> exit = true;
+                case 5 -> deleteMedicine(med);
+                case 6 -> exit = true;
                 default -> System.out.println("Invalid choice. Please select an option from 1 to 4.");
             }
         }
     }
 
     /**
-     * Updates the threshold for when a medicine is considered low in stock.
-     * Allows the user to specify a new threshold value.
-     *
-     * @param medicine The medicine whose low stock threshold is being updated.
+     * Deletes a specific medication from the inventory.
+     * 
+     * @param med The medication to delete.
+     */
+    private void deleteMedicine(Medicine med) {
+        try {
+            MedicineController.removeMedicine(med);
+            System.out.println("Removed all stock rom inventory.");
+        } catch (EntityNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        }
+    }
+    
+    /**
+     * Updates the low stock threshold for a specific medication.
+     * 
+     * @param medicine The medication whose threshold needs to be updated.
      */
     private void updateMedicineThreshold(Medicine medicine) {
         try {
@@ -564,12 +700,10 @@ public class A_HomeUI implements IUserInterface {
         }
     }
     
-
     /**
-     * Increases the stock quantity for a specific medicine.
-     * Prompts the user to input the quantity to increase.
-     *
-     * @param medicine The medicine whose stock is being increased.
+     * Increases the stock quantity of a specific medication.
+     * 
+     * @param medicine The medication to update.
      */
     private void increaseMedicineStock(Medicine medicine) {
         try {
@@ -605,10 +739,9 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Decreases the stock quantity for a specific medicine.
-     * Prompts the user to input the quantity to decrease.
-     *
-     * @param medicine The medicine whose stock is being decreased.
+     * Decreases the stock quantity of a specific medication.
+     * 
+     * @param medicine The medication to update.
      */
     private void decreaseMedicineStock(Medicine medicine) {
         try {
@@ -629,7 +762,7 @@ public class A_HomeUI implements IUserInterface {
                 } catch (InputMismatchException e) {
                     System.out.println("Error: Invalid input. Please enter a valid number.");
                     scanner.nextLine();
-                }
+                } 
             }
             if (MedicineController.decMedStock(medicine, quantity)) {
                 System.out.printf("Decreased stock for medicine ID %s by %d units.%n", medicine.getId(), quantity);
@@ -644,10 +777,9 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Updates the stock quantity for a specific medicine.
-     * Prompts the user to input a new stock quantity.
-     *
-     * @param medicine The medicine whose stock quantity is being updated.
+     * Updates the stock quantity of a specific medication.
+     * 
+     * @param medicine The medication to update.
      */
     private void updateMedicineStock(Medicine medicine) {
         try {
@@ -682,8 +814,7 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Displays and processes replenishment requests for medicines.
-     * Allows the user to approve or reject requests for replenishing stock.
+     * Manages replenishment requests for medications.
      */
     private void manageReplenishmentRequests() {
         while (true) {
@@ -738,8 +869,8 @@ public class A_HomeUI implements IUserInterface {
     }
 
     /**
-     * Processes a selected replenishment request, allowing the user to approve or reject it.
-     *
+     * Processes a specific replenishment request.
+     * 
      * @param selectedRequest The replenishment request to process.
      */
     private void processReplenishmentRequest(MedicineRequest selectedRequest) {
@@ -788,8 +919,9 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("Error: " + e.getMessage());
         }
     }
+    
     /**
-     * Displays a list of notifications and marks them as read after displaying.
+     * Displays notifications for the administrator and marks them as read.
      */
     public void viewNotifications() {
         try {

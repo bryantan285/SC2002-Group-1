@@ -257,8 +257,29 @@ public class MedicineController {
         if (med == null) {
             throw new EntityNotFoundException("Medicine", "null");
         }
-        medicineRepository.remove(med);
+        med.setStockQuantity(0);
         medicineRepository.save();
         return true;
     }
+    
+    
+    /**
+     * Adds a new medicine to the inventory.
+     *
+     * @param name             The name of the medicine.
+     * @param stock            The current stock of the medicine.
+     * @param quantity         The quantity per dose.
+     * @param unitCost         The cost per unit of the medicine.
+     * @param dosage           The dosage details of the medicine.
+     * @param lowStockThreshold The low stock threshold for the medicine.
+     * @return {@code true} if the addition is successful.
+     * @throws EntityNotFoundException If any of the required parameters are invalid.
+     */
+   public static Boolean addMedicine(String name, int stock, int quantity, double unitCost, double dosage, int lowstockthreshold) throws EntityNotFoundException {
+
+        Medicine med = new Medicine(medicineRepository.getNextClassId(), name, stock, unitCost,dosage,lowstockthreshold);
+       medicineRepository.add(med);
+       medicineRepository.save();
+       return true;
+   }
 }

@@ -3,36 +3,38 @@ package entity.medicine;
 import entity.EntityObject;
 
 /**
- * Represents a medicine item in the system.
- * The Medicine class stores details such as the name, stock quantity,
- * unit cost, dosage, and low stock threshold for a specific medicine.
+ * The Medicine class represents a medicine entity with details such as ID, name,
+ * stock quantity, unit cost, dosage, and low stock threshold. It extends the 
+ * {@link EntityObject} class.
  */
 public class Medicine extends EntityObject {
 
     private String id;
     private String medicineName;
     private int stockQuantity;
-    private float unitCost;
+    private double unitCost;
     private double dosage; // in mg
     private int lowStockThreshold;
 
     /**
-     * Default constructor for the Medicine class. Initializes an empty Medicine object.
+     * Default constructor for the Medicine class.
      */
     public Medicine() {
         
     }
 
     /**
-     * Constructor to initialize a Medicine object with specific details.
+     * Constructs a Medicine object with specified attributes.
      * 
-     * @param medicineName The name of the medicine.
-     * @param stockQuantity The available stock quantity of the medicine.
-     * @param unitCost The unit cost of the medicine.
-     * @param dosage The dosage of the medicine in milligrams (mg).
-     * @param lowStockThreshold The stock level at which the medicine is considered to have low stock.
+     * @param id               The unique identifier for the medicine.
+     * @param medicineName     The name of the medicine.
+     * @param stockQuantity    The quantity of the medicine in stock.
+     * @param unitCost         The cost per unit of the medicine.
+     * @param dosage           The dosage of the medicine (in mg).
+     * @param lowStockThreshold The low stock threshold for the medicine.
      */
-    public Medicine(String medicineName, int stockQuantity, float unitCost, double dosage, int lowStockThreshold) {
+    public Medicine(String id, String medicineName, int stockQuantity, double unitCost, double dosage, int lowStockThreshold) {
+        this.id = id;
         this.medicineName = medicineName;
         this.stockQuantity = stockQuantity;
         this.unitCost = unitCost;
@@ -41,27 +43,27 @@ public class Medicine extends EntityObject {
     }
 
     /**
-     * Restocks the medicine by the specified quantity.
+     * Restocks the medicine by adding a specified quantity.
      * 
-     * @param quantity The quantity to restock.
+     * @param quantity The quantity to add to the current stock.
      */
     public void restock(int quantity) {
         stockQuantity += quantity;
     }
 
     /**
-     * Checks if the medicine is available in stock (i.e., if the stock quantity is greater than zero).
+     * Checks if the medicine is available in stock.
      * 
-     * @return true if the medicine is available in stock, false otherwise.
+     * @return {@code true} if the stock quantity is greater than 0, {@code false} otherwise.
      */
     public boolean checkAvailability() {
         return stockQuantity > 0;
     }
 
     /**
-     * Retrieves the unique ID of the medicine.
+     * Gets the unique ID of the medicine.
      * 
-     * @return The unique identifier of the medicine.
+     * @return The ID of the medicine.
      */
     @Override
     public String getId() {
@@ -69,9 +71,9 @@ public class Medicine extends EntityObject {
     }
 
     /**
-     * Sets the unique ID for the medicine.
+     * Sets the unique ID of the medicine.
      * 
-     * @param id The new unique identifier for the medicine.
+     * @param id The new ID of the medicine.
      */
     public void setId(String id) {
         this.id = id;
@@ -80,26 +82,25 @@ public class Medicine extends EntityObject {
     /**
      * Sets the name of the medicine.
      * 
-     * @param medicineName The new name for the medicine.
+     * @param medicineName The name of the medicine.
      */
     public void setMedicineName(String medicineName) {
         this.medicineName = medicineName;
     }
 
     /**
-     * Retrieves the stock quantity of the medicine.
+     * Gets the current stock quantity of the medicine.
      * 
-     * @return The available stock quantity of the medicine.
+     * @return The current stock quantity.
      */
     public int getStockQuantity() {
         return stockQuantity;
     }
 
     /**
-     * Sets the stock quantity of the medicine.
-     * Ensures the stock quantity is not negative.
+     * Sets the current stock quantity of the medicine.
      * 
-     * @param stockQuantity The new stock quantity for the medicine.
+     * @param stockQuantity The new stock quantity.
      * @throws IllegalArgumentException if the new stock quantity is negative.
      */
     public void setStockQuantity(int stockQuantity) {
@@ -110,18 +111,18 @@ public class Medicine extends EntityObject {
     }
 
     /**
-     * Retrieves the dosage of the medicine in milligrams (mg).
+     * Gets the dosage of the medicine.
      * 
      * @return The dosage of the medicine in mg.
      */
     public double getDosage() {
         return dosage;
     }
-
+    
     /**
-     * Sets the dosage of the medicine in milligrams (mg).
+     * Sets the dosage of the medicine.
      * 
-     * @param dosage The new dosage for the medicine in mg.
+     * @param dosage The new dosage of the medicine in mg.
      */
     public void setDosage(double dosage) {
         this.dosage = dosage;
@@ -150,8 +151,9 @@ public class Medicine extends EntityObject {
         this.lowStockThreshold = newLevel;
     }
 
+
     /**
-     * Retrieves the name of the medicine.
+     * Gets the name of the medicine.
      * 
      * @return The name of the medicine.
      */
@@ -160,20 +162,19 @@ public class Medicine extends EntityObject {
     }
 
     /**
-     * Increases the stock quantity of the medicine by the specified value.
+     * Increases the stock quantity of the medicine.
      * 
-     * @param value The value by which to increase the stock quantity.
+     * @param value The quantity to increase.
      */
     public void incStock(int value) {
         this.stockQuantity += value;
     }
 
     /**
-     * Decreases the stock quantity of the medicine by the specified value.
-     * Ensures the stock quantity does not become negative.
+     * Decreases the stock quantity of the medicine.
      * 
-     * @param value The value by which to decrease the stock quantity.
-     * @throws IllegalArgumentException if the new stock quantity would be negative.
+     * @param value The quantity to decrease.
+     * @throws IllegalArgumentException if the resulting stock quantity is negative.
      */
     public void decStock(int value) {
         if (stockQuantity - value < 0) {
@@ -183,41 +184,40 @@ public class Medicine extends EntityObject {
     }
 
     /**
-     * Returns a string representation of the medicine, including its ID, name, stock quantity,
-     * unit cost, dosage, and low stock threshold. If the stock is below the low stock threshold,
-     * a warning is included in the string.
+     * Gets the unit cost of the medicine.
      * 
-     * @return A string representation of the medicine.
+     * @return The cost per unit of the medicine.
      */
-    @Override
-    public String toString() {
-        String str = "ID: " + id + "\n" +
-                    "Name: " + medicineName + "\n" +
-                    "Stock Quantity: " + stockQuantity + "\n" +
-                    "Unit Cost: $" + unitCost + "\n" +
-                    "Dosage: " + dosage + " mg\n" +
-                    "Low Stock Threshold: " + lowStockThreshold;
-        if (lowStockThreshold > stockQuantity) {
-            str = str + "\nWARNING: LOW STOCK!";
-        }
-        return str;
-    }
-
-    /**
-     * Retrieves the unit cost of the medicine.
-     * 
-     * @return The unit cost of the medicine.
-     */
-    public float getUnitCost() {
+    public double getUnitCost() {
         return unitCost;
     }
 
     /**
      * Sets the unit cost of the medicine.
      * 
-     * @param unitCost The new unit cost for the medicine.
+     * @param unitCost The new unit cost of the medicine.
      */
     public void setUnitCost(float unitCost) {
         this.unitCost = unitCost;
+    }
+
+    /**
+     * Returns a string representation of the Medicine object, including all its attributes.
+     * A warning is added if the stock is below the low stock threshold.
+     * 
+     * @return A string representation of the medicine.
+     */
+    @Override
+    public String toString() {
+        String str = "ID: " + id + "\n" +
+                     "Name: " + medicineName + "\n" +
+                     "Stock Quantity: " + stockQuantity + "\n" +
+                     "Unit Cost: $" + unitCost + "\n" +
+                     "Dosage: " + dosage + " mg\n" +
+                     "Low Stock Threshold: " + lowStockThreshold;
+        if (lowStockThreshold > stockQuantity) {
+            str = str + "\nWARNING: LOW STOCK!";
+        }
+        return str;
     }
 }
