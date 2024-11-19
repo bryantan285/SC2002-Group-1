@@ -70,7 +70,7 @@ public class DateTimeSelect {
         // Display available slots to the user
         System.out.println("Available slots for Doctor " + doctor.getId() + " on " + selectedDate + ":");
         for (int i = 0; i < availableSlots.size(); i++) {
-            System.out.println((i + 1) + ". " + availableSlots.get(i));
+            System.out.println((i + 1) + ". " + DateFormat.formatWithTime(availableSlots.get(i)));
         }
 
         int slotChoice;
