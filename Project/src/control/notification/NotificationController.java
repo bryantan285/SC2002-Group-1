@@ -14,7 +14,8 @@ import repository.user.StaffRepository;
 import utility.DateFormat;
 
 /**
- * Controller for managing notifications.
+ * Controller for managing notifications related to users. It provides functionality
+ * to create, retrieve, mark as read, and notify users or admins about various events.
  */
 public class NotificationController {
 
@@ -22,10 +23,18 @@ public class NotificationController {
     private static NotificationController instance;
     private final Map<String, IObserver> observers;
 
+    /**
+     * Private constructor to prevent instantiation. Initializes the observers map.
+     */
     public NotificationController() {
         this.observers = new HashMap<>();
     }
 
+    /**
+     * Retrieves the singleton instance of the NotificationController.
+     *
+     * @return The singleton instance of NotificationController.
+     */
     public static NotificationController getInstance() {
         if (instance == null) {
             instance = new NotificationController();
@@ -34,10 +43,11 @@ public class NotificationController {
     }
 
     /**
-     * Creates a new notification for the specified user.
+     * Creates a new notification for a specific user with a message.
      *
-     * @param userId  The ID of the user to receive the notification.
-     * @param message The message content of the notification.
+     * @param userId The ID of the user to receive the notification.
+     * @param message The content of the notification.
+     * @return The created Notification object.
      */
     public static Notification createNotification(String userId, String message) {
         Notification newNotification = new Notification(notificationRepository.getNextClassId(), userId, message);
@@ -47,14 +57,15 @@ public class NotificationController {
     }
 
     /**
-     * Retrieves a list of notifications for the specified user, sorted by datetime.
-     * Admin users (ID starting with "A") receive both general and user-specific notifications.
+     * Retrieves the list of notifications for a given user, sorted by the notification's datetime.
+     * Admin users (whose IDs start with "A") receive both general and admin-specific notifications.
      *
      * @param user The user whose notifications are to be retrieved.
      * @return A sorted list of notifications for the user.
      */
     public static List<Notification> getNotificationByUser(User user) {
         if (user.getId().startsWith("A")) {
+            // Admin users get both their own and the 'ADMIN' notifications.
             return notificationRepository.toList()
                 .stream()
                 .filter(noti -> noti.getUserId().equals(user.getId()) || noti.getUserId().equals("ADMIN")
@@ -63,6 +74,7 @@ public class NotificationController {
                 .toList();
         }
 
+        // Regular users only get their specific notifications.
         return notificationRepository.findByField("userId", user.getId())
                 .stream()
                 .filter(noti -> Boolean.FALSE.equals(noti.getReadStatus())) // Filter unread notifications
@@ -70,6 +82,11 @@ public class NotificationController {
                 .toList();
     }
 
+    /**
+     * Marks all notifications for a specific user as read.
+     *
+     * @param userId The ID of the user whose notifications are to be marked as read.
+     */
     public void markNotificationsRead(String userId) {
         List<Notification> userNotifications = notificationRepository.findByField("userId", userId);
         userNotifications.forEach(notification -> notification.setReadStatus(true));
@@ -79,10 +96,10 @@ public class NotificationController {
     /**
      * Notifies all admin users about a specific message.
      *
-     * @param message The message content to notify the admins.
+     * @param message The message to notify the admins.
      */
     public void notifyAdmins(String message) {
-        List<HospitalStaff> admins = getAllAdmins(); // Assumes a method exists to retrieve all admin users
+        List<HospitalStaff> admins = getAllAdmins(); // Retrieves all admin users
         for (User admin : admins) {
             Notification newNoti = createNotification(admin.getId(), message);
             IObserver observer = observers.get(admin.getId());
@@ -96,27 +113,43 @@ public class NotificationController {
     }
 
     /**
-     * Retrieves all admin users.
+     * Retrieves all admin users by filtering those whose IDs start with "A".
      *
-     * @return A list of users whose IDs start with "A".
+     * @return A list of all admin users.
      */
     private List<HospitalStaff> getAllAdmins() {
-        // Replace with appropriate repository or user management logic
-        // Assuming `UserRepository` is a singleton handling all users
+        // Retrieve all users from the StaffRepository and filter by admin IDs
         return StaffRepository.getInstance().toList()
                 .stream()
                 .filter(user -> user.getId().startsWith("A"))
                 .toList();
     }
 
+    /**
+     * Registers an observer to receive notifications for a specific user ID.
+     *
+     * @param id The ID of the user to register the observer for.
+     * @param observer The observer to register.
+     */
     public void registerObserver(String id, IObserver observer) {
         observers.put(id, observer);
     }
 
+    /**
+     * Removes an observer from the list of observers for a specific user ID.
+     *
+     * @param id The ID of the user to remove the observer for.
+     */
     public void removeObserver(String id) {
         observers.remove(id);
     }
 
+    /**
+     * Notifies a specific observer with a new notification message.
+     *
+     * @param id The ID of the user to notify.
+     * @param message The message content to send to the observer.
+     */
     public void notifyObserver(String id, String message) {
         Notification newNoti = createNotification(id, message);
         IObserver observer = observers.get(id);

@@ -87,7 +87,17 @@ public class HospitalStaffController {
         return null;
     }
     
-
+    /**
+     * Updates the details of an existing staff member.
+     * Ensures that all input parameters are valid before updating the staff record.
+     *
+     * @param staff the staff member to update
+     * @param name the new name of the staff member
+     * @param gender the new gender of the staff member
+     * @param role the new role of the staff member
+     * @param dob the new date of birth of the staff member
+     * @throws InvalidInputException if any of the input parameters are invalid
+     */
     public static void updateStaff(HospitalStaff staff, String name, String gender, HospitalStaff.Role role, LocalDate dob) throws InvalidInputException {
         if (name == null || name.trim().length() < 3) {
             throw new InvalidInputException("Name must be at least 3 characters long.");

@@ -182,7 +182,21 @@ public class PrescriptionController {
         prescriptionRepository.remove(prescription);
         prescriptionRepository.save();
     }
-
+    /**
+     * Updates the prescription for a specific appointment by adding or modifying prescribed medications.
+     * If a prescription already exists for the appointment, it updates the prescribed items. 
+     * If no prescription exists, a new prescription is created.
+     * 
+     * @param appt The appointment for which the prescription needs to be updated.
+     * @param updatedPrescribedMedication A map containing the updated prescribed medications, where 
+     *                                    each entry contains a medication ID as the key, and a list 
+     *                                    of objects as the value. The list contains the medication 
+     *                                    quantity at index 0 and the notes at index 1.
+     * 
+     * @throws InvalidInputException If the input data is invalid, such as null or empty appointment 
+     *                               or medication data.
+     * @throws EntityNotFoundException If the prescription or prescription items cannot be found.
+     */
     public static void updatePrescription(Appointment appt, HashMap<String, List<Object>> updatedPrescribedMedication) {
         if (updatedPrescribedMedication != null && !updatedPrescribedMedication.isEmpty()) {
             Prescription prescription = null;
