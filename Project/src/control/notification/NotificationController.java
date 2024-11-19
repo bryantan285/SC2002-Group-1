@@ -1,6 +1,7 @@
 package control.notification;
 
 import entity.notification.Notification;
+import entity.user.HospitalStaff;
 import entity.user.User;
 import interfaces.observer.IObserver;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import repository.notification.NotificationRepository;
+import repository.user.StaffRepository;
 import utility.DateFormat;
 
 /**
@@ -55,14 +57,55 @@ public class NotificationController {
         if (user.getId().startsWith("A")) {
             return notificationRepository.toList()
                 .stream()
-                .filter(noti -> noti.getUserId().equals(user.getId()) || noti.getUserId().equals("ADMIN"))
+                .filter(noti -> noti.getUserId().equals(user.getId()) || noti.getUserId().equals("ADMIN")
+                && Boolean.FALSE.equals(noti.getReadStatus())) // Filter unread notifications
                 .sorted(Comparator.comparing(Notification::getDatetime).reversed())
                 .toList();
         }
 
         return notificationRepository.findByField("userId", user.getId())
                 .stream()
+                .filter(noti -> Boolean.FALSE.equals(noti.getReadStatus())) // Filter unread notifications
                 .sorted(Comparator.comparing(Notification::getDatetime).reversed())
+                .toList();
+    }
+
+    public void markNotificationsRead(String userId) {
+        List<Notification> userNotifications = notificationRepository.findByField("userId", userId);
+        userNotifications.forEach(notification -> notification.setReadStatus(true));
+        notificationRepository.save();
+    }
+
+    /**
+     * Notifies all admin users about a specific message.
+     *
+     * @param message The message content to notify the admins.
+     */
+    public void notifyAdmins(String message) {
+        List<HospitalStaff> admins = getAllAdmins(); // Assumes a method exists to retrieve all admin users
+        for (User admin : admins) {
+            Notification newNoti = createNotification(admin.getId(), message);
+            IObserver observer = observers.get(admin.getId());
+            if (observer != null) {
+                List<String> newEntry = new ArrayList<>();
+                newEntry.add(newNoti.getMessage());
+                newEntry.add(DateFormat.formatWithTime(newNoti.getDatetime()));
+                observer.notify(newEntry);
+            }
+        }
+    }
+
+    /**
+     * Retrieves all admin users.
+     *
+     * @return A list of users whose IDs start with "A".
+     */
+    private List<HospitalStaff> getAllAdmins() {
+        // Replace with appropriate repository or user management logic
+        // Assuming `UserRepository` is a singleton handling all users
+        return StaffRepository.getInstance().toList()
+                .stream()
+                .filter(user -> user.getId().startsWith("A"))
                 .toList();
     }
 

@@ -68,7 +68,7 @@ public class P_HomeUI implements IUserInterface {
             System.out.println("6. Cancel an Appointment");
             System.out.println("7. View Scheduled Appointments");
             System.out.println("8. View Past Appointment Outcome Records");
-            System.out.println("9. View and Pay invoice");
+            System.out.println("9. View and Pay Invoice");
             System.out.println("10. View Notifications");
             System.out.println("11. Logout");
             System.out.println("============================================");
@@ -604,6 +604,11 @@ public class P_HomeUI implements IUserInterface {
     
             System.out.println("Selected Invoice Details:");
             System.out.println(selectedInvoice);
+
+            if (selectedInvoice.getStatus() == Invoice.InvoiceStatus.PAID) {
+            System.out.println("This invoice is already marked as PAID.");
+            return;
+        }
     
             if (selectedInvoice.getBalance() <= 0) {
                 System.out.println("This invoice is already paid in full.");
@@ -651,13 +656,20 @@ public class P_HomeUI implements IUserInterface {
     
     
     public void viewNotifications() {
-        List<List<String>> notiList = observer.getNotificationHistory();
-        System.out.println("Notifications");
-        System.out.println("=============");
-        for (List<String> noti : notiList) {
-            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+        try {
+            List<List<String>> notiList = observer.getNotificationHistory();
+            System.out.println("Notifications");
+            System.out.println("=============");
+            for (List<String> noti : notiList) {
+                System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+            }
+            
+            // Mark all notifications as read
+            notificationController.markNotificationsRead(session.getCurrentUser().getId());
+            
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        } catch (NoUserLoggedInException ex) {
         }
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 }

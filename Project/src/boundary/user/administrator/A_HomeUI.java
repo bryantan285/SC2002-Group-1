@@ -57,7 +57,7 @@ public class A_HomeUI implements IUserInterface {
             System.out.println("2. View Appointments Details");
             System.out.println("3. View and Manage Medication Inventory");
             System.out.println("4. Approve Replenishment Requests");
-            System.out.println("5. View notifications");
+            System.out.println("5. View Notifications");
             System.out.println("6. Logout");
             System.out.println("====================");
     
@@ -715,13 +715,20 @@ private void addHospitalStaff() {
     }
     
     public void viewNotifications() {
-        List<List<String>> notiList = observer.getNotificationHistory();
-        System.out.println("Notifications");
-        System.out.println("=============");
-        for (List<String> noti : notiList) {
-            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+        try {
+            List<List<String>> notiList = observer.getNotificationHistory();
+            System.out.println("Notifications");
+            System.out.println("=============");
+            for (List<String> noti : notiList) {
+                System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+            }
+            
+            // Mark all notifications as read
+            notificationController.markNotificationsRead(session.getCurrentUser().getId());
+            
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        } catch (NoUserLoggedInException ex) {
         }
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 }

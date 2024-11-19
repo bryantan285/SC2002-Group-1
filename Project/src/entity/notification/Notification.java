@@ -8,6 +8,7 @@ public class Notification extends EntityObject {
     private String userId;
     private String message;
     private LocalDateTime datetime;
+    private Boolean read;
 
     public Notification() {
 
@@ -18,6 +19,7 @@ public class Notification extends EntityObject {
         this.userId = userId;
         this.message = message;
         this.datetime = LocalDateTime.now();
+        this.read = false;
     }
 
     @Override
@@ -53,4 +55,11 @@ public class Notification extends EntityObject {
         this.datetime = datetime;
     }
 
+    public Boolean getReadStatus() {
+        return read;
+    }
+
+    public void setReadStatus(Boolean read) {
+        this.read = read;
+    }
 }

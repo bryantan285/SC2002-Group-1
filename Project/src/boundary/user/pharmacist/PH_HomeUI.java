@@ -64,7 +64,7 @@ public class PH_HomeUI implements IUserInterface {
             System.out.println("3. Dispense Prescription Item");
             System.out.println("4. Create Replenishment Request");
             System.out.println("5. View All Medicines");
-            System.out.println("6. View notifications");
+            System.out.println("6. View Notifications");
             System.out.println("7. Logout");
             System.out.println("====================");
     
@@ -175,7 +175,7 @@ public class PH_HomeUI implements IUserInterface {
         try {
             System.out.print("Enter prescription ID to view pending items: ");
             String prescriptionId = scanner.nextLine();
-    
+
             List<PrescriptionItem> pendingItems = PrescriptionItemController.getPendingPrescriptionItems(prescriptionId);
             if (pendingItems.isEmpty()) {
                 System.out.println("No pending items for this prescription.");
@@ -201,6 +201,7 @@ public class PH_HomeUI implements IUserInterface {
                 String itemId = id.trim();
                 try {
                     PrescriptionItem itemToDispense = PrescriptionItemController.getPrescriptionItemById(itemId);
+                    Medicine med = MedicineController.getMedicineById(itemToDispense.getId());
     
                     if (itemToDispense == null || !itemToDispense.getPrescriptionId().equals(prescriptionId)) {
                         System.out.println("Invalid prescription item ID: " + itemId);
@@ -218,6 +219,15 @@ public class PH_HomeUI implements IUserInterface {
                         System.out.println("Item dispensed successfully: " + itemId);
                     } else {
                         System.out.println("Failed to dispense item: " + itemId);
+                    }
+
+                    if (MedicineController.checkLowStock(med)) {
+                        try {
+                            notificationController.notifyObserver(session.getCurrentUser().getId(), "URGENT: Need to request replenishment to restock " + med.getMedicineName() + " !");
+                            notificationController.notifyAdmins("URGENT: Medicine " + med.getMedicineName() + " is low in stock!");
+                        } catch (NoUserLoggedInException e) {
+                            e.printStackTrace();
+                        }
                     }
                 } catch (EntityNotFoundException | InvalidInputException e) {
                     System.out.println("Error dispensing item with ID " + itemId + ": " + e.getMessage());
@@ -283,13 +293,20 @@ public class PH_HomeUI implements IUserInterface {
      * Displays the notification history for the logged-in user.
      */
     public void viewNotifications() {
-        List<List<String>> notiList = observer.getNotificationHistory();
-        System.out.println("Notifications");
-        System.out.println("=============");
-        for (List<String> noti : notiList) {
-            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+        try {
+            List<List<String>> notiList = observer.getNotificationHistory();
+            System.out.println("Notifications");
+            System.out.println("=============");
+            for (List<String> noti : notiList) {
+                System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+            }
+            
+            // Mark all notifications as read
+            notificationController.markNotificationsRead(session.getCurrentUser().getId());
+            
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        } catch (NoUserLoggedInException ex) {
         }
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 }

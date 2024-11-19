@@ -65,7 +65,7 @@ public class D_HomeUI implements IUserInterface {
             System.out.println("5. Accept/Decline Appointment Request");
             System.out.println("6. View Upcoming Appointments");
             System.out.println("7. Record Appointment Outcome");
-            System.out.println("8. View notifications");
+            System.out.println("8. View Notifications");
             System.out.println("9. Logout");
             System.out.println("====================");
     
@@ -560,10 +560,14 @@ public class D_HomeUI implements IUserInterface {
                 case 1 -> {
                     AppointmentController.apptRequestDecision(selectedAppt, true);
                     System.out.println("Appointment accepted.");
+                    notificationController.notifyObserver(selectedAppt.getPatientId(),"Your appointment " + selectedAppt.getId() + " on " + selectedAppt.getApptDateTime() + " has been confirmed by doctor " + session.getCurrentUser().getName());
+
                 }
                 case 0 -> {
                     AppointmentController.apptRequestDecision(selectedAppt, false);
                     System.out.println("Appointment declined.");
+                    notificationController.notifyObserver(selectedAppt.getPatientId(),"Your appointment " + selectedAppt.getId() + " on " + selectedAppt.getApptDateTime() + " has been declined by doctor " + session.getCurrentUser().getName());
+
                 }
                 default -> System.out.println("Invalid choice. Returning to main menu.");
             }
@@ -731,6 +735,7 @@ public class D_HomeUI implements IUserInterface {
                 PrescriptionController.updatePrescription(appt, prescriptionItems);
             }
             InvoiceController.createInvoice(appt.getPatientId(), appt.getId(), 0.09f);
+            notificationController.notifyObserver(appt.getPatientId(), "Billing ready for appointment ID " + appt.getId() + " on " + appt.getApptDateTime());
             System.out.println("Outcome recorded successfully.");
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
@@ -743,13 +748,20 @@ public class D_HomeUI implements IUserInterface {
     }
     
     public void viewNotifications() {
-        List<List<String>> notiList = observer.getNotificationHistory();
-        System.out.println("Notifications");
-        System.out.println("=============");
-        for (List<String> noti : notiList) {
-            System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+        try {
+            List<List<String>> notiList = observer.getNotificationHistory();
+            System.out.println("Notifications");
+            System.out.println("=============");
+            for (List<String> noti : notiList) {
+                System.out.println("Message: " + noti.get(0) + " | Time sent: " + noti.get(1));
+            }
+            
+            // Mark all notifications as read
+            notificationController.markNotificationsRead(session.getCurrentUser().getId());
+            
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
+        } catch (NoUserLoggedInException ex) {
         }
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
 }
