@@ -4,6 +4,11 @@ import entity.EntityObject;
 import java.time.LocalDate;
 import utility.Password_hash;
 
+/**
+ * Abstract class representing a user in the system.
+ * The User class holds common properties for all types of users, such as patients, 
+ * and provides methods to manage their details, including password handling.
+ */
 public abstract class User extends EntityObject {
 
     private boolean isPatient;
@@ -27,6 +32,7 @@ public abstract class User extends EntityObject {
      * @param id The unique identifier of the user.
      * @param name The name of the user.
      * @param gender The gender of the user.
+     * @param dob The date of birth of the user.
      */
     public User(boolean isPatient, String id, String name, String gender, LocalDate dob){
         this.isPatient = isPatient;
@@ -85,11 +91,15 @@ public abstract class User extends EntityObject {
         return this.gender;
     }
 
+    /**
+     * Retrieves the date of birth of the user.
+     * 
+     * @return The date of birth of the user.
+     */
     public LocalDate getDob() {
         return this.dob;
     }
 
-    
     // Setters
 
     /**
@@ -148,6 +158,11 @@ public abstract class User extends EntityObject {
         setPassword(Password_hash.hashPassword(input));
     }
 
+    /**
+     * Sets the date of birth for the user.
+     * 
+     * @param date The new date of birth for the user.
+     */
     public void setDob(LocalDate date) {
         this.dob = date;
     }
