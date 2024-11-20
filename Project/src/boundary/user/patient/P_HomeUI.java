@@ -7,6 +7,7 @@ import control.notification.NotificationController;
 import control.user.HospitalStaffController;
 import control.user.PatientController;
 import control.user.SessionManager;
+import control.user.UnavailableDateController;
 import control.user.UserController;
 import entity.appointment.Appointment;
 import entity.billing.Invoice;
@@ -548,7 +549,8 @@ public class P_HomeUI implements IUserInterface {
             if (newDateTime == null) {
                 return;
             }
-    
+            
+            UnavailableDateController.removeUnavailability(selectedAppointment.getApptDateTime());
             AppointmentController.rescheduleAppointment(selectedAppointment, newDateTime);
             System.out.println("Appointment rescheduled successfully.");
         } catch (InvalidInputException | EntityNotFoundException | NoUserLoggedInException e) {
@@ -600,10 +602,13 @@ public class P_HomeUI implements IUserInterface {
             }
     
             AppointmentController.cancelAppointment(selectedAppointment);
+            UnavailableDateController.removeUnavailability(selectedAppointment.getApptDateTime());
             System.out.println("Appointment canceled successfully.");
         } catch (InvalidInputException | NoUserLoggedInException e) {
             System.out.println("Error: " + e.getMessage());
-        } finally {
+        } catch (EntityNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
             KeystrokeWait.waitForKeyPress();
             ClearConsole.clearConsole();
         }

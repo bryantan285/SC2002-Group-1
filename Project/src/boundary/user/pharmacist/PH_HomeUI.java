@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Scanner;
 import observer.NotificationObserver;
 import utility.ClearConsole;
+import utility.DateFormat;
 import utility.InputHandler;
 import utility.KeystrokeWait;
 
@@ -123,27 +124,77 @@ public class PH_HomeUI implements IUserInterface {
      * Displays all active prescriptions.
      */
     private void viewActivePrescriptions() {
-        List<Prescription> activePrescriptions = PrescriptionController.getActivePrescriptions();
+        try {
+            List<Prescription> activePrescriptions = PrescriptionController.getActivePrescriptions();
+    
+            if (activePrescriptions.isEmpty()) {
+                System.out.println("No active prescriptions.");
+            } else {
+                System.out.println("Active prescriptions:");
+                for (Prescription prescription : activePrescriptions) {
+                    System.out.println("=============================");
+                    System.out.println("Prescription ID: " + prescription.getId());
+                    
+                    // Get associated appointment details
+                    Appointment appointment = AppointmentController.getAppt(prescription.getApptId());
+                    if (appointment != null) {
+                        System.out.println("\tAppointment ID: " + appointment.getId());
+                        System.out.println("\tAppointment Date: " + DateFormat.formatWithTime(appointment.getApptDateTime()));
+                        System.out.println("\tPrescribed by: " + appointment.getDoctorId());
+                        System.out.println("\tService: " + appointment.getService());
+                        System.out.println("\tDiagnosis: " + appointment.getDiagnosis());
+                        System.out.println("\tConsultation Notes: " + appointment.getNotes());
+                    } else {
+                        System.out.println("\tNo associated appointment found.");
+                    }
+    
+                    // Prescription items and details
+                    // System.out.println("\tPrescription items:");
+                    // List<Object> list = AppointmentController.getAppointmentOutcomesById(prescription.getApptId());
+                    // HashMap<String, List<PrescriptionItem>> prescriptionItemList = (HashMap<String, List<PrescriptionItem>>) list.get(2);
+                    // if (prescriptionItemList.isEmpty()) {
+                    //     System.out.println("\tNo prescribed items.");
+                    // } else {
+                    //     for (PrescriptionItem item : prescriptionItemList.get(prescription.getId())) {
+                    //         Medicine med = MedicineController.getMedicineById(item.getMedicineId());
+                    //         if (med != null) {
+                    //             System.out.println("\t\tMedicine Name: " + med.getMedicineName());
+                    //             System.out.println("\t\tDosage: " + med.getDosage());
+                    //             System.out.println("\t\tQuantity: " + item.getQuantity());
+                    //             System.out.println("\t\tStatus: " + item.getStatus());
+                    //             System.out.println("----------------------------------");
+                    //         }
+                    //     }
+                    // }
+                }
 
-        if (activePrescriptions.isEmpty()) {
-            System.out.println("No active prescriptions.");
-        } else {
-            System.out.println("Active prescriptions");
-            for (Prescription prescription : activePrescriptions) {
                 System.out.println("=============================");
-                System.out.println(prescription.toString());
             }
-            System.out.println("=============================");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            KeystrokeWait.waitForKeyPress();
+            ClearConsole.clearConsole();
         }
-        KeystrokeWait.waitForKeyPress();
-        ClearConsole.clearConsole();
     }
-
+    
     /**
      * Displays the items of a specific prescription.
      */
     private void viewPrescriptionItems() {
         try {
+            List<Prescription> activePrescriptions = PrescriptionController.getActivePrescriptions();
+    
+            if (activePrescriptions.isEmpty()) {
+                System.out.println("No active prescriptions.");
+            } else {
+                System.out.println("Active prescriptions:");
+                System.out.println("----------------------------");
+                for (Prescription pre : activePrescriptions) {
+                    System.out.println("Prescription ID: " + pre.getId());
+                }
+                System.out.println("=============================");
+            }
             System.out.print("Enter prescription ID to view items: ");
             String prescriptionId = scanner.nextLine();
             Prescription prescription = PrescriptionController.getPrescriptionById(prescriptionId);

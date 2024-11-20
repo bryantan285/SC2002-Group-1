@@ -10,6 +10,8 @@ import control.user.UnavailableDateController;
 import entity.appointment.Appointment;
 import entity.appointment.Appointment.Status;
 import entity.medicine.Medicine;
+import entity.medicine.Prescription;
+import entity.medicine.PrescriptionItem;
 import entity.user.Doctor;
 import entity.user.Patient;
 import entity.user.UnavailableDate;
@@ -176,6 +178,8 @@ public class D_HomeUI implements IUserInterface {
             Patient selectedPatient = patients.get(patientIndex);
             List<Object> list = AppointmentController.getAppointmentOutcomes(selectedPatient);
             List<Appointment> pastAppts = (List<Appointment>) list.get(0);
+            HashMap<String, Prescription> pastPrescriptions = (HashMap<String, Prescription>) list.get(1);
+            HashMap<String, List<PrescriptionItem>> prescriptionItems = (HashMap<String, List<PrescriptionItem>>) list.get(2);
 
             System.out.println("\n==========================================");
             System.out.println("Medical Record for " + selectedPatient.getName() + ":");
@@ -191,6 +195,24 @@ public class D_HomeUI implements IUserInterface {
                 System.out.println("\tDiagnosis: " + appt.getDiagnosis());
                 System.out.println("\tConsultation Notes: " + appt.getNotes());
                 System.out.println("----------------------------------");
+                System.out.println("Prescription items:");
+                Prescription prescription = pastPrescriptions.get(appt.getId());
+                if (prescription == null) {
+                    System.out.println("No prescribed items.");
+                } else {
+                    for (PrescriptionItem item : prescriptionItems.get(prescription.getId())) {
+                        Medicine med = null;
+                        try {
+                            med = MedicineController.getMedicineById(item.getMedicineId());
+                        } catch (EntityNotFoundException ex) {
+                        }
+                        System.out.println("\tName: " + med.getMedicineName());
+                        System.out.println("\tDosage: " + med.getDosage());
+                        System.out.println("\tQuantity: " + item.getQuantity());
+                        System.out.println("\tStatus: " + item.getStatus());
+                        System.out.println("----------------------------------");
+                    }
+                }
             }
             System.out.println("==========================================");
 
@@ -485,13 +507,16 @@ public class D_HomeUI implements IUserInterface {
             Doctor doctor = (Doctor) user;
     
             System.out.println("Default working hours: 9 AM - 5 PM (Break: 12 PM - 2 PM)");
-            System.out.print("Enter start date for availability (yyyy-MM-dd): ");
+            System.out.print("Enter start date for availability (dd-MM-yyyy): ");
             String startDateInput = scanner.nextLine().trim();
-            System.out.print("Enter end date for availability (yyyy-MM-dd): ");
+            System.out.print("Enter end date for availability (dd-MM-yyyy): ");
             String endDateInput = scanner.nextLine().trim();
     
-            LocalDate startDate = LocalDate.parse(startDateInput);
-            LocalDate endDate = LocalDate.parse(endDateInput);
+            // Define the date formatter for dd-MM-yyyy
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+            LocalDate startDate = LocalDate.parse(startDateInput, formatter);
+            LocalDate endDate = LocalDate.parse(endDateInput, formatter);
     
             if (startDate.isAfter(endDate) || startDate.isBefore(LocalDate.now())) {
                 System.out.println("Invalid date range.");
@@ -679,10 +704,10 @@ public class D_HomeUI implements IUserInterface {
                 return;
             }
     
-            System.out.println("Your appointments today:");
             for (Appointment appt : list) {
-                System.out.println("=============================");
                 System.out.println(appt);
+                System.out.println("----------------------------");
+                
             }
             System.out.println("=============================");
     

@@ -145,6 +145,51 @@ public class AppointmentController {
     }
 
     /**
+     * Retrieves the outcomes of a completed appointment based on its appointment ID.
+     *
+     * @param appointmentId The ID of the appointment whose outcomes are to be retrieved.
+     * @return A list containing the appointment, prescription, and prescription items.
+     * @throws InvalidInputException If the appointment ID is invalid or does not exist.
+     */
+    public static List<Object> getAppointmentOutcomesById(String appointmentId) throws InvalidInputException, EntityNotFoundException {
+        if (appointmentId == null || appointmentId.isEmpty()) {
+            throw new InvalidInputException("Appointment ID cannot be null or empty.");
+        }
+
+        // Fetch the appointment based on appointmentId
+        Appointment appointment = getAppt(appointmentId);
+        if (appointment == null) {
+            throw new InvalidInputException("Appointment with the given ID does not exist.");
+        }
+
+        // Check if the appointment is completed
+        if (appointment.getStatus() != Appointment.Status.COMPLETED) {
+            throw new InvalidInputException("Appointment is not completed yet.");
+        }
+
+        // Create result containers
+        HashMap<String, Prescription> pastPrescriptions = new HashMap<>();
+        HashMap<String, List<PrescriptionItem>> prescriptionItems = new HashMap<>();
+
+        // Fetch the prescription associated with the appointment
+        Prescription prescription = PrescriptionController.getPrescriptionByAppt(appointment);
+        pastPrescriptions.put(appointmentId, prescription);
+
+        // Fetch the prescription items associated with the prescription
+        if (prescription != null) {
+            prescriptionItems.put(prescription.getId(), PrescriptionItemController.getPrescriptionItems(prescription));
+        }
+
+        // Return the results in a list
+        List<Object> result = new ArrayList<>();
+        result.add(appointment); // Adding the appointment object
+        result.add(pastPrescriptions); // Adding the prescription details
+        result.add(prescriptionItems); // Adding the prescription items
+
+        return result;
+    }
+
+    /**
      * Retrieves the outcomes of completed appointments for a specific patient.
      *
      * @param patient The patient whose appointment outcomes are to be retrieved.
@@ -241,6 +286,9 @@ public class AppointmentController {
         appt.setApptDate(newDateTime);
         appt.setStatus(Appointment.Status.PENDING);
         appointmentRepository.save();
+
+        // Mark the selected slot as unavailable for the doctor
+        UnavailableDateController.addUnavailability(doc, newDateTime);
     }
 
     /**

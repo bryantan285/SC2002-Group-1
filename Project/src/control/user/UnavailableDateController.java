@@ -50,15 +50,27 @@ public class UnavailableDateController {
      * @throws EntityNotFoundException If the unavailable date is not found.
      * @throws InvalidInputException   If the unavailable date is null.
      */
-    public static Boolean removeUnavailability(UnavailableDate unavailableDate) throws EntityNotFoundException, InvalidInputException {
-        if (unavailableDate == null) {
-            throw new EntityNotFoundException("Unavailable date for user not found.");
+    public static Boolean removeUnavailability(LocalDateTime dateTime) throws EntityNotFoundException, InvalidInputException {
+        if (dateTime == null) {
+            throw new InvalidInputException("Date and time cannot be null.");
         }
-
+    
+        // Search for the unavailable date in the repository
+        UnavailableDate unavailableDate = repo.findByField("date", dateTime).stream()
+                .filter(date -> date.getDate().isEqual(dateTime))
+                .findFirst()
+                .orElse(null);
+    
+        if (unavailableDate == null) {
+            throw new EntityNotFoundException("No unavailable date found for the specified date and time.");
+        }
+    
+        // Remove the unavailable date
         repo.remove(unavailableDate);
-        repo.save();
+        repo.save(); // Save changes to the file
         return true;
     }
+    
 
     /**
      * Retrieves a list of unavailable dates for the specified hospital staff.
